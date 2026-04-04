@@ -186,6 +186,7 @@ const S={
   agreed:false, agree_ts:'',
   id_no:'', birth_y:'', birth_m:'', birth_d:'', reg_addr:'', same_addr:'no',
   company:'', company_tel:'', income:'', tenure:'', has_job_tel:'',
+  phone_owner:'',
   is_alert:'no', fin_credit:'good',
   salary_type:'', has_credit_card:'', credit_card_bank:'', credit_card_status:'',
   has_car:'no', car_ok:'', car_time:'', car_quality:'',
@@ -265,6 +266,15 @@ function renderBody(){
           </div>
         </div>
       </div>
+
+      <div class="field">
+        <div class="fl">門號是否為本人名下？ <span class="req">*</span></div>
+        <div class="choice-group">
+          <button class="choice ${S.phone_owner==='yes'?'on':''}" onclick="S.phone_owner='yes';render()">✅ 是，本人門號</button>
+          <button class="choice ${S.phone_owner==='no'?'on-warn':''}" onclick="S.phone_owner='no';render()">❌ 否，非本人門號</button>
+        </div>
+      </div>
+
       <div class="field">
         <div class="fl">方便聯絡時間 <span class="req">*</span></div>
         <select onchange="S.contact_time=this.value">
@@ -682,7 +692,7 @@ function validPhone(p){
 }
 
 function canNext(){
-  if(cur===0) return S.name.trim()!==''&&validPhone(S.phone)&&S.contact_time!==''&&S.agreed;
+  if(cur===0) return S.name.trim()!==''&&validPhone(S.phone)&&S.phone_owner!==''&&S.contact_time!==''&&S.agreed;
   if(cur===1){
     if(!S.id_no.trim()||S.id_no.trim().length!==10) return false;
     if(!S.birth_y||!S.birth_m||!S.birth_d) return false;
@@ -811,6 +821,7 @@ async function submit(){
     channel: CH_CODE,
     sc_tenure: tenureScore,
     sc_job_tel: S.has_job_tel==='yes'?'是':S.has_job_tel==='no'?'否':'',
+    phone_owner: S.phone_owner||'',
   };
 
   const insertRes = await fetch(`${SUPABASE_URL}/rest/v1/applications`, {

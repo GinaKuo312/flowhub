@@ -1112,7 +1112,11 @@ function calcScore(c){
     base += vehicleCalc({time: c.moto_time, quality: c.moto_quality, ok: c.moto_ok});
   }
 
-  // ⑬ 公司行業穩定度評估
+  // ⑬ 門號本人評分
+  if(c.phone_owner === 'yes') base += 10;   // 本人門號：聯絡真實性高
+  else if(c.phone_owner === 'no') base -= 20; // 非本人門號：聯絡真實性低
+
+  // ⑭ 公司行業穩定度評估
   if(c.company){
     var co = c.company.trim();
     // 穩定行業關鍵字（加分）
@@ -1873,42 +1877,9 @@ function openPanel(id){
   // CCIS 不良警示移除（未實際串接查詢）
   if(sc>=70&&c.is_alert!=='yes') alertBar+='<div style="background:#ECFDF5;border:1.5px solid #A7F3D0;border-radius:8px;padding:10px 14px;margin-bottom:8px;display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:#065F46"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>初步條件良好，建議優先處理</div>';
 
-  var GROUPS=[
-    {title:'工作穩定度',items:[
-      {key:'sc_tenure',label:'現職年資',opts:['≥12月','6-12月','3-6月','<3月'],scores:[20,15,10,-10],hint:'年資越短，穩定性越弱'},
-      {key:'sc_job_type',label:'工作性質',opts:['正職','兼職/接案','不穩定'],scores:[10,5,-5],hint:'收入型態是否可持續'},
-      {key:'sc_company_check',label:'公司可查',opts:['是','否'],scores:[5,-5],hint:'無公司資訊影響真實性'},
-      {key:'sc_job_tel',label:'工作職電確認',opts:['是','否'],scores:[5,-10],hint:'可確認在職對初審很重要'},
-    ]},
-    {title:'還款來源',items:[
-      {key:'sc_salary_transfer',label:'薪轉',opts:['有','無'],scores:[20,0],hint:'最強的還款來源證明'},
-      {key:'sc_bank_record',label:'存摺收入',opts:['有','無'],scores:[10,0],hint:'固定流入可補強還款來源'},
-      {key:'sc_income_proof',label:'收入佐證',opts:['有','無'],scores:[10,-15],hint:'沒有收入證明時風險高'},
+  // 初審評分工具已移除，評分完全由客戶表單自動帶入
 
-    ]},
-    {title:'其他查核',items:[
-      {key:'sc_phone_owner',label:'門號本人',opts:['是','否'],scores:[10,-20],hint:'聯絡真實性很重要'},
-      {key:'sc_residence',label:'居住穩定',opts:['是','否'],scores:[5,0],hint:'非核心但可補強穩定度'},
-      {key:'sc_addr_transfer',label:'戶政逕遷戶',opts:['是','否'],scores:[-20,0],hint:'不直接婉拒，但需補居住證明'},
-    ]},
-  ];
-
-  var scHTML='';
-  GROUPS.forEach(function(g){
-    scHTML+='<div class="sc-group-title">'+g.title+'</div>';
-    g.items.forEach(function(item){
-      var cur=c[item.key]||'';
-      scHTML+='<div class="sc-item"><div class="sc-item-top"><span class="sc-label">'+item.label+'</span></div>';
-      scHTML+='<div class="sc-hint">'+item.hint+'</div><div class="sc-btns">';
-      item.opts.forEach(function(opt,i){
-        var sel=cur===opt; var sc=item.scores[i];
-        var cls=sel?(sc>0?'sel-g':sc<0?'sel-r':sc===0&&i===0?'sel-n':'sel-n'):'';
-        if(sel&&sc>0)cls='sel-g'; else if(sel&&sc<0)cls='sel-r'; else if(sel)cls='sel-n';
-        scHTML+='<button class="sc-btn '+cls+'" onclick="setSc(\''+id+'\',\''+item.key+'\',\''+opt+'\')">'+opt+'</button>';
-      });
-      scHTML+='</div></div>';
-    });
-  });
+  // scHTML 已移除
 
   document.getElementById('pbody').innerHTML=
     '<div class="score-box" style="background:'+gi.bg+';border:2px solid '+gi.border+'">'+
@@ -1927,6 +1898,7 @@ function openPanel(id){
 
       '<div class="info"><div class="info-k">現有貸款</div><div class="info-v">'+(c.has_loan==='yes'?'有，每月約 '+(c.loan_burden||'未填'):c.has_loan==='no'?'✓ 無':'—')+'</div></div>'+
       '<div class="info"><div class="info-k">居住＝戶籍</div><div class="info-v" style="color:'+(c.same_addr==='yes'?'#059669':c.same_addr==='no'?'#D97706':'#9CA3AF')+';font-weight:600">'+(c.same_addr==='yes'?'✓ 相同':c.same_addr==='no'?'⚠ 不同':'未填')+'</div></div>'+
+      '<div class="info"><div class="info-k">門號本人</div><div class="info-v" style="color:'+(c.phone_owner==='yes'?'#059669':c.phone_owner==='no'?'#DC2626':'#9CA3AF')+';font-weight:600">'+(c.phone_owner==='yes'?'✓ 本人門號':c.phone_owner==='no'?'✕ 非本人':'未填')+'</div></div>'+
       '<div class="info"><div class="info-k">身分證</div><div class="info-v" style="color:'+(c.id_verified?'#059669':'#9CA3AF')+'">'+(c.id_verified?'✓ 已上傳':'未上傳')+'</div></div>'+
     '</div>'+
 
@@ -1996,7 +1968,8 @@ function openPanel(id){
       (isAdmin ? '<div class="info full"><div class="info-k">來源通路</div><div class="info-v" style="color:'+(c.channel&&c.channel!=='FlowPay'?'#1E40AF':'#6B7280')+'">'+(c.channel? chName(c.channel) :'FlowHub')+'</div></div>' : '')+
     '</div>'+
 
-    '<div class="sec-title">初審評分工具</div>'+scHTML+
+    // 初審評分工具已移除，改由客戶填寫表單自動帶入評分
+    // (原手動評分工具移除，評分完全由 calcScore 自動計算)
 
     '<div class="sec-title">✍️ 審核操作</div>'+
     '<div style="font-size:12px;color:#9CA3AF;margin-bottom:10px">更新審核狀態與備註，點儲存後即時同步</div>'+
