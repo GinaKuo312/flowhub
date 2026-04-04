@@ -1,0 +1,2517 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>FlowHub 後台</title>
+<link rel="manifest" href="/manifest.json"/>
+<meta name="mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="default"/>
+<meta name="apple-mobile-web-app-title" content="FlowHub"/>
+<meta name="theme-color" content="#2563EB"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Noto Sans TC',sans-serif;background:#F0F4F8;min-height:100vh}
+#login{display:flex;align-items:center;justify-content:center;min-height:100vh}
+.card{background:#fff;border-radius:16px;box-shadow:0 4px 24px rgba(0,0,0,.1);padding:40px;width:380px}
+.logo{text-align:center;font-size:28px;font-weight:800;color:#2563EB;margin-bottom:6px}
+.logo-sub{text-align:center;font-size:13px;color:#9CA3AF;margin-bottom:28px}
+label{display:block;font-size:12px;font-weight:600;color:#6B7280;margin-bottom:6px;margin-top:16px}
+input{width:100%;height:44px;padding:0 14px;border:1.5px solid #E5E7EB;border-radius:8px;font-size:14px;font-family:inherit;outline:none}
+input:focus{border-color:#2563EB}
+.btn{width:100%;height:44px;background:#2563EB;color:#fff;border:none;border-radius:8px;font-size:15px;font-weight:700;cursor:pointer;margin-top:20px;font-family:inherit}
+.btn:hover{background:#1D4ED8}
+.err{color:#DC2626;font-size:12px;text-align:center;margin-top:10px;min-height:18px}
+.top{background:#fff;border-bottom:1px solid #E5E7EB;padding:16px 24px;display:flex;align-items:center;justify-content:space-between}
+.top-logo{font-size:18px;font-weight:800;color:#2563EB}
+.top-user{font-size:13px;color:#6B7280}
+.logout{background:none;border:none;color:#9CA3AF;cursor:pointer;margin-left:12px;font-size:13px}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px}
+.stat{background:#fff;border-radius:12px;padding:18px;border:1px solid #E5E7EB}
+.stat-label{font-size:12px;color:#9CA3AF;margin-bottom:6px}
+.stat-num{font-size:28px;font-weight:800}
+.table-wrap{background:#fff;border-radius:12px;border:1px solid #E5E7EB;overflow:hidden}
+.table-head{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid #F3F4F6}
+.table-title{font-size:15px;font-weight:700}
+.search-row{display:flex;gap:8px}
+.search{height:36px;padding:0 12px;border:1.5px solid #E5E7EB;border-radius:8px;font-size:13px;font-family:inherit;outline:none;width:180px}
+.search:focus{border-color:#2563EB}
+select.filter{height:36px;padding:0 10px;border:1.5px solid #E5E7EB;border-radius:8px;font-size:13px;font-family:inherit;outline:none;background:#fff;cursor:pointer}
+.refresh{height:36px;padding:0 14px;background:#EFF6FF;color:#2563EB;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit}
+table{width:100%;border-collapse:collapse}
+th{padding:10px 16px;text-align:left;font-size:11px;font-weight:700;color:#9CA3AF;text-transform:uppercase;background:#F9FAFB}
+td{padding:14px 16px;font-size:13px;color:#374151;border-top:1px solid #F3F4F6}
+tr:hover td{background:#FAFBFF;cursor:pointer}
+.name-bold{font-weight:700;color:#111827}
+.date-sub{font-size:11px;color:#9CA3AF;margin-top:2px}
+.badge{display:inline-block;font-size:11px;font-weight:600;padding:3px 10px;border-radius:99px}
+.b-wait{background:#FEF3C7;color:#92400E}
+.b-contact{background:#F5F3FF;color:#5B21B6}
+.b-review{background:#EFF6FF;color:#1E40AF}
+.b-approve{background:#ECFDF5;color:#065F46}
+.b-reject{background:#FEF2F2;color:#991B1B}
+.dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:5px}
+.dot-g{background:#059669}.dot-y{background:#D97706}.dot-r{background:#DC2626}
+.empty{text-align:center;padding:60px;color:#9CA3AF}
+
+/* Panel */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.2);z-index:40;display:none}
+.overlay.on{display:block}
+.panel{position:fixed;top:0;right:-540px;width:540px;bottom:0;background:#fff;box-shadow:-4px 0 24px rgba(0,0,0,.1);z-index:50;transition:right .3s;overflow-y:auto}
+.panel.on{right:0}
+.panel-top{display:flex;align-items:center;justify-content:space-between;padding:20px 24px;border-bottom:1px solid #F3F4F6;position:sticky;top:0;background:#fff;z-index:1}
+.panel-title{font-size:17px;font-weight:800}
+.close{width:32px;height:32px;border-radius:8px;background:#F3F4F6;border:none;cursor:pointer;font-size:18px;color:#6B7280}
+.panel-body{padding:20px 24px}
+.sec-title{font-size:11px;font-weight:700;color:#9CA3AF;letter-spacing:.06em;text-transform:uppercase;margin:20px 0 10px;padding-bottom:6px;border-bottom:1px solid #F3F4F6}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.info{background:#F9FAFB;border-radius:8px;padding:10px 12px}
+.info.full{grid-column:1/-1}
+.info-k{font-size:11px;color:#9CA3AF;margin-bottom:3px}
+.info-v{font-size:13px;font-weight:600;color:#111827}
+.score-box{border-radius:10px;padding:14px 16px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between}
+.score-num{font-size:28px;font-weight:800}
+.score-grade{font-size:13px;font-weight:700;margin-top:2px}
+.score-hint{font-size:12px;opacity:.8;margin-top:3px}
+.sc-group-title{font-size:11px;font-weight:700;color:#6B7280;letter-spacing:.06em;margin:14px 0 8px}
+.sc-item{margin-bottom:10px;background:#F9FAFB;border-radius:8px;padding:10px 12px}
+.sc-item-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
+.sc-label{font-size:13px;font-weight:600;color:#374151}
+.sc-hint{font-size:11px;color:#9CA3AF;margin-bottom:6px}
+.sc-btns{display:flex;flex-wrap:wrap;gap:4px}
+.sc-btn{padding:4px 12px;border-radius:99px;border:1.5px solid #E5E7EB;background:#fff;color:#6B7280;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .15s}
+.sc-btn.sel-g{border-color:#059669;background:#ECFDF5;color:#065F46}
+.sc-btn.sel-r{border-color:#DC2626;background:#FEF2F2;color:#991B1B}
+.sc-btn.sel-y{border-color:#D97706;background:#FFFBEB;color:#92400E}
+.sc-btn.sel-n{border-color:#9CA3AF;background:#F3F4F6;color:#374151}
+.status-sel{width:100%;height:40px;padding:0 12px;border:1.5px solid #E5E7EB;border-radius:8px;font-size:14px;font-family:inherit;outline:none;cursor:pointer;background:#fff;margin-bottom:10px}
+.status-sel:focus{border-color:#2563EB}
+.notes{width:100%;height:100px;padding:10px 12px;border:1.5px solid #E5E7EB;border-radius:8px;font-size:13px;font-family:inherit;outline:none;resize:none;margin-bottom:10px}
+.notes:focus{border-color:#2563EB}
+.save{width:100%;height:42px;background:#2563EB;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit}
+.save:hover{background:#1D4ED8}
+
+/* Sidebar layout */
+#app{display:none;min-height:100vh}
+.layout{display:flex;min-height:calc(100vh - 57px)}
+.sidebar{width:200px;background:#fff;border-right:1px solid #E5E7EB;padding:12px 10px;flex-shrink:0}
+.nav-btn{display:flex;align-items:center;gap:8px;width:100%;padding:10px 12px;border:none;border-radius:8px;background:none;cursor:pointer;font-size:14px;font-weight:500;color:#6B7280;font-family:inherit;margin-bottom:2px;text-align:left;transition:all .15s}
+.nav-btn:hover{background:#F9FAFB;color:#374151}
+.nav-btn.active{background:#EFF6FF;color:#2563EB;font-weight:600}
+.content{flex:1;padding:24px;overflow-y:auto}
+.ch-table{width:100%;border-collapse:collapse;margin-top:16px}
+.ch-table th{padding:10px 16px;text-align:left;font-size:11px;font-weight:700;color:#9CA3AF;text-transform:uppercase;background:#F9FAFB;border-bottom:1px solid #E5E7EB}
+.ch-table td{padding:14px 16px;font-size:14px;color:#374151;border-bottom:1px solid #F3F4F6}
+.ch-table tr:hover td{background:#FAFBFF}
+.ch-name{font-weight:700;color:#111827}
+
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+/* 手機版響應式 */
+@media(max-width:768px){
+  .layout{flex-direction:column}
+  .sidebar{width:100%;border-right:none;border-bottom:1px solid #E5E7EB;padding:8px;display:flex;flex-direction:row;gap:4px;overflow-x:auto}
+  .nav-btn{white-space:nowrap;flex-shrink:0;padding:8px 12px;font-size:13px}
+  .content{padding:16px}
+  .stats{grid-template-columns:1fr 1fr;gap:10px}
+  .stat{padding:12px}
+  .stat-num{font-size:22px}
+  table{font-size:12px}
+  th,td{padding:8px 10px}
+  .panel{width:100%;right:-100%}
+  .top{padding:12px 16px}
+  .top-logo{font-size:15px}
+  .search-row{flex-wrap:wrap}
+  .search{width:140px}
+  .grid2{grid-template-columns:1fr}
+  .score-box{flex-direction:column;gap:8px}
+}
+@media(max-width:480px){
+  .stats{grid-template-columns:1fr 1fr}
+  .panel{width:100%}
+}
+</style>
+</head>
+<body>
+
+<div id="login">
+  <div class="card">
+    <div class="logo">FlowHub</div>
+    <div class="logo-sub">後台管理系統</div>
+    <label>帳號</label>
+    <input type="text" id="u" autocomplete="off" placeholder="輸入帳號" style="letter-spacing:.04em"/>
+    <label>密碼</label>
+    <input type="password" id="p" autocomplete="off" placeholder="輸入密碼"/>
+    <button class="btn" id="login-btn">登入後台</button>
+    <div class="err" id="err"></div>
+    <div style="text-align:center;margin-top:12px">
+      <span style="font-size:12px;color:#9CA3AF">忘記密碼請聯繫管理員重置（密碼將重設為統編）</span>
+    </div>
+  </div>
+</div>
+
+<!-- 忘記密碼 Modal（手機 OTP 三步驟） -->
+<div id="forgot-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:999;align-items:center;justify-content:center">
+  <div style="background:#fff;border-radius:16px;padding:28px;width:380px;max-width:90vw;box-shadow:0 20px 60px rgba(0,0,0,.2)">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <div style="font-size:16px;font-weight:800">🔐 忘記密碼</div>
+      <button id="close-forgot-btn" style="background:#F3F4F6;border:none;border-radius:8px;padding:4px 10px;cursor:pointer;font-size:14px">✕</button>
+    </div>
+    <!-- 步驟1：輸入手機號碼 -->
+    <div id="forgot-step1">
+      <div style="font-size:13px;color:#6B7280;margin-bottom:14px">輸入您的手機號碼，我們會發送驗證碼</div>
+      <input id="forgot-phone" type="tel" placeholder="手機號碼（09 開頭，共 10 碼）"
+        style="width:100%;padding:10px 14px;border:1.5px solid #E5E7EB;border-radius:10px;font-size:14px;font-family:inherit;outline:none;margin-bottom:12px;box-sizing:border-box"/>
+      <button id="send-otp-btn" style="width:100%;background:#2563EB;color:#fff;border:none;border-radius:10px;padding:11px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;margin-bottom:8px">發送驗證碼</button>
+    </div>
+    <!-- 步驟2：輸入 OTP -->
+    <div id="forgot-step2" style="display:none">
+      <div style="font-size:13px;color:#6B7280;margin-bottom:4px">驗證碼已發送至 <span id="otp-phone-display" style="font-weight:700;color:#2563EB"></span></div>
+      <div style="font-size:12px;color:#9CA3AF;margin-bottom:14px">請輸入簡訊中的 6 位數驗證碼</div>
+      <input id="forgot-otp" type="tel" placeholder="6 位驗證碼" maxlength="6"
+        style="width:100%;padding:10px 14px;border:1.5px solid #E5E7EB;border-radius:10px;font-size:18px;font-family:inherit;outline:none;margin-bottom:12px;box-sizing:border-box;letter-spacing:.2em;text-align:center"/>
+      <button id="verify-otp-btn" style="width:100%;background:#059669;color:#fff;border:none;border-radius:10px;padding:11px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;margin-bottom:8px">驗證</button>
+      <button id="resend-otp-btn" style="width:100%;background:#F3F4F6;color:#6B7280;border:none;border-radius:10px;padding:10px;font-size:13px;cursor:pointer;font-family:inherit">重新發送驗證碼</button>
+    </div>
+    <!-- 步驟3：設定新密碼 -->
+    <div id="forgot-step3" style="display:none">
+      <div style="font-size:13px;color:#059669;font-weight:600;margin-bottom:14px">✅ 驗證成功！請設定您的新密碼</div>
+      <input id="new-pw1" type="password" placeholder="輸入新密碼（至少 8 碼）"
+        style="width:100%;padding:10px 14px;border:1.5px solid #E5E7EB;border-radius:10px;font-size:14px;font-family:inherit;outline:none;margin-bottom:10px;box-sizing:border-box"/>
+      <input id="new-pw2" type="password" placeholder="再次輸入新密碼"
+        style="width:100%;padding:10px 14px;border:1.5px solid #E5E7EB;border-radius:10px;font-size:14px;font-family:inherit;outline:none;margin-bottom:12px;box-sizing:border-box"/>
+      <button id="set-pw-btn" style="width:100%;background:#2563EB;color:#fff;border:none;border-radius:10px;padding:11px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit">設定新密碼</button>
+    </div>
+    <div id="forgot-msg" style="text-align:center;font-size:13px;margin-top:10px;min-height:18px"></div>
+  </div>
+</div>
+
+<!-- 月目標設定 Modal -->
+<div id="target-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:999;align-items:center;justify-content:center">
+  <div style="background:#fff;border-radius:16px;padding:28px;width:380px;max-width:90vw;box-shadow:0 20px 60px rgba(0,0,0,.2)">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px">
+      <div style="font-size:16px;font-weight:800">⚙️ 設定本月目標</div>
+      <button onclick="closeTargetModal()" style="background:#F3F4F6;border:none;border-radius:8px;padding:4px 10px;cursor:pointer;font-size:14px">✕</button>
+    </div>
+    <div style="font-size:12px;color:#9CA3AF;margin-bottom:14px">設定本月核准撥款目標金額</div>
+    <div style="font-size:12px;font-weight:700;color:#374151;margin-bottom:6px">目標金額（NT$）</div>
+    <input id="target-input" type="text" placeholder="例：1,000,000"
+      style="width:100%;padding:10px 14px;border:1.5px solid #E5E7EB;border-radius:10px;font-size:14px;font-family:inherit;outline:none;margin-bottom:16px;box-sizing:border-box"/>
+    <button onclick="saveTargets()" style="width:100%;background:#2563EB;color:#fff;border:none;border-radius:10px;padding:12px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit">儲存目標</button>
+  </div>
+</div>
+
+<!-- 修改密碼 Modal -->
+<div id="change-pw-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:999;align-items:center;justify-content:center">
+  <div style="background:#fff;border-radius:16px;padding:28px;width:380px;max-width:90vw;box-shadow:0 20px 60px rgba(0,0,0,.2)">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px">
+      <div style="font-size:16px;font-weight:800">🔑 修改密碼</div>
+      <button id="close-change-pw" style="background:#F3F4F6;border:none;border-radius:8px;padding:4px 10px;cursor:pointer;font-size:14px">✕</button>
+    </div>
+    <div style="font-size:12px;color:#9CA3AF;margin-bottom:14px">密碼至少 8 碼，建議包含英文和數字</div>
+    <input id="cp-old" type="password" placeholder="目前密碼"
+      style="width:100%;padding:10px 14px;border:1.5px solid #E5E7EB;border-radius:10px;font-size:14px;font-family:inherit;outline:none;margin-bottom:10px;box-sizing:border-box"/>
+    <input id="cp-new1" type="password" placeholder="新密碼（至少 8 碼）"
+      style="width:100%;padding:10px 14px;border:1.5px solid #E5E7EB;border-radius:10px;font-size:14px;font-family:inherit;outline:none;margin-bottom:10px;box-sizing:border-box"/>
+    <input id="cp-new2" type="password" placeholder="再次輸入新密碼"
+      style="width:100%;padding:10px 14px;border:1.5px solid #E5E7EB;border-radius:10px;font-size:14px;font-family:inherit;outline:none;margin-bottom:14px;box-sizing:border-box"/>
+    <button id="confirm-change-pw" style="width:100%;background:#2563EB;color:#fff;border:none;border-radius:10px;padding:12px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit">確認修改</button>
+    <div id="change-pw-msg" style="text-align:center;font-size:13px;margin-top:10px;min-height:18px"></div>
+  </div>
+</div>
+
+<!-- PWA 安裝提示 -->
+<div id="install-bar" style="display:none;position:fixed;bottom:0;left:0;right:0;background:linear-gradient(135deg,#1E40AF,#2563EB);color:#fff;padding:12px 16px;z-index:9999;align-items:center;justify-content:space-between;gap:10px;box-shadow:0 -2px 12px rgba(0,0,0,.2)">
+  <div style="display:flex;align-items:center;gap:10px">
+    <div style="width:36px;height:36px;background:#fff;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">F</div>
+    <div>
+      <div style="font-size:14px;font-weight:700">安裝 FlowHub App</div>
+      <div style="font-size:12px;opacity:.8">加到主畫面，像 App 一樣使用</div>
+    </div>
+  </div>
+  <div style="display:flex;gap:8px;flex-shrink:0">
+    <button onclick="document.getElementById('install-bar').style.display='none'" style="background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:8px;padding:6px 12px;font-size:13px;cursor:pointer;font-family:inherit">稍後</button>
+    <button onclick="installApp()" style="background:#fff;color:#2563EB;border:none;border-radius:8px;padding:6px 16px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">安裝</button>
+  </div>
+</div>
+
+<div id="app">
+  <div class="top">
+    <div class="top-logo" id="top-logo">FlowHub</div>
+    <div>
+      <span class="top-user" id="top-user"></span>
+      <button onclick="showChangePw()" style="background:transparent;border:1px solid rgba(255,255,255,.3);color:rgba(255,255,255,.85);border-radius:8px;padding:5px 12px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;margin-right:6px">🔑 改密碼</button>
+      <button class="logout" onclick="logout()">登出</button>
+    </div>
+  </div>
+  <div class="layout">
+    <div class="sidebar" id="sidebar">
+      <button class="nav-btn active" id="nav-cases" onclick="showPage('cases')">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="3"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+        案件列表
+        <span id="new-dot" style="display:none;width:7px;height:7px;border-radius:50%;background:#DC2626;margin-left:4px;animation:pulse 1.5s infinite"></span>
+      </button>
+      <button class="nav-btn" id="nav-approved" onclick="showPage('approved')">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        核准案件
+        <span id="approved-count" style="margin-left:auto;background:#ECFDF5;color:#065F46;font-size:11px;font-weight:700;padding:1px 7px;border-radius:99px"></span>
+      </button>
+      <button class="nav-btn" id="nav-stats" onclick="showPage('stats')">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        統計總覽
+      </button>
+      <button class="nav-btn" id="nav-channel" onclick="showPage('channel')" style="display:none">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+        通路總覽
+      </button>
+      <button class="nav-btn" id="nav-channel-setup" onclick="showPage('channel-setup')" style="display:none">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>
+        通路設定
+      </button>
+      <button class="nav-btn" id="nav-accounts" onclick="showPage('accounts')" style="display:none">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        帳號管理
+      </button>
+    </div>
+    <div class="content">
+      <!-- 案件列表 -->
+      <div id="page-cases">
+        <div class="stats" id="stats"></div>
+        <div class="table-wrap">
+          <div class="table-head">
+            <div class="table-title">所有申請案件</div>
+            <div class="search-row">
+              <input class="search" id="q" placeholder="搜尋姓名/電話..." oninput="filter()"/>
+              <select class="filter" id="sf" onchange="filter()">
+                <option value="">全部狀態</option>
+                <option>待處理</option><option>已聯繫</option>
+                <option>審核中</option><option>已核准</option><option>婉拒</option>
+              </select>
+              <button class="refresh" onclick="load()">重新整理</button>
+  
+            </div>
+          </div>
+          <div id="tbody"></div>
+          <div id="load-more-wrap" style="display:none;justify-content:center;padding:16px 0">
+            <button id="load-more-btn" onclick="load(true)" style="background:#F8FAFC;border:1.5px solid #E5E7EB;border-radius:10px;padding:10px 28px;font-size:13px;font-weight:700;color:#374151;cursor:pointer;font-family:inherit">載入更多</button>
+          </div>
+        </div>
+      </div>
+      <!-- 核准案件 -->
+      <div id="page-approved" style="display:none">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+          <div style="font-size:20px;font-weight:800">核准撥款案件</div>
+          <button onclick="exportApprovedCSV()" style="background:#059669;color:#fff;border:none;border-radius:8px;padding:7px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">📥 匯出 Excel</button>
+        </div>
+        <div style="font-size:13px;color:#9CA3AF;margin-bottom:16px">已核准的所有案件</div>
+        <div id="approved-channel-filter" style="display:none;margin-bottom:16px;gap:8px;flex-wrap:wrap">
+          <button class="refresh" onclick="filterApproved('')" id="af-all">全部通路</button>
+        </div>
+        <div class="table-wrap"><div id="approved-tbody"></div></div>
+      </div>
+      <!-- 統計總覽 -->
+      <div id="page-stats" style="display:none">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;flex-wrap:wrap;gap:10px">
+          <div style="font-size:20px;font-weight:800">統計總覽</div>
+
+        </div>
+        <div style="font-size:13px;color:#9CA3AF;margin-bottom:16px">案件數據統計 · 更新時間：<span id="stats-update-time">—</span></div>
+
+        <!-- ① 業績目標（最上面！最有動力！）-->
+        <div class="table-wrap" style="padding:20px;margin-bottom:16px;background:linear-gradient(135deg,#EFF6FF,#F0FDF4);border:1.5px solid #BFDBFE">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+            <div style="font-size:15px;font-weight:800;color:#1E40AF">🎯 本月業績目標</div>
+            <button onclick="showTargetModal()" style="background:#2563EB;color:#fff;border:none;border-radius:8px;padding:5px 12px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">⚙️ 設定</button>
+          </div>
+          <div id="target-val" style="font-size:13px;color:#6B7280;margin-bottom:10px">尚未設定目標</div>
+          <div style="background:#E0E7FF;border-radius:99px;height:14px;overflow:hidden;margin-bottom:8px">
+            <div id="target-bar" style="height:100%;background:linear-gradient(90deg,#2563EB,#059669);border-radius:99px;width:0%;transition:width .8s"></div>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between">
+            <div id="target-motto" style="font-size:13px;font-weight:700;color:#059669"></div>
+            <div id="target-bar-label" style="font-size:16px;font-weight:900;color:#1E40AF">0%</div>
+          </div>
+        </div>
+
+        <!-- ② 數字卡片 4格 -->
+        <div id="stats2-cards" class="stats" style="margin-bottom:16px"></div>
+
+        <!-- ③ 核准率 + 案件狀態分布 -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
+          <div class="table-wrap" style="padding:20px;text-align:center">
+            <div style="font-size:13px;font-weight:700;color:#374151;margin-bottom:12px">📊 核准率</div>
+            <canvas id="donut-canvas" width="130" height="130" style="display:block;margin:0 auto 8px"></canvas>
+            <div id="donut-label" style="font-size:12px;color:#6B7280"></div>
+          </div>
+          <div class="table-wrap" style="padding:20px">
+            <div style="font-size:13px;font-weight:700;color:#374151;margin-bottom:12px">📋 案件狀態分布</div>
+            <div id="status-dist" style="display:flex;flex-direction:column;gap:8px"></div>
+          </div>
+        </div>
+
+        <!-- ④ 評等分布 -->
+        <div class="table-wrap" style="padding:20px;margin-bottom:16px">
+          <div style="font-size:13px;font-weight:700;color:#374151;margin-bottom:12px">🏅 風險評等分布</div>
+          <div id="grade-dist" style="display:flex;gap:8px;flex-wrap:wrap"></div>
+        </div>
+
+        <!-- ⑤ 前十大通路排名（只有管理員看得到）-->
+        <div id="top-channels-wrap" class="table-wrap" style="padding:20px;margin-bottom:16px;display:none">
+          <div style="font-size:13px;font-weight:700;color:#374151;margin-bottom:12px">🏆 前十大通路排名</div>
+          <div id="top-channels" style="display:flex;flex-direction:column;gap:8px"></div>
+        </div>
+
+        <div id="stats-content"></div>
+      </div>
+      <!-- 通路總覽 -->
+      <div id="page-channel" style="display:none">
+        <div style="font-size:20px;font-weight:800;margin-bottom:6px">通路總覽</div>
+        <div style="font-size:13px;color:#9CA3AF;margin-bottom:20px">各通路案件統計</div>
+        <div class="table-wrap">
+          <table class="ch-table">
+            <thead><tr>
+              <th>通路名稱</th><th>總案件</th><th>待處理</th><th>已核准</th><th>婉拒</th><th>高風險</th>
+            </tr></thead>
+            <tbody id="ch-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+      <!-- 通路設定 -->
+      <div id="page-channel-setup" style="display:none">
+        <div style="font-size:20px;font-weight:800;margin-bottom:4px">通路設定</div>
+        <div style="font-size:13px;color:#9CA3AF;margin-bottom:20px">新增合作通路，建立後立即可登入後台，帳號密碼都是統編</div>
+
+        <!-- 新增通路 -->
+        <div class="table-wrap" style="padding:24px;margin-bottom:20px">
+          <div style="font-size:15px;font-weight:800;color:#111;margin-bottom:16px">➕ 新增通路</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+            <div>
+              <div style="font-size:12px;font-weight:700;color:#374151;margin-bottom:5px">商家名稱 <span style="color:#DC2626">*</span></div>
+              <input id="cs-name" type="text" placeholder="例：得人疼企業社"
+                style="width:100%;padding:10px 12px;border:1.5px solid #E5E7EB;border-radius:10px;font-size:13px;font-family:inherit;outline:none;box-sizing:border-box"/>
+            </div>
+            <div>
+              <div style="font-size:12px;font-weight:700;color:#374151;margin-bottom:5px">統編（8碼）<span style="color:#DC2626">*</span></div>
+              <input id="cs-bizid" type="text" placeholder="例：72533080" maxlength="8"
+                style="width:100%;padding:10px 12px;border:1.5px solid #E5E7EB;border-radius:10px;font-size:13px;font-family:inherit;outline:none;box-sizing:border-box;letter-spacing:.06em"/>
+            </div>
+            <div>
+              <div style="font-size:12px;font-weight:700;color:#374151;margin-bottom:5px">產業類別 <span style="color:#DC2626">*</span></div>
+              <select id="cs-cat" onchange="updateCsCode()"
+                style="width:100%;padding:10px 12px;border:1.5px solid #E5E7EB;border-radius:10px;font-size:13px;font-family:inherit;background:#fff;outline:none">
+                <option value="a">a — 美容類</option>
+                <option value="b">b — 直銷類</option>
+                <option value="c">c — 經銷商類</option>
+                <option value="d">d — 課程類</option>
+                <option value="e">e — 保健食品類</option>
+                <option value="f">f — 其他類</option>
+              </select>
+            </div>
+            <div>
+              <div style="font-size:12px;font-weight:700;color:#374151;margin-bottom:5px">通路編號 <span style="color:#DC2626">*</span></div>
+              <div style="display:flex;align-items:center;gap:8px">
+                <input id="cs-num" type="number" placeholder="01" min="1" max="99" oninput="updateCsCode()"
+                  style="width:70px;padding:10px 12px;border:1.5px solid #E5E7EB;border-radius:10px;font-size:13px;font-family:inherit;outline:none"/>
+                <div style="font-size:13px;color:#6B7280">代碼：<strong id="cs-code-preview" style="color:#2563EB;font-size:15px">--</strong></div>
+              </div>
+            </div>
+          </div>
+          <div style="background:#EFF6FF;border:1px solid #BFDBFE;border-radius:10px;padding:11px 14px;margin:14px 0;font-size:12px;color:#1E40AF;line-height:1.7">
+            💡 <strong>帳號 = 統編，密碼 = 統編</strong>，商家登入後可自行修改密碼<br>
+            🔗 申辦連結自動產生：<span id="cs-link-preview" style="color:#2563EB">填完代碼後自動顯示</span>
+          </div>
+          <button onclick="doCreateChannel()"
+            style="background:#2563EB;color:#fff;border:none;border-radius:10px;padding:11px 28px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit">
+            🚀 建立通路 + 帳號
+          </button>
+          <div id="cs-msg" style="font-size:13px;margin-top:12px;min-height:18px"></div>
+        </div>
+
+        <!-- 現有通路列表 -->
+        <div style="font-size:15px;font-weight:800;color:#111;margin-bottom:12px">目前所有通路</div>
+        <div id="cs-channel-list" style="display:grid;gap:10px"></div>
+      </div>
+
+      <!-- 帳號管理 -->
+      <div id="page-accounts" style="display:none">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+          <div style="font-size:20px;font-weight:800">帳號管理</div>
+          <button onclick="loadAccounts()" style="background:#F3F4F6;border:1.5px solid #E5E7EB;border-radius:8px;padding:7px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;color:#374151">🔄 重新載入</button>
+        </div>
+        <div style="font-size:13px;color:#9CA3AF;margin-bottom:16px">管理所有後台使用者帳號，可直接幫商家重設密碼</div>
+        <!-- 通路明細 -->
+        <div id="channel-summary" style="background:#F8FAFC;border:1.5px solid #E5E7EB;border-radius:12px;padding:16px;margin-bottom:20px">
+          <div style="font-size:13px;font-weight:700;color:#374151;margin-bottom:10px">📊 目前通路明細</div>
+          <div id="channel-summary-list" style="display:grid;gap:6px"></div>
+        </div>
+        <div id="accounts-list" style="display:grid;gap:12px"></div>
+      </div>
+      <!-- 各通路專屬頁面（動態產生） -->
+      <div id="page-ch-single" style="display:none">
+        <div id="ch-single-header" style="margin-bottom:20px">
+          <div id="ch-single-title" style="font-size:20px;font-weight:800;margin-bottom:4px"></div>
+          <div id="ch-single-sub" style="font-size:13px;color:#9CA3AF"></div>
+        </div>
+        <div class="stats" id="ch-single-stats" style="margin-bottom:20px"></div>
+        <div class="table-wrap"><div id="ch-single-tbody"></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="ov" onclick="closePanel()"></div>
+<div class="panel" id="panel">
+  <div class="panel-top">
+    <div class="panel-title" id="ptitle"></div>
+    <button class="close" onclick="closePanel()">✕</button>
+  </div>
+  <div class="panel-body" id="pbody"></div>
+</div>
+
+<script>
+const URL_ = 'https://zqwzmlythbcspoqfmamt.supabase.co';
+const KEY_ = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inpxd3ptbHl0aGJjc3BvcWZtYW10Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUxNzIwMzgsImV4cCI6MjA5MDc0ODAzOH0.64Qp1tqtZswhidf16QhX11_y614DDZHM4AUDKHFa-GM';
+const HDR = {'apikey':KEY_,'Authorization':'Bearer '+KEY_,'Content-Type':'application/json'};
+
+// 通路對照表：代碼 -> 對外名稱
+const CHANNELS = {
+  'FlowPay': {name:'FlowHub', category:'總公司'},
+  'e01': {name:'得人疼企業社', category:'保健食品類'},
+  'c02': {name:'榮鑫國際商業有限公司', category:'經銷商類'},
+};
+
+function chName(code){ return CHANNELS[code] ? CHANNELS[code].name : code; }
+function chCategory(code){ return CHANNELS[code] ? CHANNELS[code].category : '—'; }
+
+// ===== 忘記密碼（手機 OTP 三步驟）=====
+var _forgotPhone = ''; // 儲存手機號碼供後續步驟使用
+var _forgotSession = null; // 儲存 OTP session
+
+function showForgotPw(){
+  var modal = document.getElementById('forgot-modal');
+  modal.style.display='flex';
+  // 重置到步驟1
+  document.getElementById('forgot-step1').style.display='block';
+  document.getElementById('forgot-step2').style.display='none';
+  document.getElementById('forgot-step3').style.display='none';
+  document.getElementById('forgot-msg').textContent='';
+  document.getElementById('forgot-phone').value='';
+  _forgotPhone=''; _forgotSession=null;
+  setTimeout(function(){ document.getElementById('forgot-phone').focus(); }, 100);
+}
+
+function closeForgotPw(){
+  document.getElementById('forgot-modal').style.display='none';
+}
+
+// 步驟1：發送 OTP
+async function sendForgotOtp(){
+  var rawPhone = document.getElementById('forgot-phone').value.trim().replace(/[^0-9]/g,'');
+  var msg = document.getElementById('forgot-msg');
+  if(!rawPhone||rawPhone.length!==10||!rawPhone.startsWith('09')){
+    msg.innerHTML='<span style="color:#DC2626">請輸入正確的手機號碼（09開頭，10碼）</span>'; return;
+  }
+  _forgotPhone = '+886'+rawPhone.substring(1);
+  msg.innerHTML='<span style="color:#9CA3AF">發送中...</span>';
+  var btn = document.getElementById('send-otp-btn');
+  btn.disabled=true; btn.textContent='發送中...';
+  try {
+    var r = await fetch(URL_+'/auth/v1/otp',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','apikey':KEY_},
+      body:JSON.stringify({phone:_forgotPhone, create_user:false})
+    });
+    if(r.ok||r.status===200){
+      msg.innerHTML='';
+      document.getElementById('otp-phone-display').textContent=rawPhone;
+      document.getElementById('forgot-step1').style.display='none';
+      document.getElementById('forgot-step2').style.display='block';
+      document.getElementById('forgot-otp').focus();
+    } else {
+      var err = await r.json();
+      msg.innerHTML='<span style="color:#DC2626">'+(err.message||'發送失敗，請確認手機號碼是否正確')+'</span>';
+      btn.disabled=false; btn.textContent='發送驗證碼';
+    }
+  } catch(e){
+    msg.innerHTML='<span style="color:#DC2626">網路錯誤，請稍後再試</span>';
+    btn.disabled=false; btn.textContent='發送驗證碼';
+  }
+}
+
+// 步驟2：驗證 OTP
+async function verifyForgotOtp(){
+  var otp = document.getElementById('forgot-otp').value.trim();
+  var msg = document.getElementById('forgot-msg');
+  if(!otp||otp.length!==6){ msg.innerHTML='<span style="color:#DC2626">請輸入 6 位驗證碼</span>'; return; }
+  msg.innerHTML='<span style="color:#9CA3AF">驗證中...</span>';
+  var btn = document.getElementById('verify-otp-btn');
+  btn.disabled=true;
+  try {
+    var r = await fetch(URL_+'/auth/v1/token?grant_type=phone_otp_verify',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','apikey':KEY_},
+      body:JSON.stringify({phone:_forgotPhone, token:otp, type:'sms'})
+    });
+    // Supabase OTP 驗證
+    if(!r.ok){
+      // 嘗試另一個端點
+      r = await fetch(URL_+'/auth/v1/verify',{
+        method:'POST',
+        headers:{'Content-Type':'application/json','apikey':KEY_},
+        body:JSON.stringify({phone:_forgotPhone, token:otp, type:'sms'})
+      });
+    }
+    var data = await r.json();
+    if(r.ok && data.access_token){
+      _forgotSession = data.access_token;
+      msg.innerHTML='';
+      document.getElementById('forgot-step2').style.display='none';
+      document.getElementById('forgot-step3').style.display='block';
+      document.getElementById('new-pw1').focus();
+    } else {
+      msg.innerHTML='<span style="color:#DC2626">驗證碼錯誤或已過期，請重試</span>';
+      btn.disabled=false;
+    }
+  } catch(e){
+    msg.innerHTML='<span style="color:#DC2626">網路錯誤，請稍後再試</span>';
+    btn.disabled=false;
+  }
+}
+
+// 步驟3：設定新密碼
+async function setNewPw(){
+  var pw1 = document.getElementById('new-pw1').value;
+  var pw2 = document.getElementById('new-pw2').value;
+  var msg = document.getElementById('forgot-msg');
+  if(!pw1||pw1.length<8){ msg.innerHTML='<span style="color:#DC2626">密碼至少需要 8 碼</span>'; return; }
+  if(pw1!==pw2){ msg.innerHTML='<span style="color:#DC2626">兩次密碼不一致</span>'; return; }
+  if(!_forgotSession){ msg.innerHTML='<span style="color:#DC2626">驗證已過期，請重新開始</span>'; return; }
+  msg.innerHTML='<span style="color:#9CA3AF">設定中...</span>';
+  var btn = document.getElementById('set-pw-btn');
+  btn.disabled=true;
+  try {
+    var r = await fetch(URL_+'/auth/v1/user',{
+      method:'PUT',
+      headers:{'Content-Type':'application/json','apikey':KEY_,'Authorization':'Bearer '+_forgotSession},
+      body:JSON.stringify({password:pw1})
+    });
+    if(r.ok){
+      msg.innerHTML='<span style="color:#059669">✅ 密碼設定成功！請重新登入</span>';
+      setTimeout(function(){ closeForgotPw(); _forgotSession=null; }, 2000);
+    } else {
+      msg.innerHTML='<span style="color:#DC2626">設定失敗，請重新驗證</span>';
+      btn.disabled=false;
+    }
+  } catch(e){
+    msg.innerHTML='<span style="color:#DC2626">網路錯誤，請稍後再試</span>';
+    btn.disabled=false;
+  }
+}
+
+// ===== Supabase Auth 登入系統 =====
+// 帳號密碼不再寫在前端，改由 Supabase Auth 管理
+// 每個帳號的角色/通路資訊存在 user_metadata 裡
+
+let cases=[], me=null, isAdmin=false, currentUser=null;
+var ACCS = {}; // 動態從 Supabase Auth 載入
+var _refreshToken = null; // 儲存 refresh token
+var _tokenTimer = null;   // 自動 refresh 計時器
+
+// Token 自動 Refresh（每 50 分鐘更新一次，避免1小時失效）
+async function startTokenRefresh(refreshToken){
+  _refreshToken = refreshToken;
+  if(_tokenTimer) clearInterval(_tokenTimer);
+  _tokenTimer = setInterval(async function(){
+    if(!_refreshToken) return;
+    try {
+      var r = await fetch(URL_+'/auth/v1/token?grant_type=refresh_token',{
+        method:'POST',
+        headers:{'Content-Type':'application/json','apikey':KEY_},
+        body:JSON.stringify({refresh_token:_refreshToken})
+      });
+      var data = await r.json();
+      if(r.ok && data.access_token){
+        HDR['Authorization'] = 'Bearer '+data.access_token;
+        _refreshToken = data.refresh_token || _refreshToken;
+      }
+    } catch(e){ console.warn('Token refresh 失敗',e); }
+  }, 50*60*1000); // 每50分鐘
+}
+
+window.addEventListener('DOMContentLoaded', function(){
+
+// ===== 本地帳號表（緊急備用）=====
+// ===== 帳號系統 =====
+// 基礎帳號（管理員/員工固定在這裡）
+var LOCAL_ACCOUNTS = {
+  'flowhub312': {pw:'Tingyou0312', name:'FlowHub',      role:'admin',   channel:null},
+  'staff1':     {pw:'staff1234',   name:'shane',         role:'staff',   channel:null},
+};
+
+// 通路帳號（從 Supabase DB 動態載入，也可本地備用）
+var CHANNEL_ACCOUNTS = {
+  '72533080': {pw:'72533080', name:'得人疼企業社',        role:'channel', channel:'e01'},
+  '90719952': {pw:'90719952', name:'榮鑫國際商業有限公司', role:'channel', channel:'c02'},
+};
+
+// 合併所有帳號查詢
+function findAccount(acct){
+  return LOCAL_ACCOUNTS[acct] || CHANNEL_ACCOUNTS[acct] || null;
+}
+
+// 新增通路帳號（通路設定頁面呼叫）
+function addChannelAccount(bizId, name, chCode){
+  CHANNEL_ACCOUNTS[bizId] = {
+    pw: bizId,  // 預設密碼 = 統編
+    name: name,
+    role: 'channel',
+    channel: chCode
+  };
+  saveChannelAccountsLocal();
+}
+
+// 儲存通路帳號到 localStorage（這次關掉再開還在）
+function saveChannelAccountsLocal(){
+  try {
+    // 只儲存透過後台新增的帳號（不儲存程式碼裡已定義的）
+    var toSave = {};
+    Object.keys(CHANNEL_ACCOUNTS).forEach(function(k){
+      toSave[k] = CHANNEL_ACCOUNTS[k];
+    });
+    localStorage.setItem('fp_channel_accounts', JSON.stringify(toSave));
+  } catch(e){}
+}
+
+// 載入通路帳號從 localStorage
+function loadChannelAccountsLocal(){
+  try {
+    var saved = localStorage.getItem('fp_channel_accounts');
+    if(saved){
+      var parsed = JSON.parse(saved);
+      // localStorage 只補充程式碼裡沒有的帳號（程式碼定義的優先）
+      Object.keys(parsed).forEach(function(k){
+        if(!CHANNEL_ACCOUNTS[k]) CHANNEL_ACCOUNTS[k] = parsed[k];
+      });
+    }
+  } catch(e){}
+}
+
+// ===== Supabase Auth 登入（統編/帳號 + 密碼）=====
+document.getElementById('login-btn').onclick = async function(){
+  var acct  = document.getElementById('u').value.trim();
+  var pass  = document.getElementById('p').value.trim();
+  var errEl = document.getElementById('err');
+  var btn   = document.getElementById('login-btn');
+  if(!acct||!pass){ errEl.textContent='請輸入帳號與密碼'; return; }
+
+  // 先檢查本地帳號（管理員/員工/通路）
+  var localAcc = findAccount(acct);
+  if(localAcc && localAcc.pw === pass){
+    // 本地登入成功，設定角色
+    me      = 'local_'+acct;
+    isAdmin = (localAcc.role==='admin');
+    var isStaff   = (localAcc.role==='staff');
+    var isChannel = (localAcc.role==='channel');
+    HDR['Authorization'] = 'Bearer '+KEY_;
+    ACCS[me] = {name:localAcc.name, channel:localAcc.channel};
+    document.getElementById('login').style.display='none';
+    document.getElementById('app').style.display='block';
+    document.getElementById('top-user').textContent = localAcc.name;
+    document.title = 'FlowHub';
+    var logoEl2 = document.getElementById('top-logo');
+    if(logoEl2) logoEl2.textContent = 'FlowHub';
+    if(isAdmin || isStaff){
+      document.getElementById('nav-channel').style.display='flex';
+      document.getElementById('nav-channel-setup').style.display='flex';
+      renderChannelNav();
+    }
+    if(isAdmin){
+      document.getElementById('nav-accounts').style.display='flex';
+    }
+    // 通路帳號顯示核准案件選單
+    var navApproved = document.getElementById('nav-approved');
+    if(navApproved) navApproved.style.display='flex';
+    startTokenRefresh(null);
+    showPage('cases');
+    load();
+    startPolling();
+    return;
+  }
+
+  var email = acct.includes('@') ? acct : acct+'@flowpay.com';
+  btn.textContent='登入中...'; btn.disabled=true; errEl.textContent='';
+  try {
+    var r = await fetch(URL_+'/auth/v1/token?grant_type=password',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','apikey':KEY_},
+      body:JSON.stringify({email:email, password:pass})
+    });
+    var data = await r.json();
+    if(!r.ok||data.error){
+      errEl.textContent='帳號或密碼錯誤，請再試一次';
+      btn.textContent='登入後台'; btn.disabled=false; return;
+    }
+    // 登入成功：從 user_metadata 讀取角色與通路
+    var meta    = (data.user && data.user.user_metadata) || {};
+    var name    = meta.name    || data.user.email;
+    var channel = meta.channel || null;
+    var role    = meta.role    || 'staff';
+    me      = data.user.id;
+    isAdmin = (role==='admin');
+    var isStaff  = (role==='staff');   // 員工：看案件+統計+撥款，不看通路設定/帳號
+    var isChannel = (role==='channel'); // 通路：只看自己的案件
+    // 把 access_token 設進 Header，之後所有 API 都用這個驗證
+    HDR['Authorization'] = 'Bearer '+data.access_token;
+    // 啟動 Token 自動 Refresh
+    startTokenRefresh(data.refresh_token);
+    // ACCS 相容層（給其他地方用）
+    // channel 為 null 或 'null' 都當作沒有通路（管理員）
+    ACCS[me] = {name:name, channel:(channel && channel!=='null') ? channel : null};
+    // 更新 UI
+    var brand = channel ? chName(channel) : 'FlowHub';
+    document.title = 'FlowHub';
+    var logoEl = document.getElementById('top-logo');
+    if(logoEl) logoEl.textContent = 'FlowHub';
+    document.getElementById('top-user').textContent = name;
+    document.getElementById('login').style.display='none';
+    document.getElementById('app').style.display='block';
+    // 通路帳號可以看：案件、核准案件、統計（只看自己的）
+    if(isAdmin || isStaff || (role==='channel')){
+      document.getElementById('nav-approved').style.display='flex';
+    }
+    if(isAdmin || isStaff){
+      document.getElementById('nav-channel').style.display='flex';
+      document.getElementById('nav-channel-setup').style.display='flex';
+      renderChannelNav();
+    }
+    if(isAdmin){
+      document.getElementById('nav-accounts').style.display='flex';
+    }
+    if(isAdmin || isStaff){
+      var sidebar = document.getElementById('sidebar');
+      var sep = document.createElement('div');
+      sep.style.cssText='font-size:10px;font-weight:700;color:#C4C9D4;letter-spacing:.08em;padding:12px 12px 4px;text-transform:uppercase';
+      sep.textContent='各通路';
+      sidebar.appendChild(sep);
+      Object.keys(CHANNELS).filter(function(k){return k!=='FlowPay';}).forEach(function(code){
+        var btn2 = document.createElement('button');
+        btn2.className='nav-btn';
+        btn2.id='nav-ch-'+code;
+        btn2.onclick=function(){showChannelPage(code);};
+        btn2.innerHTML='<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg>'+
+          '<span style="flex:1;text-align:left;font-size:13px">'+CHANNELS[code].name+'</span>'+
+          '<span id="ch-badge-'+code+'" style="background:#EFF6FF;color:#1E40AF;font-size:10px;font-weight:700;padding:1px 6px;border-radius:99px;min-width:18px;text-align:center"></span>';
+        sidebar.appendChild(btn2);
+      });
+    }
+    load();
+    loadTargets();
+  } catch(e){
+    errEl.textContent='連線失敗，請確認網路後重試';
+    btn.textContent='登入後台'; btn.disabled=false;
+  }
+};
+
+document.getElementById('p').onkeydown=function(e){if(e.key==='Enter')document.getElementById('login-btn').click();};
+document.getElementById('u').onkeydown=function(e){if(e.key==='Enter')document.getElementById('p').focus();};
+
+// 忘記密碼 Modal 事件綁定
+// 新增帳號 Modal 事件
+var auModal = document.getElementById('add-user-modal');
+if(auModal){
+  auModal.addEventListener('click', function(e){ if(e.target===this) closeAddUserModal(); });
+  var closeAuBtn = document.getElementById('close-add-user');
+  if(closeAuBtn) closeAuBtn.onclick = closeAddUserModal;
+  var confirmAuBtn = document.getElementById('confirm-add-user');
+  if(confirmAuBtn) confirmAuBtn.onclick = doAddUser;
+  // 通路類別按鈕不需要額外事件，onclick 已內建
+}
+
+// 月目標 Modal 事件
+var tmModal = document.getElementById('target-modal');
+if(tmModal){
+  tmModal.addEventListener('click', function(e){ if(e.target===this) closeTargetModal(); });
+  var ti = document.getElementById('target-input');
+  if(ti) ti.onkeydown = function(e){ if(e.key==='Enter') saveTargets(); };
+}
+
+// 改密碼 Modal 事件
+var cpModal = document.getElementById('change-pw-modal');
+if(cpModal){
+  cpModal.addEventListener('click', function(e){ if(e.target===this) closeChangePw(); });
+  var closeCpBtn = document.getElementById('close-change-pw');
+  if(closeCpBtn) closeCpBtn.onclick = closeChangePw;
+  var confirmCpBtn = document.getElementById('confirm-change-pw');
+  if(confirmCpBtn) confirmCpBtn.onclick = doChangePw;
+  var cp2 = document.getElementById('cp-new2');
+  if(cp2) cp2.onkeydown = function(e){ if(e.key==='Enter') doChangePw(); };
+}
+
+var fgModal = document.getElementById('forgot-modal');
+if(fgModal){
+  fgModal.addEventListener('click', function(e){ if(e.target===this) closeForgotPw(); });
+  // 關閉按鈕
+  var closeFgBtn = document.getElementById('close-forgot-btn');
+  if(closeFgBtn) closeFgBtn.onclick = closeForgotPw;
+  // 步驟1：發送OTP
+  var sendOtpBtn = document.getElementById('send-otp-btn');
+  if(sendOtpBtn) sendOtpBtn.onclick = sendForgotOtp;
+  // 按 Enter 也能送
+  var fpInput = document.getElementById('forgot-phone');
+  if(fpInput) fpInput.onkeydown = function(e){ if(e.key==='Enter') sendForgotOtp(); };
+  // 步驟2：驗證OTP
+  var verifyBtn = document.getElementById('verify-otp-btn');
+  if(verifyBtn) verifyBtn.onclick = verifyForgotOtp;
+  var otpInput = document.getElementById('forgot-otp');
+  if(otpInput){
+    otpInput.onkeydown = function(e){ if(e.key==='Enter') verifyForgotOtp(); };
+    // 只允許輸入數字
+    otpInput.oninput = function(){ this.value=this.value.replace(/[^0-9]/g,''); };
+  }
+  // 重新發送
+  var resendBtn = document.getElementById('resend-otp-btn');
+  if(resendBtn) resendBtn.onclick = function(){
+    document.getElementById('forgot-step2').style.display='none';
+    document.getElementById('forgot-step1').style.display='block';
+    document.getElementById('send-otp-btn').disabled=false;
+    document.getElementById('send-otp-btn').textContent='發送驗證碼';
+    document.getElementById('forgot-msg').textContent='';
+  };
+  // 步驟3：設定新密碼
+  var setPwBtn = document.getElementById('set-pw-btn');
+  if(setPwBtn) setPwBtn.onclick = setNewPw;
+  var pw1 = document.getElementById('new-pw1');
+  if(pw1) pw1.onkeydown = function(e){ if(e.key==='Enter') document.getElementById('new-pw2').focus(); };
+  var pw2 = document.getElementById('new-pw2');
+  if(pw2) pw2.onkeydown = function(e){ if(e.key==='Enter') setNewPw(); };
+}
+
+}); // end DOMContentLoaded
+
+// PWA 安裝
+function installApp(){
+  if(_installPrompt){
+    _installPrompt.prompt();
+    _installPrompt.userChoice.then(function(result){
+      if(result.outcome==='accepted'){
+        document.getElementById('install-bar').style.display='none';
+      }
+      _installPrompt=null;
+    });
+  } else {
+    // iOS 手動引導
+    alert('請點瀏覽器下方的「分享」→「加入主畫面」來安裝 FlowHub App！');
+  }
+}
+
+async function logout(){
+  // 呼叫 Supabase Auth 登出，讓 token 失效
+  try{
+    await fetch(URL_+'/auth/v1/logout',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','apikey':KEY_,'Authorization':HDR['Authorization']||('Bearer '+KEY_)}
+    });
+  }catch(e){}
+  // 還原 header 為 anon key
+  HDR['Authorization'] = 'Bearer '+KEY_;
+  if(_tokenTimer){ clearInterval(_tokenTimer); _tokenTimer=null; }
+  _refreshToken = null;
+  me=null; isAdmin=false; cases=[]; ACCS={};
+  document.getElementById('app').style.display='none';
+  document.getElementById('login').style.display='flex';
+  document.getElementById('u').value='';
+  document.getElementById('p').value='';
+  document.getElementById('err').textContent='';
+}
+
+var _caseOffset = 0;
+var _caseTotal  = 0;
+var PAGE_SIZE   = 100;
+
+async function load(append){
+  if(!append){
+    _caseOffset=0; cases=[];
+    document.getElementById('tbody').innerHTML='<div class="empty">載入中...</div>';
+  }
+  var acc = ACCS[me] || {};
+  var base = URL_+'/rest/v1/applications?order=created_at.desc&select=*,id_image,id_image_back';
+  // 只有通路帳號（role=channel）才篩選，管理員看全部
+  if(!isAdmin && acc.channel && acc.channel!=='null'){
+    base += '&channel=eq.'+encodeURIComponent(acc.channel);
+    var d60=new Date(); d60.setDate(d60.getDate()-60);
+    base += '&created_at=gte.'+d60.toISOString();
+  }
+  var url = base+'&limit='+PAGE_SIZE+'&offset='+_caseOffset;
+  // 取總數
+  try {
+    var rh = await fetch(base+'&limit=1',{headers:Object.assign({},HDR,{'Prefer':'count=exact'})});
+    var ct = rh.headers.get('content-range');
+    _caseTotal = ct ? (parseInt(ct.split('/')[1])||0) : 0;
+  } catch(e){}
+  var r = await fetch(url,{headers:HDR});
+  if(!r.ok){document.getElementById('tbody').innerHTML='<div class="empty">載入失敗</div>';return;}
+  var newData = await r.json();
+  if(append) cases = cases.concat(newData);
+  else cases = newData;
+  _caseOffset += newData.length;
+  renderStats(); filter(); renderLoadMore();
+}
+
+function renderLoadMore(){
+  var el=document.getElementById('load-more-wrap');
+  if(!el) return;
+  var hasMore = _caseTotal>0 && cases.length<_caseTotal;
+  el.style.display = hasMore?'flex':'none';
+  var btn=document.getElementById('load-more-btn');
+  if(btn) btn.textContent='載入更多（已顯示 '+cases.length+' / '+_caseTotal+' 筆）';
+}
+
+function buildIdButtons(c){
+  var color = c.id_verified ? '#059669' : '#9CA3AF';
+  var html = '<div class="info-v" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;color:'+color+'">';
+  html += c.id_verified ? '✓ 已上傳驗證' : '未上傳';
+  if(c.id_image){
+    html += '<button data-id="'+c.id+'" data-side="front" class="id-view-btn" style="background:#EFF6FF;border:1px solid #BFDBFE;color:#1E40AF;padding:4px 12px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">📷 正面</button>';
+  }
+  if(c.id_image_back){
+    html += '<button data-id="'+c.id+'" data-side="back" class="id-view-btn" style="background:#F0FDF4;border:1px solid #A7F3D0;color:#065F46;padding:4px 12px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">📷 反面</button>';
+  }
+  if(!c.id_image && !c.id_image_back){
+    html += '<span style="font-size:11px;color:#D1D5DB;margin-left:4px">（未上傳圖片）</span>';
+  }
+  html += '</div>';
+  return html;
+}
+
+function calcScore(c){
+  var base = 50;
+
+  // ① 薪資發放方式
+  if(c.salary_type==='transfer') base+=15;
+  else if(c.salary_type==='cash') base-=5;
+
+  // ② 信用卡繳款狀況
+  if(c.has_credit_card==='yes'){
+    if(c.credit_card_status==='normal')    base+=10;
+    if(c.credit_card_status==='minimum')   base-=15;
+    if(c.credit_card_status==='suspended') base-=30;
+    if(c.credit_card_status==='unused')    base+=2;
+  }
+
+  // ③ 年資（工作穩定度）
+  var tenure = {
+    '≥12月': 20, '6-12月': 12, '3-6月': 5, '<3月': -15
+  };
+  if(c.sc_tenure && tenure[c.sc_tenure] !== undefined) base += tenure[c.sc_tenure];
+
+  // ② 工作性質
+  var jobType = {
+    '正職': 10, '兼職/接案': 3, '不穩定': -10
+  };
+  if(c.sc_job_type && jobType[c.sc_job_type] !== undefined) base += jobType[c.sc_job_type];
+
+  // ③ 公司可查核
+  var compCheck = { '是': 5, '否': -5 };
+  if(c.sc_company_check && compCheck[c.sc_company_check] !== undefined) base += compCheck[c.sc_company_check];
+
+  // ⑧ 月付比例 - 自動從月收入與貸款負擔計算
+  var income = parseInt(c.income) || 0;
+  var loanBurdenMap = {'5,000 以下':3000,'5,000–10,000':7500,'10,000–20,000':15000,'20,000 以上':25000};
+  var loanBurden = loanBurdenMap[c.loan_burden] || 0;
+  var amtMap = {'NT$ 30,000 以下':30000,'NT$ 50,000 左右':50000,'NT$ 100,000 左右':100000,'NT$ 100,000–200,000':150000,'NT$ 300,000 以上':300000};
+  var reqAmt = amtMap[c.need_amount] || 0;
+  var newPayment = Math.round(reqAmt / 24);
+  var totalPayment = loanBurden + newPayment;
+  if(income > 0){
+    var ratio = totalPayment / income;
+    if(ratio < 0.3) base += 15;
+    else if(ratio < 0.5) base += 3;
+    else base -= 20;
+    if(reqAmt <= income * 6) base += 10;
+    else if(reqAmt > income * 12) base -= 12;
+  }
+
+  // 最近送件次數影響評分
+  // 資金需求型（扣更多）：代表資金緊張、高風險
+  // 消費分期型（扣較少）：購物行為，風險相對低
+  var recentPenalty = 0;
+  var recentType = c.recent_apply_type || '';   // 資金需求方面
+  var recentCount = c.recent_apply_count || ''; // 消費分期方面
+  // 資金詢問：影響較大
+  if(recentType.indexOf('3次以上') >= 0) recentPenalty -= 20;
+  else if(recentType.indexOf('2次') >= 0) recentPenalty -= 12;
+  else if(recentType.indexOf('1次') >= 0) recentPenalty -= 5;
+  else if(recentType.indexOf('0次') >= 0) recentPenalty += 3; // 完全沒送過，加分
+  // 消費分期：影響較小
+  if(recentCount.indexOf('3次以上') >= 0) recentPenalty -= 8;
+  else if(recentCount.indexOf('2次') >= 0) recentPenalty -= 4;
+  else if(recentCount.indexOf('1次') >= 0) recentPenalty -= 1;
+  else if(recentCount.indexOf('0次') >= 0) recentPenalty += 2; // 沒有消費分期紀錄，加分
+  base += recentPenalty;
+
+  // ④ 工作職電確認
+  var jobTel = { '是': 5, '否': -12 };
+  if(c.sc_job_tel && jobTel[c.sc_job_tel] !== undefined) base += jobTel[c.sc_job_tel];
+
+  // ⑤ 薪轉（還款來源最重要）
+  var salaryTr = { '有': 22, '無': 0 };
+  if(c.sc_salary_transfer && salaryTr[c.sc_salary_transfer] !== undefined) base += salaryTr[c.sc_salary_transfer];
+
+  // ⑥ 存摺收入佐證
+  var bankRec = { '有': 10, '無': 0 };
+  if(c.sc_bank_record && bankRec[c.sc_bank_record] !== undefined) base += bankRec[c.sc_bank_record];
+
+  // ⑦ 收入佐證文件
+  var incProof = { '有': 10, '無': -15 };
+  if(c.sc_income_proof && incProof[c.sc_income_proof] !== undefined) base += incProof[c.sc_income_proof];
+
+  // ⑧ 門號本人（聯絡真實性）
+  var phoneOwn = { '是': 10, '否': -25 };
+  if(c.sc_phone_owner && phoneOwn[c.sc_phone_owner] !== undefined) base += phoneOwn[c.sc_phone_owner];
+
+  // ⑨ 居住穩定（含居住地址＝戶籍判斷）
+  var residence = { '是': 5, '否': 0 };
+  if(c.sc_residence && residence[c.sc_residence] !== undefined) base += residence[c.sc_residence];
+  // 居住地址與戶籍相同：掌握度高，加分；不同：稍扣分
+  if(c.same_addr === 'yes') base += 5;
+  else if(c.same_addr === 'no') base -= 5;
+
+  // ⑩ 戶政逕遷戶
+  var addrTr = { '是': -20, '否': 0 };
+  if(c.sc_addr_transfer && addrTr[c.sc_addr_transfer] !== undefined) base += addrTr[c.sc_addr_transfer];
+
+  // ⑪ 汽機車繳款（時間 + 品質 各自獨立計分）（CCIS已移除，未實際串接）（時間 + 品質 各自獨立計分）
+  function timeScore(t){
+    if(t==='over1y') return 10;  // 繳款1年以上：穩定加10分
+    if(t==='lt6')    return -3;  // 未滿6期：觀察中略扣3分
+    return 0;
+  }
+  function qualityScore(q){
+    if(q==='normal')     return 8;   // 正常繳款：良好習慣加8分
+    if(q==='paid')       return 5;   // 已繳清：還清加5分
+    if(q==='late')       return -20; // 偶爾遲繳：明顯扣20分
+    if(q==='late_often') return -40; // 常常遲繳：高風險扣40分
+    return 0;
+  }
+  function vehicleCalc(veh){
+    // 新欄位：car_time + car_quality 或 moto_time + moto_quality
+    if(veh.time!==undefined || veh.quality!==undefined){
+      return timeScore(veh.time||'') + qualityScore(veh.quality||'');
+    }
+    // 舊欄位相容：car_ok / moto_ok
+    if(veh.ok){
+      if(veh.ok==='over1y'||veh.ok==='lt6') return timeScore(veh.ok);
+      return qualityScore(veh.ok);
+    }
+    return 0;
+  }
+  if(c.has_car==='yes'){
+    base += vehicleCalc({time: c.car_time, quality: c.car_quality, ok: c.car_ok});
+  }
+  if(c.has_moto==='yes'){
+    base += vehicleCalc({time: c.moto_time, quality: c.moto_quality, ok: c.moto_ok});
+  }
+
+  // ⑬ 門號本人評分
+  if(c.sc_phone_owner === 'yes') base += 10;   // 本人門號：聯絡真實性高
+  else if(c.sc_phone_owner === 'no') base -= 20; // 非本人門號：聯絡真實性低
+
+  // ⑭ 公司行業穩定度評估
+  if(c.company){
+    var co = c.company.trim();
+    // 穩定行業關鍵字（加分）
+    var stableKeys = ['股份有限公司','有限公司','企業社','企業行','國際','實業','科技','工程','建設','營造','醫療','醫院','診所','藥局','學校','幼兒園','補習班','政府','公所','鄉公所','市政府','銀行','金融','保險','證券','投資','百貨','連鎖','超市','便利商店','量販','飯店','酒店','旅館','航空','運輸','物流'];
+    var stableMatch = stableKeys.some(function(k){ return co.indexOf(k) >= 0; });
+    if(stableMatch) base += 8;  // 正規公司組織，穩定性高
+
+    // 自營/工作室（輕微扣分，並列提醒）
+    var selfKeys = ['工作室','個人工作室','個人','自營','獨資','攤販','小吃','夜市','早餐店','路邊攤','地攤'];
+    var selfMatch = selfKeys.some(function(k){ return co.indexOf(k) >= 0; });
+    if(selfMatch) base -= 5;  // 自營收入較不穩定
+
+    // 家管/學生（不扣分，但會提醒）
+    var noIncomeKeys = ['家管','家庭主婦','家庭主夫','家庭主','學生','在學','就學','無業','待業','失業','退休','無','none'];
+    // 這類不影響評分，但在 alertBar 提醒
+  }
+
+  // ⑭ 年齡評估（根據西元生日）
+  if(c.birth_date){
+    var bdStr = String(c.birth_date).replace(/[-\/]/g,'');  // 統一去除分隔符
+    var birthYear = parseInt(bdStr.substring(0,4));
+    var birthMonth = parseInt(bdStr.substring(4,6));
+    var birthDay = parseInt(bdStr.substring(6,8));
+    if(!isNaN(birthYear) && birthYear > 1900 && birthYear < 2100){
+      var now = new Date();
+      var age = now.getFullYear() - birthYear;
+      // 精確計算（考慮今年還沒過生日）
+      if(now.getMonth()+1 < birthMonth || (now.getMonth()+1 === birthMonth && now.getDate() < birthDay)){
+        age--;
+      }
+      if(age < 18) base -= 50;       // 未成年，不符申辦資格
+      else if(age > 65) base -= 20;  // 超過65歲，謹慎評估
+      else if(age >= 25 && age <= 55) base += 5;  // 黃金工作年齡
+    }
+  }
+
+  // ⑮ 警示戶 → 直接歸 E
+  if(c.is_alert === 'yes') return 0;
+
+  return Math.min(100, Math.max(0, base));
+}
+
+function viewIdImage(id){
+  var c = cases.find(function(x){return x.id===id;});
+  if(!c || !c.id_image) return;
+  var overlay = document.createElement('div');
+  overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:200;display:flex;align-items:center;justify-content:center;cursor:pointer';
+  overlay.id='id-overlay';
+  overlay.onclick=function(){overlay.remove();};
+  var box = document.createElement('div');
+  box.style.cssText='background:#fff;border-radius:16px;padding:20px;max-width:90vw;max-height:90vh;overflow:auto;cursor:default;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.4)';
+  box.onclick=function(e){e.stopPropagation();};
+  box.innerHTML=
+    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">'+
+    '<div style="font-size:15px;font-weight:700;color:#111">'+(c.name||'—')+' — 身分證</div>'+
+    '<button onclick="document.getElementById(\'id-overlay\').remove()" style="background:#F3F4F6;border:none;border-radius:8px;padding:6px 12px;cursor:pointer;font-size:13px;font-weight:600">✕ 關閉</button>'+
+    '</div>'+
+    '<img src="'+c.id_image+'" style="max-width:100%;max-height:70vh;border-radius:8px;border:1px solid #E5E7EB"/>';
+  box.setAttribute('data-idbox','1');
+  overlay.appendChild(box);
+  document.body.appendChild(overlay);
+}
+
+function vehicleLabel(code){
+  var map={
+    'lt6':'未滿6期','over1y':'繳款1年以上',
+    'normal':'正常繳款','late':'偶爾遲繳',
+    'late_often':'常常遲繳','paid':'已繳清',
+    'ok6':'準時6期以上'
+  };
+  return map[code] || code || '未填';
+}
+
+function vehicleDisplay(has, time, quality, ok){
+  if(has!=='yes') return '無';
+  var parts = [];
+  if(time) parts.push(vehicleLabel(time));
+  if(quality) parts.push(vehicleLabel(quality));
+  if(!parts.length && ok) parts.push(vehicleLabel(ok));
+  return parts.length ? '有（'+parts.join(' ／ ')+'）' : '有（未填）';
+}
+
+function gradeInfo(s){
+  if(s>=82)return{g:'A',label:'穩定可承作',hint:'條件穩定，確認資料完整後可送件',bg:'#ECFDF5',border:'#059669',text:'#065F46',dot:'dot-g'};
+  if(s>=68)return{g:'B',label:'可承作，確認收入',hint:'確認薪轉與月付比例後可評估',bg:'#EFF6FF',border:'#2563EB',text:'#1E40AF',dot:'dot-g'};
+  if(s>=55)return{g:'C',label:'建議降額或補件',hint:'補薪轉存摺或調降申請金額',bg:'#FFFBEB',border:'#D97706',text:'#92400E',dot:'dot-y'};
+  if(s>=40)return{g:'D',label:'高風險，需補強',hint:'遲繳紀錄或資料不一致，先補件',bg:'#FEF3C7',border:'#E97010',text:'#92400E',dot:'dot-y'};
+  return{g:'E',label:'不建議送件',hint:'警示戶／多項重大負分，婉拒為主',bg:'#FEF2F2',border:'#DC2626',text:'#991B1B',dot:'dot-r'};
+}
+
+function badgeClass(s){
+  var m={待處理:'b-wait',已聯繫:'b-contact',審核中:'b-review',已核准:'b-approve',婉拒:'b-reject'};
+  return m[s||'待處理']||'b-wait';
+}
+
+function fmtDate(d){
+  if(!d)return'—';
+  var dt=new Date(d);
+  return (dt.getMonth()+1)+'/'+dt.getDate()+' '+dt.getHours().toString().padStart(2,'0')+':'+dt.getMinutes().toString().padStart(2,'0');
+}
+
+// ===== 核准案件 =====
+function renderApproved(){
+  var acc = ACCS[me] || {};
+  var myChannel = acc.channel && acc.channel!=='null' ? acc.channel : null;
+  var list = cases.filter(function(c){
+    if(c.status!=='已核准') return false;
+    if(myChannel) return (c.channel||'FlowPay') === myChannel;
+    return true;
+  });
+  var badge = document.getElementById('approved-count');
+  if(badge) badge.textContent = list.length > 0 ? list.length : '';
+  if(!list.length){
+    document.getElementById('approved-tbody').innerHTML='<div class="empty">目前尚無核准案件</div>';
+    return;
+  }
+  var rows=list.map(function(c){
+    var sc=calcScore(c); var gi=gradeInfo(sc);
+    return '<tr data-id="'+c.id+'" class="open-panel-row" style="cursor:pointer">'+
+      '<td><div class="name-bold">'+(c.name||'—')+'</div><div class="date-sub">'+fmtDate(c.created_at)+'</div></td>'+
+      '<td>'+(c.phone||'—')+'</td>'+
+      '<td>'+(c.need_amount||'—')+'</td>'+
+      '<td style="color:#2563EB;font-weight:700">'+(c.approved_amount||'—')+'</td>'+
+      '<td><span class="dot '+gi.dot+'"></span>'+gi.g+' '+gi.label+'</td>'+
+      (isAdmin?'<td style="font-size:11px;color:#6B7280">'+(c.channel? chName(c.channel):'FlowHub')+'</td>':'')+
+    '</tr>';
+  }).join('');
+  document.getElementById('approved-tbody').innerHTML=
+    '<table><thead><tr><th>申請人</th><th>電話</th><th>申請金額</th><th>核准金額</th><th>風險評估</th>'+(isAdmin?'<th>通路</th>':'')+
+    '</tr></thead><tbody>'+rows+'</tbody></table>';
+}
+
+function filterApproved(ch){
+  var acc = ACCS[me] || {};
+  var myChannel = acc.channel && acc.channel!=='null' ? acc.channel : null;
+  var list = cases.filter(function(c){
+    if(c.status!=='已核准') return false;
+    if(myChannel) return (c.channel||'FlowPay') === myChannel;
+    if(ch) return (c.channel||'FlowPay') === ch;
+    return true;
+  });
+  if(!list.length){
+    document.getElementById('approved-tbody').innerHTML='<div class="empty">尚無符合條件的核准案件</div>'; return;
+  }
+  var rows=list.map(function(c){
+    var sc=calcScore(c); var gi=gradeInfo(sc);
+    return '<tr data-id="'+c.id+'" class="open-panel-row" style="cursor:pointer">'+
+      '<td><div class="name-bold">'+(c.name||'—')+'</div><div class="date-sub">'+fmtDate(c.created_at)+'</div></td>'+
+      '<td>'+(c.phone||'—')+'</td>'+
+      '<td>'+(c.need_amount||'—')+'</td>'+
+      '<td style="color:#2563EB;font-weight:700">'+(c.approved_amount||'—')+'</td>'+
+      '<td><span class="dot '+gi.dot+'"></span>'+gi.g+' '+gi.label+'</td>'+
+      (isAdmin?'<td style="font-size:11px;color:#6B7280">'+(c.channel? chName(c.channel):'FlowHub')+'</td>':'')+
+    '</tr>';
+  }).join('');
+  document.getElementById('approved-tbody').innerHTML=
+    '<table><thead><tr><th>申請人</th><th>電話</th><th>申請金額</th><th>核准金額</th><th>風險評估</th>'+(isAdmin?'<th>通路</th>':'')+
+    '</tr></thead><tbody>'+rows+'</tbody></table>';
+}
+
+// ===== 智慧輪詢（新案件通知）=====
+var lastCaseCount = -1;
+var _pollingTimer = null;
+
+function startPolling(){
+  if(_pollingTimer) clearInterval(_pollingTimer);
+  _pollingTimer = setInterval(async function(){
+    try {
+      var acc = ACCS[me] || {};
+      var url = URL_+'/rest/v1/applications?select=id&order=created_at.desc&limit=1';
+      if(acc.channel && acc.channel!=='null'){
+        url += '&channel=eq.'+encodeURIComponent(acc.channel);
+        var d60=new Date(); d60.setDate(d60.getDate()-60);
+        url += '&created_at=gte.'+d60.toISOString();
+      }
+      // 取總數
+      var r = await fetch(url.replace('limit=1','limit=200'), {
+        headers: Object.assign({}, HDR, {'Prefer':'count=exact'})
+      });
+      var ct = r.headers.get('content-range');
+      var count = ct ? parseInt(ct.split('/')[1])||0 : 0;
+      if(lastCaseCount>=0 && count > lastCaseCount){
+        // 有新案件！
+        var dot = document.getElementById('nav-cases-dot');
+        if(!dot){
+          var btn = document.getElementById('nav-cases');
+          if(btn){
+            var d = document.createElement('span');
+            d.id='nav-cases-dot';
+            d.className='new-dot';
+            btn.appendChild(d);
+          }
+        }
+        load(); // 重新載入
+      }
+      lastCaseCount = count;
+    } catch(e){}
+  }, 30000); // 每30秒
+}
+
+// ===== 統計圖表 =====
+function renderStats2(){
+  var timeEl = document.getElementById('stats-update-time');
+  if(timeEl){ var now=new Date(); timeEl.textContent=(now.getMonth()+1)+'/'+(now.getDate())+' '+now.getHours().toString().padStart(2,'0')+':'+now.getMinutes().toString().padStart(2,'0'); }
+
+  var acc = ACCS[me] || {};
+  var myChannel = acc.channel && acc.channel!=='null' ? acc.channel : null;
+  var list = myChannel ? cases.filter(function(c){ return (c.channel||'FlowPay')===myChannel; }) : cases;
+
+  var total=list.length;
+  var statusCount={'待處理':0,'處理中':0,'已核准':0,'已撥款':0,'不予承作':0};
+  var gradeCount={A:0,B:0,C:0,D:0,E:0};
+  var approveTotal=0, scoreSum=0;
+
+  list.forEach(function(c){
+    var s=c.status||'待處理';
+    if(statusCount[s]!==undefined) statusCount[s]++; else statusCount['待處理']++;
+    var sc=calcScore(c); scoreSum+=sc;
+    var gi=gradeInfo(sc); gradeCount[gi.g]=(gradeCount[gi.g]||0)+1;
+    if(s==='已核准'||s==='已撥款') approveTotal++;
+  });
+
+  var approveRate=total>0?Math.round(approveTotal/total*100):0;
+  var avgScore=total>0?Math.round(scoreSum/total):0;
+  var highRisk=list.filter(function(c){return calcScore(c)<50||c.is_alert==='yes';}).length;
+
+  // ① 數字卡片
+  var cardsEl=document.getElementById('stats2-cards');
+  if(cardsEl){
+    cardsEl.innerHTML=
+      '<div class="stat"><div class="stat-label">總案件數</div><div class="stat-num">'+total+'</div></div>'+
+      '<div class="stat"><div class="stat-label">核准件數</div><div class="stat-num" style="color:#059669">'+approveTotal+'</div></div>'+
+      '<div class="stat"><div class="stat-label">平均評分</div><div class="stat-num" style="color:#2563EB">'+avgScore+'</div></div>'+
+      '<div class="stat"><div class="stat-label">高風險案件</div><div class="stat-num" style="color:#DC2626">'+highRisk+'</div></div>';
+  }
+
+  // ② 圓形圖（核准率）
+  var canvas=document.getElementById('donut-canvas');
+  if(canvas){
+    var ctx=canvas.getContext('2d');
+    var r=canvas.width/2, ri=r-20;
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    // 背景
+    ctx.beginPath(); ctx.arc(r,r,ri,0,Math.PI*2);
+    ctx.strokeStyle='#E5E7EB'; ctx.lineWidth=18; ctx.stroke();
+    // 核准弧
+    if(approveRate>0){
+      ctx.beginPath(); ctx.arc(r,r,ri,-Math.PI/2,-Math.PI/2+approveRate/100*Math.PI*2);
+      ctx.strokeStyle='#059669'; ctx.lineWidth=18; ctx.lineCap='round'; ctx.stroke();
+    }
+    ctx.fillStyle='#111827'; ctx.font='bold 20px -apple-system,sans-serif';
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText(approveRate+'%',r,r-8);
+    ctx.fillStyle='#9CA3AF'; ctx.font='11px -apple-system,sans-serif';
+    ctx.fillText(approveTotal+'/'+total+' 件',r,r+12);
+  }
+  var donutLabel=document.getElementById('donut-label');
+  if(donutLabel) donutLabel.textContent=total>0?'共 '+total+' 件，核准 '+approveTotal+' 件':'尚無案件';
+
+  // ③ 案件狀態分布
+  var statusEl=document.getElementById('status-dist');
+  if(statusEl){
+    var statusColors={'待處理':'#6B7280','處理中':'#2563EB','已核准':'#059669','已撥款':'#7C3AED','不予承作':'#DC2626'};
+    var statusOrder=['待處理','處理中','已核准','已撥款','不予承作'];
+    statusEl.innerHTML=statusOrder.map(function(s){
+      var cnt=statusCount[s]||0;
+      var pct=total>0?Math.round(cnt/total*100):0;
+      var color=statusColors[s]||'#6B7280';
+      return '<div>'+
+        '<div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px">'+
+          '<span style="color:#374151;font-weight:600">'+s+'</span>'+
+          '<span style="color:#6B7280">'+cnt+' 件（'+pct+'%）</span>'+
+        '</div>'+
+        '<div style="background:#F3F4F6;border-radius:99px;height:7px;overflow:hidden">'+
+          '<div style="width:'+pct+'%;height:100%;background:'+color+';border-radius:99px;transition:width .5s"></div>'+
+        '</div>'+
+      '</div>';
+    }).join('');
+  }
+
+  // ④ 評等分布
+  var gradeEl=document.getElementById('grade-dist');
+  if(gradeEl){
+    var grades=[
+      {g:'A',color:'#059669',bg:'#ECFDF5'},
+      {g:'B',color:'#2563EB',bg:'#EFF6FF'},
+      {g:'C',color:'#D97706',bg:'#FFFBEB'},
+      {g:'D',color:'#EA580C',bg:'#FFF7ED'},
+      {g:'E',color:'#DC2626',bg:'#FEF2F2'},
+    ];
+    gradeEl.innerHTML=grades.map(function(gd){
+      var cnt=gradeCount[gd.g]||0;
+      var pct=total>0?Math.round(cnt/total*100):0;
+      return '<div style="flex:1;min-width:52px;background:'+gd.bg+';border-radius:10px;padding:10px 8px;text-align:center">'+
+        '<div style="font-size:18px;font-weight:900;color:'+gd.color+'">'+gd.g+'</div>'+
+        '<div style="font-size:16px;font-weight:800;color:#111;margin:2px 0">'+cnt+'</div>'+
+        '<div style="font-size:10px;color:#9CA3AF">'+pct+'%</div>'+
+      '</div>';
+    }).join('');
+  }
+
+  // ⑤ 月目標進度
+  renderTargetBar();
+
+  // ⑥ 前十大通路排名（只有管理員看得到）
+  var topWrap = document.getElementById('top-channels-wrap');
+  var topEl = document.getElementById('top-channels');
+  if(topWrap && topEl){
+    if(isAdmin){
+      topWrap.style.display = 'block';
+      // 統計每個通路的案件數和核准數
+      var chStats = {};
+      cases.forEach(function(c){
+        var ch = c.channel || 'FlowPay';
+        if(!chStats[ch]) chStats[ch] = {total:0, approved:0, name:chName(ch)};
+        chStats[ch].total++;
+        if(c.status==='已核准'||c.status==='已撥款') chStats[ch].approved++;
+      });
+      // 排序：按總案件數排名
+      var ranked = Object.keys(chStats).map(function(k){
+        return {code:k, name:chStats[k].name, total:chStats[k].total, approved:chStats[k].approved};
+      }).sort(function(a,b){ return b.total - a.total; }).slice(0,10);
+
+      if(!ranked.length){
+        topEl.innerHTML='<div style="font-size:13px;color:#9CA3AF">尚無通路資料</div>';
+      } else {
+        var maxTotal = ranked[0].total || 1;
+        topEl.innerHTML = ranked.map(function(ch, i){
+          var pct = Math.round(ch.total/maxTotal*100);
+          var approveRate = ch.total>0?Math.round(ch.approved/ch.total*100):0;
+          var medal = i===0?'🥇':i===1?'🥈':i===2?'🥉':'';
+          return '<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #F3F4F6">'+
+            '<div style="font-size:14px;font-weight:900;color:#9CA3AF;width:24px;text-align:center">'+(medal||i+1)+'</div>'+
+            '<div style="flex:1">'+
+              '<div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px">'+
+                '<span style="font-weight:700;color:#111">'+(ch.code==='FlowPay'?'FlowHub 直客':ch.name)+'</span>'+
+                '<span style="color:#6B7280">'+ch.total+' 件｜核准 '+approveRate+'%</span>'+
+              '</div>'+
+              '<div style="background:#F3F4F6;border-radius:99px;height:6px;overflow:hidden">'+
+                '<div style="width:'+pct+'%;height:100%;background:linear-gradient(90deg,#2563EB,#059669);border-radius:99px;transition:width .5s"></div>'+
+              '</div>'+
+            '</div>'+
+          '</div>';
+        }).join('');
+      }
+    } else {
+      topWrap.style.display = 'none';
+    }
+  }
+}
+
+
+// ===== 月目標 =====
+var _targets = {};
+
+async function loadTargets(){
+  var acc = ACCS[me] || {};
+  var chKey = acc.channel && acc.channel!=='null' ? acc.channel : 'FlowPay';
+  var ym = new Date().getFullYear()+'-'+(new Date().getMonth()+1).toString().padStart(2,'0');
+  try {
+    var r = await fetch(URL_+'/rest/v1/monthly_targets?channel=eq.'+chKey+'&year_month=eq.'+ym, {headers:HDR});
+    var data = await r.json();
+    if(data && data[0]) _targets[chKey] = data[0].target_amount;
+  } catch(e){}
+}
+
+async function saveTargets(){
+  var inp = document.getElementById('target-input');
+  if(!inp) return;
+  var val = parseInt(inp.value.replace(/,/g,''));
+  if(!val||val<=0){ alert('請輸入有效金額'); return; }
+  var acc = ACCS[me] || {};
+  var chKey = acc.channel && acc.channel!=='null' ? acc.channel : 'FlowPay';
+  var ym = new Date().getFullYear()+'-'+(new Date().getMonth()+1).toString().padStart(2,'0');
+  try {
+    await fetch(URL_+'/rest/v1/monthly_targets', {
+      method:'POST', headers:Object.assign({},HDR,{'Prefer':'resolution=merge-duplicates'}),
+      body:JSON.stringify({channel:chKey, year_month:ym, target_amount:val})
+    });
+    _targets[chKey]=val;
+    closeTargetModal();
+    renderStats2();
+  } catch(e){ alert('儲存失敗'); }
+}
+
+function showTargetModal(){
+  var modal = document.getElementById('target-modal');
+  if(modal) modal.style.display='flex';
+  var acc = ACCS[me] || {};
+  var chKey = acc.channel && acc.channel!=='null' ? acc.channel : 'FlowPay';
+  var inp = document.getElementById('target-input');
+  if(inp && _targets[chKey]) inp.value = _targets[chKey].toLocaleString();
+}
+
+function closeTargetModal(){
+  var modal = document.getElementById('target-modal');
+  if(modal) modal.style.display='none';
+}
+
+function renderTargetBar(){
+  var acc = ACCS[me] || {};
+  var chKey = acc.channel && acc.channel!=='null' ? acc.channel : 'FlowPay';
+  var target = _targets[chKey] || 0;
+  var list2 = chKey==='FlowPay' ? cases : cases.filter(function(c){ return (c.channel||'FlowPay')===chKey; });
+  var achieved = list2.filter(function(c){ return c.status==='已核准'; })
+    .reduce(function(sum,c){ return sum+(parseInt((c.approved_amount||'').replace(/,/g,''))||0); },0);
+  var pct = target>0 ? Math.min(100,Math.round(achieved/target*100)) : 0;
+  var barEl = document.getElementById('target-bar');
+  var barLabelEl = document.getElementById('target-bar-label');
+  var targetValEl = document.getElementById('target-val');
+  var mottoEl = document.getElementById('target-motto');
+  if(barEl){
+    barEl.style.width=pct+'%';
+    barEl.style.background=pct>=100?'#059669':pct>=70?'#2563EB':'linear-gradient(90deg,#2563EB,#059669)';
+  }
+  if(barLabelEl) barLabelEl.textContent=pct+'%';
+  if(targetValEl) targetValEl.textContent=target?'目標：NT$ '+target.toLocaleString():'尚未設定目標';
+  // 加油標語
+  if(mottoEl){
+    var motto = pct>=100?'🎉 恭喜達標！太棒了！':
+                pct>=80?'💪 快到了！衝刺最後一哩路！':
+                pct>=60?'🔥 過半了！繼續保持！':
+                pct>=40?'🚀 穩定前進，加油！':
+                pct>=20?'⚡ 起步良好，繼續衝！':
+                pct>0?'🌱 好的開始！每筆都重要！':'💡 設定目標，開始衝吧！';
+    mottoEl.textContent = motto;
+    mottoEl.style.color = pct>=100?'#059669':pct>=60?'#2563EB':'#D97706';
+  }
+}
+
+// ===== 通路側邊選單 =====
+function showChannelPage(code){
+  showPage('ch-single');
+  var ch = CHANNELS[code]||{};
+  var el1 = document.getElementById('ch-single-title');
+  var el2 = document.getElementById('ch-single-sub');
+  if(el1) el1.textContent = ch.name||code;
+  if(el2) el2.textContent = ch.category||'';
+  var chCases = cases.filter(function(c){ return (c.channel||'FlowPay')===code; });
+  var tbody = document.getElementById('ch-single-tbody');
+  if(!tbody) return;
+  if(!chCases.length){ tbody.innerHTML='<div class="empty">此通路尚無案件</div>'; return; }
+  var rows=chCases.map(function(c){
+    var sc=calcScore(c); var gi=gradeInfo(sc);
+    return '<tr data-id="'+c.id+'" class="open-panel-row" style="cursor:pointer">'+
+      '<td><div class="name-bold">'+(c.name||'—')+'</div><div class="date-sub">'+fmtDate(c.created_at)+'</div></td>'+
+      '<td>'+(c.phone||'—')+'</td>'+
+      '<td>'+(c.need_amount||'—')+'</td>'+
+      '<td><span class="dot '+gi.dot+'"></span>'+gi.g+'</td>'+
+      '<td><span class="badge '+badgeClass(c.status)+'">'+(c.status||'待處理')+'</span></td>'+
+    '</tr>';
+  }).join('');
+  tbody.innerHTML='<table><thead><tr><th>申請人</th><th>電話</th><th>申請金額</th><th>評等</th><th>狀態</th></tr></thead><tbody>'+rows+'</tbody></table>';
+  setTimeout(function(){
+    tbody.querySelectorAll('.open-panel-row').forEach(function(tr){
+      tr.onclick=function(){ openPanel(tr.getAttribute('data-id')); };
+    });
+  },50);
+  var statsEl = document.getElementById('ch-single-stats');
+  if(statsEl) renderStats();
+}
+
+function renderChannel(){
+  var el = document.getElementById('channel-list');
+  if(!el) return;
+  var chKeys = Object.keys(CHANNELS).filter(function(k){ return k!=='FlowPay'; });
+  if(!chKeys.length){ el.innerHTML='<div class="empty">尚未建立任何通路</div>'; return; }
+  el.innerHTML = chKeys.map(function(code){
+    var ch=CHANNELS[code];
+    var chCases=cases.filter(function(c){return (c.channel||'FlowPay')===code;});
+    var approved=chCases.filter(function(c){return c.status==='已核准';}).length;
+    return '<div class="table-wrap" style="padding:16px 20px;cursor:pointer" data-code="'+code+'" class="ch-row">'+
+      '<div style="display:flex;align-items:center;justify-content:space-between">'+
+        '<div style="display:flex;align-items:center;gap:10px">'+
+          '<div style="width:36px;height:36px;border-radius:8px;background:#EFF6FF;display:flex;align-items:center;justify-content:center;font-size:16px">🏢</div>'+
+          '<div>'+
+            '<div style="font-size:14px;font-weight:700">'+ch.name+'</div>'+
+            '<div style="font-size:11px;color:#9CA3AF">'+code+' · '+ch.category+'</div>'+
+          '</div>'+
+        '</div>'+
+        '<div style="text-align:right">'+
+          '<div style="font-size:20px;font-weight:800;color:#2563EB">'+chCases.length+'</div>'+
+          '<div style="font-size:11px;color:#9CA3AF">案件 / '+approved+' 核准</div>'+
+        '</div>'+
+      '</div>'+
+    '</div>';
+  }).join('');
+  setTimeout(function(){
+    el.querySelectorAll('.ch-row').forEach(function(div){
+      div.onclick=function(){ showChannelPage(div.getAttribute('data-code')); };
+    });
+  },50);
+}
+
+function renderChannelNav(){
+  var sidebar = document.getElementById('sidebar');
+  if(!sidebar) return;
+  // 移除舊的通路按鈕
+  sidebar.querySelectorAll('[id^="nav-ch-"]').forEach(function(b){ b.remove(); });
+  // 加入分隔線
+  var existing = sidebar.querySelector('.ch-sep');
+  if(!existing){
+    var sep=document.createElement('div');
+    sep.className='ch-sep';
+    sep.style.cssText='font-size:10px;font-weight:700;color:#C4C9D4;letter-spacing:.08em;padding:12px 12px 4px;text-transform:uppercase';
+    sep.textContent='通路';
+    sidebar.appendChild(sep);
+  }
+  Object.keys(CHANNELS).filter(function(k){return k!=='FlowPay';}).forEach(function(code){
+    var ch=CHANNELS[code];
+    var btn=document.createElement('button');
+    btn.className='nav-btn'; btn.id='nav-ch-'+code;
+    btn.onclick=function(){showChannelPage(code);};
+    btn.innerHTML='<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg>'+
+      '<span style="flex:1;text-align:left;font-size:13px" id="nav-ch-label-'+code+'">'+ch.name+'</span>'+
+      '<span class="badge-num" id="ch-badge-'+code+'"></span>';
+    sidebar.appendChild(btn);
+  });
+}
+
+function renderStats(){
+  var total=cases.length, wait=0, approve=0, high=0;
+  cases.forEach(function(c){
+    if(!c.status||c.status==='待處理'||c.status==='已聯繫'||c.status==='審核中')wait++;
+    if(c.status==='已核准')approve++;
+    var s=calcScore(c); if(s<50||c.is_alert==='yes')high++;
+  });
+  document.getElementById('stats').innerHTML=
+    '<div class="stat"><div class="stat-label">總申請數</div><div class="stat-num">'+total+'</div></div>'+
+    '<div class="stat"><div class="stat-label">待處理</div><div class="stat-num" style="color:#D97706">'+wait+'</div></div>'+
+    '<div class="stat"><div class="stat-label">已核准</div><div class="stat-num" style="color:#059669">'+approve+'</div></div>'+
+    '<div class="stat"><div class="stat-label">高風險</div><div class="stat-num" style="color:#DC2626">'+high+'</div></div>';
+  var badge = document.getElementById('approved-count');
+  if(badge) badge.textContent = approve > 0 ? approve : '';
+  // Update channel badges
+  if(isAdmin){
+    Object.keys(CHANNELS).filter(function(k){return k!=='FlowPay';}).forEach(function(code){
+      var b = document.getElementById('ch-badge-'+code);
+      if(b){
+        var cnt = cases.filter(function(c){return (c.channel||'FlowPay')===code;}).length;
+        b.textContent = cnt > 0 ? cnt : '';
+      }
+    });
+  }
+}
+
+// ===== 頁面切換 =====
+function showPage(page){
+  // 所有頁面清單
+  var pages = ['cases','approved','stats','channel','accounts','channel-setup','ch-single'];
+  pages.forEach(function(p){
+    var el = document.getElementById('page-'+p);
+    if(el) el.style.display = (page===p) ? 'block' : 'none';
+  });
+  // 導覽按鈕 active 狀態
+  ['cases','approved','stats','channel','accounts','channel-setup'].forEach(function(p){
+    var btn = document.getElementById('nav-'+p);
+    if(btn) btn.classList.toggle('active', page===p);
+  });
+  // 通路子頁面按鈕 active
+  document.querySelectorAll('[id^="nav-ch-"]').forEach(function(btn){
+    btn.classList.remove('active');
+  });
+  // 觸發各頁面的資料載入
+  if(page==='stats'){ renderStats2(); loadTargets().then(renderTargetBar); }
+  if(page==='channel') renderChannel();
+  if(page==='accounts') loadAccounts();
+  if(page==='channel-setup') renderChannelSetup();
+  if(page==='approved') renderApproved();
+}
+
+// ===== 匯出 CSV/Excel =====
+function exportCSV(){
+  if(!cases.length){ alert('目前沒有案件可匯出'); return; }
+  var headers = ['姓名','電話','申請金額','月收入','公司','工作年資','薪資方式','信用卡','警示戶','汽車','機車','風險評分','評等','狀態','核准金額','通路','申請時間'];
+  var rows = cases.map(function(c){
+    var sc = calcScore(c);
+    var gi = gradeInfo(sc);
+    var salaryMap = {transfer:'薪轉', cash:'領現金'};
+    var ccMap = {normal:'正常繳清', minimum:'繳最低', unused:'沒在用', suspended:'被停卡'};
+    return [
+      c.name||'',
+      c.phone||'',
+      c.need_amount||'',
+      c.income?'NT$ '+parseInt(c.income).toLocaleString():'',
+      c.company||'',
+      c.tenure||'',
+      salaryMap[c.salary_type]||c.salary_type||'',
+      c.has_credit_card==='yes'?(ccMap[c.credit_card_status]||''):'未辦過',
+      c.is_alert==='yes'?'是':'否',
+      c.has_car==='yes'?'有':'無',
+      c.has_moto==='yes'?'有':'無',
+      sc,
+      gi.g+' '+gi.label,
+      c.status||'待處理',
+      c.approved_amount||'',
+      c.channel||'FlowHub',
+      c.created_at?new Date(c.created_at).toLocaleDateString('zh-TW'):''
+    ].map(function(v){ return '"'+String(v).replace(/"/g,'""')+'"'; }).join(',');
+  });
+  var csv = [headers.map(function(h){return '"'+h+'"';}).join(',')].concat(rows).join('\n');
+
+  var bom2 = new Uint8Array([0xEF,0xBB,0xBF]);
+  var blob = new Blob([bom2, csv], {type:'text/csv;charset=utf-8'});
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url;
+  a.download = 'FlowHub案件_'+new Date().toLocaleDateString('zh-TW').replace(/\//g,'')+'.csv';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// ===== 核准案件匯出 Excel =====
+function exportApprovedCSV(){
+  var acc = ACCS[me] || {};
+  var myChannel = acc.channel && acc.channel!=='null' ? acc.channel : null;
+  var list = cases.filter(function(c){
+    if(c.status!=='已核准') return false;
+    if(myChannel) return (c.channel||'FlowPay')===myChannel;
+    return true;
+  });
+  if(!list.length){ alert('目前沒有核准案件可匯出'); return; }
+
+  var headers = ['姓名','電話','申請金額','核准金額','已撥款','未撥款','公司','月收入','薪資方式','通路','核准時間'];
+  var salaryMap = {transfer:'薪轉', cash:'領現金'};
+  var rows = list.map(function(c){
+    return [
+      c.name||'',
+      c.phone||'',
+      c.need_amount||'',
+      c.approved_amount||'',
+      c.disbursed_amount||'',
+      c.undisbursed_amount||'',
+      c.company||'',
+      c.income?'NT$ '+parseInt(c.income).toLocaleString():'',
+      salaryMap[c.salary_type]||c.salary_type||'',
+      c.channel? chName(c.channel):'FlowHub',
+      c.updated_at?new Date(c.updated_at).toLocaleDateString('zh-TW'):''
+    ].map(function(v){ return '"'+String(v||'').replace(/"/g,'""')+'"'; }).join(',');
+  });
+
+  // 用 BOM 讓 Excel 正確顯示中文
+  var bom = new Uint8Array([0xEF,0xBB,0xBF]);
+  var csvContent = headers.map(function(h){return '"'+h+'"';}).join(',') + '\n' + rows.join('\n');
+' + rows.join('
+  var blob = new Blob([bom, csvContent], {type:'text/csv;charset=utf-8'});
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url;
+  a.download = 'FlowHub核准案件_'+new Date().toLocaleDateString('zh-TW').replace(/\//g,'')+'.csv';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+// ===== 重複申請偵測 =====
+function checkDuplicate(phone, idNo){
+  var samePhone = cases.filter(function(c){
+    return c.phone && phone && c.phone===phone;
+  });
+  var sameId = cases.filter(function(c){
+    return c.id_no && idNo && c.id_no===idNo;
+  });
+  var warns = [];
+  if(samePhone.length > 1) warns.push('⚠️ 此電話已有 '+samePhone.length+' 筆申請記錄');
+  if(sameId.length > 1) warns.push('⚠️ 此身分證已有 '+sameId.length+' 筆申請記錄');
+  return warns;
+}
+
+function filter(){
+  var q=document.getElementById('q').value.toLowerCase();
+  var sf=document.getElementById('sf').value;
+  var list=cases.filter(function(c){
+    var mq=!q||(c.name||'').toLowerCase().includes(q)||(c.phone||'').includes(q);
+    var ms=!sf||(c.status||'待處理')===sf;
+    return mq&&ms;
+  });
+  if(!list.length){document.getElementById('tbody').innerHTML='<div class="empty">尚無符合條件的案件</div>';return;}
+  var rows=list.map(function(c){
+    var sc=calcScore(c); var gi=gradeInfo(sc);
+    var riskTxt=(c.is_alert==='yes')?'<span class="dot dot-r"></span>警示戶':('<span class="dot '+gi.dot+'"></span>'+gi.g+' '+gi.label);
+    return '<tr data-id="'+c.id+'" class="open-panel-row">'+
+      '<td>'+
+        '<div class="name-bold">'+(c.name||'—')+'</div>'+
+        '<div class="date-sub">'+fmtDate(c.created_at)+'</div>'+
+        (isAdmin ? '<div style="margin-top:4px"><span style="font-size:10px;font-weight:'+(c.channel&&c.channel!=='FlowPay'?'700':'600')+';padding:2px 8px;border-radius:99px;background:'+(c.channel&&c.channel!=='FlowPay'?'#EFF6FF':'#F3F4F6')+';color:'+(c.channel&&c.channel!=='FlowPay'?'#1E40AF':'#9CA3AF')+'">'+(c.channel? chName(c.channel):'FlowHub')+'</span></div>' : '')+
+      '</td>'+
+      '<td>'+(c.phone||'—')+'</td>'+
+      '<td>'+(c.need_amount||'—')+'</td>'+
+      '<td>'+(c.contact_time||'—')+'</td>'+
+      '<td>'+riskTxt+'</td>'+
+      '<td><span class="badge '+badgeClass(c.status)+'">'+(c.status||'待處理')+'</span></td>'+
+      '</tr>';
+  }).join('');
+  document.getElementById('tbody').innerHTML='<table><thead><tr><th>申請人</th><th>電話</th><th>申請金額</th><th>聯絡時間</th><th>風險評估</th><th>狀態</th></tr></thead><tbody>'+rows+'</tbody></table>';
+  setTimeout(function(){
+    document.querySelectorAll('#tbody .open-panel-row').forEach(function(tr){
+      tr.style.cursor='pointer';
+      tr.onclick=function(){ openPanel(tr.getAttribute('data-id')); };
+    });
+  },50);
+}
+
+function openPanel(id){
+  var c=cases.find(function(x){return x.id===id;});
+  if(!c)return;
+  var sc=calcScore(c); var gi=gradeInfo(sc);
+  document.getElementById('ptitle').textContent=(c.name||'—')+' 的申請';
+  // Risk alert bar
+  // 重複申請偵測
+  var dupWarns = checkDuplicate(c.phone, c.id_no);
+  var alertBar='';
+  dupWarns.forEach(function(w){
+    alertBar+='<div style="background:#FFF7ED;border:1.5px solid #FED7AA;border-radius:8px;padding:10px 14px;margin-bottom:8px;display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:#92400E">'+w+'</div>';
+  });
+  if(c.is_alert==='yes') alertBar+='<div style="background:#FEF2F2;border:1.5px solid #FECACA;border-radius:8px;padding:10px 14px;margin-bottom:8px;display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:#991B1B"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#DC2626" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><circle cx="12" cy="17" r="1" fill="#DC2626"/></svg>⚠️ 警示戶，請謹慎評估</div>';
+  // ===== 公司行業提醒 =====
+  if(c.company){
+    var co2 = c.company.trim();
+    var selfKeys2 = ['工作室','個人','自營','獨資','攤販','小吃','夜市'];
+    var noIncomeKeys2 = ['家管','家庭主婦','家庭主夫','學生','在學','無業','待業'];
+    var selfMatch2 = selfKeys2.some(function(k){ return co2.indexOf(k) >= 0; });
+    var noIncomeMatch2 = noIncomeKeys2.some(function(k){ return co2.indexOf(k) >= 0; });
+    if(noIncomeMatch2){
+      alertBar+='<div style="background:#FEF3C7;border:1.5px solid #FDE68A;border-radius:8px;padding:10px 14px;margin-bottom:8px;display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:#92400E">'+
+        '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#D97706" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><circle cx="12" cy="16" r="1" fill="#D97706"/></svg>'+
+        '申請人填寫職業為「'+co2+'」，請確認還款來源</div>';
+    } else if(selfMatch2){
+      alertBar+='<div style="background:#FFF7ED;border:1.5px solid #FED7AA;border-radius:8px;padding:10px 14px;margin-bottom:8px;display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:#92400E">'+
+        '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#EA580C" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><circle cx="12" cy="16" r="1" fill="#EA580C"/></svg>'+
+        '自營/工作室（'+co2+'），建議確認有明確固定收入來源</div>';
+    }
+  }
+
+  // ===== 年齡警告 =====
+  if(c.birth_date){
+    var bdStr2 = String(c.birth_date).replace(/[-\/]/g,'');
+    var bYear = parseInt(bdStr2.substring(0,4));
+    var bMonth = parseInt(bdStr2.substring(4,6));
+    var bDay2 = parseInt(bdStr2.substring(6,8));
+    if(!isNaN(bYear) && bYear > 1900){
+      var now2 = new Date();
+      var age2 = now2.getFullYear() - bYear;
+      if(now2.getMonth()+1 < bMonth || (now2.getMonth()+1 === bMonth && now2.getDate() < bDay2)) age2--;
+      if(age2 < 18){
+        alertBar+='<div style="background:#FEF2F2;border:1.5px solid #FECACA;border-radius:8px;padding:10px 14px;margin-bottom:8px;display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;color:#DC2626">'+
+          '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#DC2626" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><circle cx="12" cy="16" r="1" fill="#DC2626"/></svg>'+
+          '⚠️ 年齡未滿 18 歲（'+age2+'歲），不符合申辦資格</div>';
+      } else if(age2 > 65){
+        alertBar+='<div style="background:#FEF2F2;border:1.5px solid #FECACA;border-radius:8px;padding:10px 14px;margin-bottom:8px;display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;color:#DC2626">'+
+          '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#DC2626" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><circle cx="12" cy="16" r="1" fill="#DC2626"/></svg>'+
+          '⚠️ 年齡超過 65 歲（'+age2+'歲），請謹慎評估還款能力</div>';
+      }
+    }
+  }
+
+  // CCIS 不良警示移除（未實際串接查詢）
+  if(sc>=70&&c.is_alert!=='yes') alertBar+='<div style="background:#ECFDF5;border:1.5px solid #A7F3D0;border-radius:8px;padding:10px 14px;margin-bottom:8px;display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:#065F46"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>初步條件良好，建議優先處理</div>';
+
+  // 初審評分工具已移除，評分完全由客戶表單自動帶入
+
+  // scHTML 已移除
+
+  document.getElementById('pbody').innerHTML=
+    '<div class="score-box" style="background:'+gi.bg+';border:2px solid '+gi.border+'">'+
+      '<div><div class="score-num" style="color:'+gi.text+'">'+sc+' 分</div>'+
+      '<div class="score-grade" style="color:'+gi.text+'">評等 '+gi.g+'：'+gi.label+'</div></div>'+
+      '<div style="font-size:40px;font-weight:900;color:'+gi.border+';opacity:.25">'+gi.g+'</div>'+
+    '</div>'+
+
+    '<div class="sec-title">⚡ 初審重點</div>'+
+    '<div class="grid2">'+
+      '<div class="info"><div class="info-k">申請金額</div><div class="info-v" style="color:#2563EB;font-size:15px;font-weight:800">'+(c.need_amount||'—')+'</div></div>'+
+      '<div class="info"><div class="info-k">月收入</div><div class="info-v" style="font-size:15px;font-weight:800">'+(c.income?'NT$ '+parseInt(c.income).toLocaleString():'—')+'</div></div>'+
+      '<div class="info"><div class="info-k">薪資方式</div><div class="info-v" style="color:'+(c.salary_type==='transfer'?'#059669':'#D97706')+';font-weight:600">'+(c.salary_type==='transfer'?'💳 薪轉':c.salary_type==='cash'?'💵 領現金':'—')+'</div></div>'+
+      '<div class="info"><div class="info-k">信用卡</div><div class="info-v">'+(c.has_credit_card==='yes'?'有（'+(c.credit_card_status==='normal'?'✅ 正常繳清':c.credit_card_status==='minimum'?'⚠️ 繳最低':c.credit_card_status==='unused'?'沒在用':c.credit_card_status==='suspended'?'🔴 被停卡':'—')+(c.credit_card_bank?' · '+c.credit_card_bank:'')+'）':c.has_credit_card==='no'?'未辦過':'—')+'</div></div>'+
+      '<div class="info"><div class="info-k">警示戶</div><div class="info-v" style="color:'+(c.is_alert==='yes'?'#DC2626':'#059669')+';font-weight:700">'+(c.is_alert==='yes'?'⚠ 是':'✓ 否')+'</div></div>'+
+
+      '<div class="info"><div class="info-k">現有貸款</div><div class="info-v">'+(c.has_loan==='yes'?'有，每月約 '+(c.loan_burden||'未填'):c.has_loan==='no'?'✓ 無':'—')+'</div></div>'+
+      '<div class="info"><div class="info-k">居住＝戶籍</div><div class="info-v" style="color:'+(c.same_addr==='yes'?'#059669':c.same_addr==='no'?'#D97706':'#9CA3AF')+';font-weight:600">'+(c.same_addr==='yes'?'✓ 相同':c.same_addr==='no'?'⚠ 不同':'未填')+'</div></div>'+
+      '<div class="info"><div class="info-k">門號本人</div><div class="info-v" style="color:'+(c.sc_phone_owner==='yes'?'#059669':c.sc_phone_owner==='no'?'#DC2626':'#9CA3AF')+';font-weight:600">'+(c.sc_phone_owner==='yes'?'✓ 本人門號':c.sc_phone_owner==='no'?'✕ 非本人':'未填')+'</div></div>'+
+      '<div class="info"><div class="info-k">身分證</div><div class="info-v" style="color:'+(c.id_verified?'#059669':'#9CA3AF')+'">'+(c.id_verified?'✓ 已上傳':'未上傳')+'</div></div>'+
+    '</div>'+
+
+    '<div class="sec-title">基本資料</div>'+
+    '<div class="grid2">'+
+      '<div class="info"><div class="info-k">姓名</div><div class="info-v">'+(c.api_name||c.name||'—')+'</div></div>'+
+      '<div class="info"><div class="info-k">電話</div><div class="info-v">'+(c.phone||'—')+'</div></div>'+
+      '<div class="info"><div class="info-k">身分證</div><div class="info-v">'+(c.id_no||'—')+'</div></div>'+
+      '<div class="info"><div class="info-k">出生日期</div><div class="info-v">'+
+        (function(){
+          if(!c.birth_date) return '—';
+          var bdS=String(c.birth_date).replace(/[-\/]/g,'');
+          var bY=parseInt(bdS.substring(0,4));
+          var bMo=parseInt(bdS.substring(4,6));
+          var bDy=parseInt(bdS.substring(6,8));
+          if(isNaN(bY)||bY<1900) return c.birth_date;
+          var now3=new Date();
+          var age3=now3.getFullYear()-bY;
+          if(now3.getMonth()+1<bMo||(now3.getMonth()+1===bMo&&now3.getDate()<bDy)) age3--;
+          var color = age3<18?'#DC2626':age3>65?'#DC2626':'#374151';
+          var warn = age3<18?' ⚠️未成年':age3>65?' ⚠️超過65歲':'';
+          return '<span style="color:'+color+';font-weight:'+(age3<18||age3>65?'700':'400')+'">'+c.birth_date+'（'+age3+'歲'+warn+'）</span>';
+        })()+
+      '</div></div>'+
+      '<div class="info full"><div class="info-k">戶籍地址</div><div class="info-v">'+(c.reg_addr||'—')+'</div></div>'+
+    '</div>'+
+
+    '<div class="sec-title">職業資料</div>'+
+    '<div class="grid2">'+
+      '<div class="info full"><div class="info-k">公司名稱</div><div class="info-v" style="display:flex;align-items:center;gap:8px">'+(c.company||'—')+
+        (function(){
+          if(!c.company) return '';
+          var co=c.company.trim();
+          var stableK=['股份有限公司','有限公司','企業社','企業行','國際','實業','科技','工程','建設','營造','醫療','醫院','診所','藥局','學校','幼兒園','補習班','政府','公所','銀行','金融','保險','證券','百貨','連鎖','超市','便利商店','量販','飯店','酒店','航空','物流'];
+          var selfK=['工作室','個人工作室','個人','自營','獨資','攤販','小吃','夜市','早餐店','路邊攤','地攤'];
+          var noIncK=['家管','家庭主婦','家庭主夫','家庭主','學生','在學','就學','無業','待業','失業','退休'];
+          if(stableK.some(function(k){return co.indexOf(k)>=0;})) return ' <span style="font-size:11px;background:#ECFDF5;color:#059669;padding:1px 7px;border-radius:99px;font-weight:700">✓ 正規公司</span>';
+          if(noIncK.some(function(k){return co.indexOf(k)>=0;})) return ' <span style="font-size:11px;background:#FEF3C7;color:#92400E;padding:1px 7px;border-radius:99px;font-weight:700">⚠ 確認還款來源</span>';
+          if(selfK.some(function(k){return co.indexOf(k)>=0;})) return ' <span style="font-size:11px;background:#FFF7ED;color:#EA580C;padding:1px 7px;border-radius:99px;font-weight:700">⚠ 自營</span>';
+          return '';
+        })()+
+        (c.company?'<a href="https://www.google.com/search?q='+encodeURIComponent(c.company)+'" target="_blank" style="background:#EFF6FF;border:1px solid #BFDBFE;color:#1E40AF;padding:2px 8px;border-radius:6px;font-size:11px;font-weight:700;text-decoration:none">Google</a>':'')+'</div></div>'+
+      '<div class="info"><div class="info-k">公司電話</div><div class="info-v" style="display:flex;align-items:center;gap:8px;color:'+(c.company_tel?'#2563EB':'#9CA3AF')+'">'+(c.company_tel||'未填')+
+        (c.company_tel?'<a href="tel:'+c.company_tel+'" style="background:#ECFDF5;border:1px solid #A7F3D0;color:#065F46;padding:2px 8px;border-radius:6px;font-size:11px;font-weight:700;text-decoration:none">撥打</a>':'')+'</div></div>'+
+      '<div class="info"><div class="info-k">月收入</div><div class="info-v">'+(c.income?'NT$ '+parseInt(c.income).toLocaleString():'—')+'</div></div>'+
+      '<div class="info"><div class="info-k">年資</div><div class="info-v">'+(c.tenure||'—')+'</div></div>'+
+    '</div>'+
+
+    '<div class="sec-title">信用 & 資產</div>'+
+    '<div class="grid2">'+
+      '<div class="info"><div class="info-k">薪資方式</div><div class="info-v" style="color:'+(c.salary_type==='transfer'?'#059669':'#D97706')+';font-weight:600">'+(c.salary_type==='transfer'?'💳 薪轉':c.salary_type==='cash'?'💵 領現金':'—')+'</div></div>'+
+      '<div class="info"><div class="info-k">信用卡</div><div class="info-v">'+(c.has_credit_card==='yes'?'有（'+(c.credit_card_status==='normal'?'✅ 正常繳清':c.credit_card_status==='minimum'?'⚠️ 繳最低':c.credit_card_status==='unused'?'沒在用':c.credit_card_status==='suspended'?'🔴 被停卡':'—')+(c.credit_card_bank?' · '+c.credit_card_bank:'')+'）':c.has_credit_card==='no'?'未辦過':'—')+'</div></div>'+
+      '<div class="info"><div class="info-k">警示戶</div><div class="info-v" style="color:'+(c.is_alert==='yes'?'#DC2626':'#059669')+'">'+(c.is_alert==='yes'?'⚠ 是':'否')+'</div></div>'+
+
+      '<div class="info"><div class="info-k">汽車</div><div class="info-v">'+vehicleDisplay(c.has_car,c.car_time,c.car_quality,c.car_ok)+'</div></div>'+
+      '<div class="info"><div class="info-k">機車</div><div class="info-v">'+vehicleDisplay(c.has_moto,c.moto_time,c.moto_quality,c.moto_ok)+'</div></div>'+
+      '<div class="info"><div class="info-k">不動產</div><div class="info-v">'+(c.has_property==='yes'?'有':'無')+'</div></div>'+
+      '<div class="info"><div class="info-k">現有貸款</div><div class="info-v">'+(c.has_loan==='yes'?'有，每月約 '+(c.loan_burden||'未填'):c.has_loan==='no'?'無':'—')+'</div></div>'+
+      '<div class="info full"><div class="info-k">身分證上傳</div>'+buildIdButtons(c)+'</div>'+
+    '</div>'+
+
+    '<div class="sec-title">申請資訊</div>'+
+    '<div class="grid2">'+
+      '<div class="info full"><div class="info-k">申請金額</div><div class="info-v" style="color:#2563EB;font-size:16px">'+(c.need_amount||'—')+'</div></div>'+
+      '<div class="info"><div class="info-k">聯絡時間</div><div class="info-v">'+(c.contact_time||'—')+'</div></div>'+
+      '<div class="info"><div class="info-k">申請時間</div><div class="info-v">'+fmtDate(c.created_at)+'</div></div>'+
+      (isAdmin ? '<div class="info full"><div class="info-k">來源通路</div><div class="info-v" style="color:'+(c.channel&&c.channel!=='FlowPay'?'#1E40AF':'#6B7280')+'">'+(c.channel? chName(c.channel) :'FlowHub')+'</div></div>' : '')+
+    '</div>'+
+
+    // 初審評分工具已移除，改由客戶填寫表單自動帶入評分
+    // (原手動評分工具移除，評分完全由 calcScore 自動計算)
+
+    '<div class="sec-title">✍️ 審核操作</div>'+
+    '<div style="font-size:12px;color:#9CA3AF;margin-bottom:10px">更新審核狀態與備註，點儲存後即時同步</div>'+
+    '<select class="status-sel" id="ssel">'+
+      ['待處理','已聯繫','審核中','已核准','婉拒'].map(function(s){
+        return '<option'+((c.status||'待處理')===s?' selected':'')+'>'+s+'</option>';
+      }).join('')+
+    '</select>'+
+    '<div id="approved-fields" style="'+(c.status==='已核准'?'display:block':'display:none')+'">'+
+      '<div style="background:#F0FDF4;border:1px solid #A7F3D0;border-radius:10px;padding:14px;margin-bottom:12px">'+
+        '<div style="font-size:12px;font-weight:700;color:#065F46;margin-bottom:10px">💰 撥款資訊</div>'+
+        '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">'+
+          '<div><div style="font-size:11px;font-weight:700;color:#6B7280;margin-bottom:4px">核准金額</div>'+
+            '<input id="s-approved" placeholder="例：50,000" value="'+(c.approved_amount||'')+'" style="width:100%;padding:8px 10px;border:1.5px solid #E5E7EB;border-radius:8px;font-size:13px;font-family:inherit;box-sizing:border-box"/></div>'+
+          '<div><div style="font-size:11px;font-weight:700;color:#059669;margin-bottom:4px">已撥款金額</div>'+
+            '<input id="s-disbursed" placeholder="例：30,000" value="'+(c.disbursed_amount||'')+'" style="width:100%;padding:8px 10px;border:1.5px solid #A7F3D0;border-radius:8px;font-size:13px;font-family:inherit;box-sizing:border-box"/></div>'+
+          '<div><div style="font-size:11px;font-weight:700;color:#D97706;margin-bottom:4px">未撥款金額</div>'+
+            '<input id="s-undisbursed" placeholder="例：20,000" value="'+(c.undisbursed_amount||'')+'" style="width:100%;padding:8px 10px;border:1.5px solid #FDE68A;border-radius:8px;font-size:13px;font-family:inherit;box-sizing:border-box"/></div>'+
+        '</div>'+
+      '</div>'+
+    '</div>'+
+    '<textarea class="notes" id="snotes" placeholder="審核備註（僅內部可見）...">'+(c.notes||'')+'</textarea>'+
+    '<button class="save" onclick="saveCase(\''+id+'\')">儲存變更</button>';
+
+  // 狀態切換時顯示/隱藏撥款欄位
+  setTimeout(function(){
+    var sel = document.getElementById('ssel');
+    if(sel) sel.addEventListener('change', function(){
+      var af = document.getElementById('approved-fields');
+      if(af) af.style.display = sel.value==='已核准' ? 'block' : 'none';
+    });
+  }, 50);
+
+  document.getElementById('panel').classList.add('on');
+  document.getElementById('ov').classList.add('on');
+  // 身分證查看按鈕事件
+  setTimeout(function(){
+    document.querySelectorAll('.id-view-btn').forEach(function(btn){
+      btn.onclick = function(){ viewIdImage(btn.getAttribute('data-id'), btn.getAttribute('data-side')); };
+    });
+  }, 50);
+}
+
+function closePanel(){
+  document.getElementById('panel').classList.remove('on');
+  document.getElementById('ov').classList.remove('on');
+}
+
+async function setSc(id,field,val){
+  var c=cases.find(function(x){return x.id===id;});
+  if(c)c[field]=val;
+  var sc=calcScore(c||{});
+  await fetch(URL_+'/rest/v1/applications?id=eq.'+id,{
+    method:'PATCH',headers:HDR,body:JSON.stringify({[field]:val,score_total:sc})
+  });
+  renderStats();filter();openPanel(id);
+}
+
+async function saveCase(id){
+  var btn=document.querySelector('.save');
+  var status=document.getElementById('ssel').value;
+  var notes=document.getElementById('snotes').value;
+  btn.textContent='儲存中...';btn.disabled=true;
+  try {
+    var approvedAmt = document.getElementById('s-approved') ? document.getElementById('s-approved').value : null;
+    var disbursedAmt = document.getElementById('s-disbursed') ? document.getElementById('s-disbursed').value : null;
+    var undisbursedAmt = document.getElementById('s-undisbursed') ? document.getElementById('s-undisbursed').value : null;
+    // 備注歷史：加入時間戳記
+    var c2 = cases.find(function(x){return x.id===id;});
+    var oldNotes = c2 ? (c2.notes||'') : '';
+    var finalNotes = notes;
+    if(notes && notes !== oldNotes){
+      var now = new Date();
+      var ts = (now.getMonth()+1)+'/'+now.getDate()+' '+now.getHours().toString().padStart(2,'0')+':'+now.getMinutes().toString().padStart(2,'0');
+      var stamp = '['+ts+' '+ACCS[me].name+'] '+notes;
+      // 保留舊備注在下方
+      finalNotes = oldNotes ? stamp + '\n──────\n' + oldNotes : stamp;
+    }
+    var patchData = {status:status, notes:finalNotes};
+    if(approvedAmt !== null) patchData.approved_amount = approvedAmt;
+    if(disbursedAmt !== null) patchData.disbursed_amount = disbursedAmt;
+    if(undisbursedAmt !== null) patchData.undisbursed_amount = undisbursedAmt;
+    var r=await fetch(URL_+'/rest/v1/applications?id=eq.'+id,{
+      method:'PATCH',headers:HDR,body:JSON.stringify(patchData)
+    });
+    if(r.ok){
+      var c=cases.find(function(x){return x.id===id;});
+      if(c){c.status=status;c.notes=notes;}
+      renderStats();filter();
+      btn.textContent='✓ 已儲存';btn.style.background='#059669';
+      setTimeout(function(){btn.textContent='儲存變更';btn.style.background='';btn.disabled=false;},2000);
+    } else {
+      var errText = await r.text();
+      console.error('Save failed:', r.status, errText);
+      btn.textContent='儲存失敗（'+r.status+'）';btn.style.background='#DC2626';
+      setTimeout(function(){btn.textContent='儲存變更';btn.style.background='';btn.disabled=false;},3000);
+    }
+  } catch(e) {
+    console.error('Save error:', e);
+    btn.textContent='網路錯誤，請重試';btn.style.background='#DC2626';
+    setTimeout(function(){btn.textContent='儲存變更';btn.style.background='';btn.disabled=false;},3000);
+  }
+}
+
+// ===== 通路設定功能 =====
+var SITE_URL = 'https://elaborate-cassata-0ced26.netlify.app';
+
+function updateCsCode(){
+  var cat = document.getElementById('cs-cat');
+  var num = document.getElementById('cs-num');
+  var preview = document.getElementById('cs-code-preview');
+  var linkPreview = document.getElementById('cs-link-preview');
+  if(!cat||!num||!preview) return;
+  var code = num.value ? cat.value+String(parseInt(num.value)).padStart(2,'0') : '--';
+  preview.textContent = code;
+  if(linkPreview && code!=='--'){
+    linkPreview.textContent = SITE_URL+'?ch='+code;
+    linkPreview.style.wordBreak='break-all';
+  }
+}
+
+function renderChannelSetup(){
+  var el = document.getElementById('cs-channel-list');
+  if(!el) return;
+  var chKeys = Object.keys(CHANNELS).filter(function(k){ return k!=='FlowPay'; });
+  if(!chKeys.length){
+    el.innerHTML='<div class="empty">尚未建立任何通路</div>'; return;
+  }
+  el.innerHTML = chKeys.map(function(code){
+    var ch = CHANNELS[code];
+    var link = SITE_URL+'?ch='+code;
+    return '<div class="table-wrap" style="padding:16px 20px">'+
+      '<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">'+
+        '<div style="display:flex;align-items:center;gap:12px">'+
+          '<div style="width:42px;height:42px;border-radius:10px;background:#EFF6FF;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">🏢</div>'+
+          '<div>'+
+            '<div style="font-size:14px;font-weight:700">'+ch.name+'</div>'+
+            '<div style="display:flex;gap:6px;margin-top:3px;align-items:center;flex-wrap:wrap">'+
+              '<span style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:99px;background:#EFF6FF;color:#1E40AF">'+code+'</span>'+
+              '<span style="font-size:11px;color:#9CA3AF">'+ch.category+'</span>'+
+            '</div>'+
+            '<div style="margin-top:4px;display:flex;align-items:center;gap:6px">'+
+              '<span style="font-size:11px;color:#6B7280">申辦連結：</span>'+
+              '<a href="'+link+'" target="_blank" style="font-size:11px;color:#2563EB;text-decoration:none;word-break:break-all">'+link+'</a>'+
+              '<button data-link="'+link+'" class="copy-link-btn" style="background:#F3F4F6;border:1px solid #E5E7EB;border-radius:6px;padding:2px 8px;font-size:11px;cursor:pointer;font-family:inherit;white-space:nowrap">複製</button>'+
+            '</div>'+
+          '</div>'+
+        '</div>'+
+        '<div style="text-align:right;font-size:11px;color:#9CA3AF">'+
+          '帳號：'+code.replace(/[a-z]/,function(m){ return ''; })+'@flowpay.com<br>預設密碼：統編'+
+        '</div>'+
+      '</div>'+
+    '</div>';
+  }).join('');
+  // 綁定複製按鈕
+  setTimeout(function(){
+    el.querySelectorAll('.copy-link-btn').forEach(function(btn){
+      btn.onclick = function(){ copyLink(btn.getAttribute('data-link')); };
+    });
+  }, 50);
+}
+
+function copyLink(url){
+  navigator.clipboard.writeText(url).then(function(){
+    alert('✅ 連結已複製！');
+  }).catch(function(){
+    prompt('請複製此連結：', url);
+  });
+}
+
+async function doCreateChannel(){
+  var name  = document.getElementById('cs-name').value.trim();
+  var bizId = document.getElementById('cs-bizid').value.trim();
+  var cat   = document.getElementById('cs-cat').value;
+  var num   = document.getElementById('cs-num').value;
+  var msg   = document.getElementById('cs-msg');
+
+  if(!name||!bizId||!num){ msg.innerHTML='<span style="color:#DC2626">❌ 請填寫所有欄位</span>'; return; }
+  if(bizId.length!==8||isNaN(bizId)){ msg.innerHTML='<span style="color:#DC2626">❌ 統編請輸入 8 碼數字</span>'; return; }
+  var catMap = {'a':'美容類','b':'直銷類','c':'經銷商類','d':'課程類','e':'保健食品類','f':'其他類'};
+  var catName = catMap[cat] || cat+'類';
+  var chCode = cat+String(parseInt(num)).padStart(2,'0');
+  if(CHANNELS[chCode]){ msg.innerHTML='<span style="color:#DC2626">❌ 通路代碼 '+chCode+' 已存在，請換一個編號</span>'; return; }
+
+  msg.innerHTML='<span style="color:#9CA3AF">建立中...</span>';
+  var btn = document.querySelector('#page-channel-setup button[onclick="doCreateChannel()"]');
+  if(btn){ btn.disabled=true; btn.textContent='建立中...'; }
+
+  try {
+    // ① 加入 CHANNELS
+    CHANNELS[chCode] = {name:name, category:catName};
+
+    // ② 加入 CHANNEL_ACCOUNTS（帳號=統編，密碼=統編）
+    CHANNEL_ACCOUNTS[bizId] = {pw:bizId, name:name, role:'channel', channel:chCode};
+
+    // ③ 持久化到 localStorage
+    saveChannelAccountsLocal();
+
+    // ④ 顯示成功訊息
+    var link = SITE_URL+'?ch='+chCode;
+    msg.innerHTML=
+      '<div style="background:#ECFDF5;border:1px solid #A7F3D0;border-radius:12px;padding:18px;margin-top:4px">'+
+      '<div style="font-size:15px;font-weight:800;color:#065F46;margin-bottom:12px">✅ 通路建立成功！</div>'+
+      '<div style="display:grid;gap:8px;font-size:13px;color:#047857;line-height:1.8">'+
+        '<div>🏢 商家名稱：<strong>'+name+'</strong></div>'+
+        '<div>👤 後台帳號：<strong>'+bizId+'</strong></div>'+
+        '<div>🔑 初始密碼：<strong>'+bizId+'</strong>（請商家登入後自行修改）</div>'+
+        '<div>🔗 客戶填單連結：<br>'+
+          '<a href="'+link+'" target="_blank" style="color:#2563EB;word-break:break-all;font-size:12px">'+link+'</a>'+
+          ' <button id="cs-copy-btn" data-link="'+link+'" style="background:#fff;border:1px solid #059669;border-radius:6px;padding:2px 10px;font-size:12px;cursor:pointer;font-family:inherit;margin-top:4px">📋 複製連結</button>'+
+        '</div>'+
+      '</div>'+
+      '<div style="margin-top:12px;padding-top:12px;border-top:1px solid #A7F3D0;font-size:12px;color:#6B7280">'+
+        '💡 商家用此帳號登入後台，可看自己的案件、統計和核准撥款'+
+      '</div>'+
+      '</div>';
+
+    // ⑤ 綁定複製按鈕
+    setTimeout(function(){
+      var cBtn = document.getElementById('cs-copy-btn');
+      if(cBtn) cBtn.onclick = function(){ copyLink(cBtn.getAttribute('data-link')); };
+    }, 100);
+
+    // ⑥ 動態加入側邊欄通路選單
+    var sidebar = document.getElementById('sidebar');
+    if(isAdmin && sidebar){
+      var existBtn = document.getElementById('nav-ch-'+chCode);
+      if(!existBtn){
+        // 加分隔線（如果還沒有）
+        if(!sidebar.querySelector('.ch-sep')){
+          var sep=document.createElement('div');
+          sep.className='ch-sep';
+          sep.style.cssText='font-size:10px;font-weight:700;color:#C4C9D4;letter-spacing:.08em;padding:12px 12px 4px;text-transform:uppercase';
+          sep.textContent='通路';
+          sidebar.appendChild(sep);
+        }
+        var newBtn = document.createElement('button');
+        newBtn.className='nav-btn'; newBtn.id='nav-ch-'+chCode;
+        var code2 = chCode;
+        newBtn.onclick=function(){showChannelPage(code2);};
+        newBtn.innerHTML='<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg>'+
+          '<span style="flex:1;text-align:left;font-size:13px">'+name+'</span>';
+        sidebar.appendChild(newBtn);
+      }
+    }
+
+    // ⑦ 更新通路明細和通路設定清單
+    setTimeout(function(){
+      if(typeof loadAccounts === 'function') loadAccounts();
+      if(typeof renderChannelSetup === 'function') renderChannelSetup();
+    }, 200);
+
+  } catch(e){
+    msg.innerHTML='<span style="color:#DC2626">❌ 錯誤：'+e.message+'</span>';
+  }
+  if(btn){ btn.disabled=false; btn.textContent='🚀 建立通路 + 帳號'; }
+}
+
+
+
+// ===== 修改密碼（所有帳號可用）=====
+function showChangePw(){
+  var modal = document.getElementById('change-pw-modal');
+  modal.style.display='flex';
+  document.getElementById('cp-old').value='';
+  document.getElementById('cp-new1').value='';
+  document.getElementById('cp-new2').value='';
+  document.getElementById('change-pw-msg').textContent='';
+  setTimeout(function(){ document.getElementById('cp-old').focus(); },100);
+}
+function closeChangePw(){
+  document.getElementById('change-pw-modal').style.display='none';
+}
+async function doChangePw(){
+  var oldPw = document.getElementById('cp-old').value;
+  var pw1   = document.getElementById('cp-new1').value;
+  var pw2   = document.getElementById('cp-new2').value;
+  var msg   = document.getElementById('change-pw-msg');
+  if(!oldPw){ msg.innerHTML='<span style="color:#DC2626">請輸入目前密碼</span>'; return; }
+  if(!pw1||pw1.length<8){ msg.innerHTML='<span style="color:#DC2626">新密碼至少需要 8 碼</span>'; return; }
+  if(pw1!==pw2){ msg.innerHTML='<span style="color:#DC2626">兩次密碼不一致</span>'; return; }
+  if(pw1===oldPw){ msg.innerHTML='<span style="color:#DC2626">新密碼不能與目前密碼相同</span>'; return; }
+  msg.innerHTML='<span style="color:#9CA3AF">更新中...</span>';
+  var btn = document.getElementById('confirm-change-pw');
+  btn.disabled=true;
+
+  // 本地帳號：用 localStorage 更新密碼
+  var curAcct = me ? me.replace('local_','') : '';
+  var curAcc  = findAccount(curAcct);
+  if(curAcc){
+    if(curAcc.pw !== oldPw){
+      msg.innerHTML='<span style="color:#DC2626">目前密碼錯誤</span>';
+      btn.disabled=false; return;
+    }
+    curAcc.pw = pw1;
+    if(CHANNEL_ACCOUNTS[curAcct]) CHANNEL_ACCOUNTS[curAcct].pw = pw1;
+    else if(LOCAL_ACCOUNTS[curAcct]) LOCAL_ACCOUNTS[curAcct].pw = pw1;
+    saveChannelAccountsLocal();
+    try {
+      var staffPws = JSON.parse(localStorage.getItem('fp_staff_pws')||'{}');
+      staffPws[curAcct] = pw1;
+      localStorage.setItem('fp_staff_pws', JSON.stringify(staffPws));
+    } catch(e){}
+    msg.innerHTML='<span style="color:#059669">✅ 密碼修改成功！下次登入請用新密碼</span>';
+    document.getElementById('cp-old').value='';
+    document.getElementById('cp-new1').value='';
+    document.getElementById('cp-new2').value='';
+    btn.disabled=false;
+    setTimeout(closeChangePw, 1500);
+    return;
+  }
+
+  // Supabase 帳號
+  try {
+    var r = await fetch(URL_+'/auth/v1/user',{
+      method:'PUT',
+      headers:Object.assign({},HDR,{'Content-Type':'application/json'}),
+      body:JSON.stringify({password:pw1})
+    });
+    if(r.ok){
+      msg.innerHTML='<span style="color:#059669">✅ 密碼修改成功！</span>';
+      document.getElementById('cp-old').value='';
+      document.getElementById('cp-new1').value='';
+      document.getElementById('cp-new2').value='';
+      setTimeout(closeChangePw, 1500);
+    } else {
+      var err = await r.json();
+      msg.innerHTML='<span style="color:#DC2626">修改失敗：'+(err.message||'請稍後再試')+'</span>';
+      btn.disabled=false;
+    }
+  } catch(e){
+    msg.innerHTML='<span style="color:#DC2626">網路錯誤，請稍後再試</span>';
+    btn.disabled=false;
+  }
+}
+
+// ===== 管理員重置帳號密碼回統編 =====
+async function resetToDefault(uid, businessId){
+  var msg = document.getElementById('reset-pw-msg');
+  if(!businessId){ msg.innerHTML='<span style="color:#DC2626">找不到統編資訊</span>'; return; }
+  msg.innerHTML='<span style="color:#9CA3AF">重置中...</span>';
+  var btn = document.getElementById('confirm-reset-btn');
+  if(btn) btn.disabled=true;
+  // 本地帳號重置
+  if(CHANNEL_ACCOUNTS[businessId]){
+    CHANNEL_ACCOUNTS[businessId].pw = businessId;
+    saveChannelAccountsLocal();
+    msg.innerHTML='<span style="color:#059669">✅ 已重置！密碼已恢復為統編：'+businessId+'</span>';
+    setTimeout(function(){ document.getElementById('reset-pw-modal').remove(); },2000);
+    return;
+  }
+  try {
+    var r = await fetch(URL_+'/auth/v1/admin/users/'+uid,{
+      method:'PUT',
+      headers:Object.assign({},HDR,{'Content-Type':'application/json'}),
+      body:JSON.stringify({password:businessId})
+    });
+    if(r.ok){
+      msg.innerHTML='<span style="color:#059669">✅ 已重置！密碼已恢復為統編：'+businessId+'</span>';
+      setTimeout(function(){ document.getElementById('reset-pw-modal').remove(); },2000);
+    } else {
+      msg.innerHTML='<span style="color:#DC2626">重置失敗，請再試</span>';
+      if(btn) btn.disabled=false;
+    }
+  } catch(e){
+    msg.innerHTML='<span style="color:#DC2626">網路錯誤</span>';
+    if(btn) btn.disabled=false;
+  }
+}
+
+// ===== 忘記密碼（管理員重置）=====
+function showForgotPw(){
+  var modal = document.getElementById('forgot-modal');
+  if(!modal) return;
+  modal.style.display='flex';
+}
+function closeForgotPw(){
+  var modal = document.getElementById('forgot-modal');
+  if(modal) modal.style.display='none';
+}
+
+// ===== 帳號管理 =====
+var accountsList = [];
+
+async function loadAccounts(){
+  // 渲染通路明細
+  var summaryEl = document.getElementById('channel-summary-list');
+  if(summaryEl){
+    var chKeys = Object.keys(CHANNELS).filter(function(k){ return k!=='FlowPay'; });
+    if(!chKeys.length){
+      summaryEl.innerHTML='<div style="font-size:12px;color:#9CA3AF">尚未建立任何通路</div>';
+    } else {
+      summaryEl.innerHTML = chKeys.map(function(code){
+        var ch = CHANNELS[code];
+        var bizId = Object.keys(CHANNEL_ACCOUNTS).find(function(k){ return CHANNEL_ACCOUNTS[k].channel===code; }) || '—';
+        var link = SITE_URL+'?ch='+code;
+        return '<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px;padding:8px 10px;background:#fff;border-radius:8px;border:1px solid #E5E7EB">'+
+          '<div style="display:flex;align-items:center;gap:8px">'+
+            '<span style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:99px;background:#EFF6FF;color:#1E40AF">'+code+'</span>'+
+            '<span style="font-size:13px;font-weight:700">'+ch.name+'</span>'+
+            '<span style="font-size:11px;color:#9CA3AF">'+ch.category+'</span>'+
+          '</div>'+
+          '<div style="display:flex;align-items:center;gap:6px">'+
+            '<span style="font-size:11px;color:#6B7280">帳號：'+bizId+'</span>'+
+            '<a href="'+link+'" target="_blank" style="font-size:11px;color:#2563EB;text-decoration:none">填單連結</a>'+
+            '<button data-link="'+link+'" class="copy-ch-link" style="background:#F3F4F6;border:1px solid #E5E7EB;border-radius:6px;padding:1px 8px;font-size:11px;cursor:pointer;font-family:inherit">複製</button>'+
+          '</div>'+
+        '</div>';
+      }).join('');
+      setTimeout(function(){
+        summaryEl.querySelectorAll('.copy-ch-link').forEach(function(btn){
+          btn.onclick=function(){ copyLink(btn.getAttribute('data-link')); };
+        });
+      },50);
+    }
+  }
+  var el = document.getElementById('accounts-list');
+  el.innerHTML = '<div class="empty">載入中...</div>';
+  try {
+    var r = await fetch(URL_+'/auth/v1/admin/users?per_page=50',{
+      headers:Object.assign({},HDR)
+    });
+    var data = await r.json();
+    if(!r.ok){ el.innerHTML='<div class="empty">載入失敗（需要管理員權限）</div>'; return; }
+    accountsList = data.users || [];
+    renderAccounts();
+  } catch(e){
+    // 載入失敗時顯示本地帳號
+    accountsList = [];
+    el.innerHTML='<div class="empty" style="color:#9CA3AF">無法連線 Supabase，顯示本地帳號</div>';
+  }
+}
+
+function renderAccounts(){
+  var el = document.getElementById('accounts-list');
+  if(!accountsList.length){ el.innerHTML='<div class="empty">尚無帳號</div>'; return; }
+  el.innerHTML = accountsList.map(function(u){
+    var meta = u.user_metadata||{};
+    var role = meta.role||'staff';
+    var roleColor = role==='admin'?'#1E40AF':role==='channel'?'#065F46':'#374151';
+    var roleBg = role==='admin'?'#EFF6FF':role==='channel'?'#ECFDF5':'#F3F4F6';
+    var roleLabel = role==='admin'?'管理員':role==='channel'?'通路帳號':'服務員';
+    var lastSign = u.last_sign_in_at ? new Date(u.last_sign_in_at).toLocaleDateString('zh-TW') : '從未登入';
+    var bizId = u.email ? u.email.replace('@flowpay.com','') : '';
+    return '<div class="table-wrap" style="padding:16px 20px">'+
+      '<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">'+
+        '<div style="display:flex;align-items:center;gap:12px">'+
+          '<div style="width:40px;height:40px;border-radius:50%;background:'+roleBg+';display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">'+
+            (role==='admin'?'👑':role==='channel'?'🏢':'👤')+
+          '</div>'+
+          '<div>'+
+            '<div style="font-size:14px;font-weight:700;color:#111">'+(meta.name||u.email)+'</div>'+
+            '<div style="font-size:12px;color:#6B7280">'+u.email+'</div>'+
+            '<div style="margin-top:4px;display:flex;align-items:center;gap:6px">'+
+              '<span style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:99px;background:'+roleBg+';color:'+roleColor+'">'+roleLabel+'</span>'+
+              (meta.channel?'<span style="font-size:10px;color:#9CA3AF">通路：'+meta.channel+'</span>':'')+
+              '<span style="font-size:10px;color:#9CA3AF">最後登入：'+lastSign+'</span>'+
+            '</div>'+
+          '</div>'+
+        '</div>'+
+        '<button data-uid="'+u.id+'" data-email="'+u.email+'" data-bizid="'+bizId+'" class="reset-pw-btn" '+
+          'style="background:#FEF3C7;border:1.5px solid #FDE68A;color:#92400E;padding:7px 16px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap">'+
+          '🔑 重設密碼'+
+        '</button>'+
+      '</div>'+
+    '</div>';
+  }).join('');
+  setTimeout(function(){
+    el.querySelectorAll('.reset-pw-btn').forEach(function(btn){
+      btn.onclick = function(){ showResetPwModal(btn.getAttribute('data-uid'), btn.getAttribute('data-email'), btn.getAttribute('data-bizid')); };
+    });
+  }, 50);
+}
+
+function showResetPwModal(uid, email, bizId){
+  var old = document.getElementById('reset-pw-modal');
+  if(old) old.remove();
+  var overlay = document.createElement('div');
+  overlay.id='reset-pw-modal';
+  overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:300;display:flex;align-items:center;justify-content:center';
+  overlay.onclick=function(e){ if(e.target===overlay) overlay.remove(); };
+  overlay.innerHTML=
+    '<div style="background:#fff;border-radius:16px;padding:28px;width:380px;max-width:90vw">'+
+      '<div style="font-size:16px;font-weight:800;margin-bottom:4px">🔑 重設密碼</div>'+
+      '<div style="font-size:13px;color:#6B7280;margin-bottom:16px">'+email+'</div>'+
+      (bizId?'<div style="background:#FFF7ED;border:1px solid #FED7AA;border-radius:10px;padding:10px 14px;margin-bottom:12px;font-size:13px;color:#92400E">'+
+        '📌 快速重置：將密碼重設回 <strong>'+bizId+'</strong>（統編）'+
+        '<button id="reset-to-default-btn" data-uid="'+uid+'" data-bizid="'+bizId+'" style="margin-left:10px;background:#D97706;color:#fff;border:none;border-radius:8px;padding:3px 10px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">重置回統編</button>'+
+      '</div>':'')+
+      '<hr style="border:none;border-top:1px solid #E5E7EB;margin-bottom:12px"/>'+
+      '<div style="font-size:12px;font-weight:700;color:#374151;margin-bottom:6px">或自訂新密碼</div>'+
+      '<input id="new-pw-input" type="password" placeholder="輸入新密碼（至少8碼）" '+
+        'style="width:100%;padding:10px 14px;border:1.5px solid #E5E7EB;border-radius:10px;font-size:14px;font-family:inherit;outline:none;margin-bottom:6px;box-sizing:border-box"/>'+
+      '<input id="new-pw-confirm" type="password" placeholder="再次輸入新密碼" '+
+        'style="width:100%;padding:10px 14px;border:1.5px solid #E5E7EB;border-radius:10px;font-size:14px;font-family:inherit;outline:none;margin-bottom:12px;box-sizing:border-box"/>'+
+      '<div style="display:flex;gap:8px">'+
+        '<button id="confirm-reset-btn" data-uid="'+uid+'" '+
+          'style="flex:1;background:#2563EB;color:#fff;border:none;border-radius:10px;padding:11px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit">確認重設</button>'+
+        '<button id="cancel-reset-btn" '+
+          'style="flex:1;background:#F3F4F6;color:#374151;border:none;border-radius:10px;padding:11px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit">取消</button>'+
+      '</div>'+
+      '<div id="reset-pw-msg" style="text-align:center;font-size:13px;margin-top:10px;min-height:18px"></div>'+
+    '</div>';
+  document.body.appendChild(overlay);
+  setTimeout(function(){
+    document.getElementById('new-pw-input').focus();
+    var confirmBtn = document.getElementById('confirm-reset-btn');
+    if(confirmBtn) confirmBtn.onclick = function(){ doResetPw(confirmBtn.getAttribute('data-uid')); };
+    var cancelBtn = document.getElementById('cancel-reset-btn');
+    if(cancelBtn) cancelBtn.onclick = function(){ document.getElementById('reset-pw-modal').remove(); };
+    var resetDefaultBtn = document.getElementById('reset-to-default-btn');
+    if(resetDefaultBtn) resetDefaultBtn.onclick = function(){
+      resetToDefault(resetDefaultBtn.getAttribute('data-uid'), resetDefaultBtn.getAttribute('data-bizid'));
+    };
+  },100);
+}
+
+async function doResetPw(uid){
+  var pw  = document.getElementById('new-pw-input').value;
+  var pw2 = document.getElementById('new-pw-confirm').value;
+  var msg = document.getElementById('reset-pw-msg');
+  if(!pw||pw.length<8){ msg.innerHTML='<span style="color:#DC2626">密碼至少需要 8 碼</span>'; return; }
+  if(pw!==pw2){ msg.innerHTML='<span style="color:#DC2626">兩次密碼不一致</span>'; return; }
+  msg.innerHTML='<span style="color:#9CA3AF">更新中...</span>';
+  try {
+    var r = await fetch(URL_+'/auth/v1/admin/users/'+uid,{
+      method:'PUT',
+      headers:Object.assign({},HDR,{'Content-Type':'application/json'}),
+      body:JSON.stringify({password:pw})
+    });
+    if(r.ok){
+      msg.innerHTML='<span style="color:#059669">✅ 密碼已成功重設！</span>';
+      setTimeout(function(){ document.getElementById('reset-pw-modal').remove(); },1500);
+    } else {
+      var err = await r.json();
+      msg.innerHTML='<span style="color:#DC2626">重設失敗：'+(err.message||'請確認權限')+'</span>';
+    }
+  } catch(e){
+    msg.innerHTML='<span style="color:#DC2626">網路錯誤，請稍後再試</span>';
+  }
+}
+
+</script>
+</body>
+</html>
