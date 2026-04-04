@@ -753,6 +753,17 @@ const CH_MAP = {
   },
 };
 
+// 從 localStorage 讀取後台新建通路的 LINE 設定
+try {
+  var extraCh2 = JSON.parse(localStorage.getItem('fp_channels_extra')||'{}');
+  if(extraCh2[CH_CODE] && !CH_MAP[CH_CODE]) {
+    CH_MAP[CH_CODE] = {
+      name: extraCh2[CH_CODE].name || CH_CODE,
+      category: extraCh2[CH_CODE].category || '',
+      line: extraCh2[CH_CODE].lineUrl ? {url: extraCh2[CH_CODE].lineUrl, msg:'請加入我們的 LINE 官方帳號'} : null
+    };
+  }
+} catch(e){}
 const CH_INFO = CH_MAP[CH_CODE] || {name: CH_CODE, category:''};
 const CH = CH_CODE; // 存入資料庫用代碼
 const CH_NAME = CH_INFO.name; // 顯示用名稱
@@ -852,11 +863,18 @@ async function submit(){
   const tgToken = '8711749215:AAHv0N1EpqPwMmBRgo-rDlnJSEC7AdtPKAU';
   // 每個通路對應自己的 Telegram 群組
   const TG_CHATS = {
-    'FlowPay': '-5184944052',
+    'FlowPay': '-1003786268499',
     'e01':     '-5058252988',
-    'c02':     '-5219394985',
+    'c02':     '-4935598859',
   };
-  const tgChatId = TG_CHATS[CH_CODE] || '-5184944052';
+  // 從 localStorage 讀取後台新建通路的 TG Chat ID
+  try {
+    var extraCh = JSON.parse(localStorage.getItem('fp_channels_extra')||'{}');
+    if(extraCh[CH_CODE] && extraCh[CH_CODE].tgId) {
+      TG_CHATS[CH_CODE] = extraCh[CH_CODE].tgId;
+    }
+  } catch(e){}
+  const tgChatId = TG_CHATS[CH_CODE] || '-1003786268499';
   const creditMap = {good:'良好', fair:'有遲繳紀錄', bad:'不良/黑名單', none:'無融資紀錄'};
   const chDisplayName = (typeof CH_MAP !== 'undefined' && CH_MAP[CH_CODE]) ? CH_MAP[CH_CODE].name : (CH_CODE || 'FlowPay');
   // 風險評等（精準計算）
@@ -926,11 +944,11 @@ async function submit(){
   }).catch(()=>{});
 
   // 如果是通路案件，同時也通知總公司
-  if(CH_CODE !== 'FlowPay' && tgChatId !== '-5184944052'){
+  if(CH_CODE !== 'FlowPay' && tgChatId !== '-1003786268499'){
     await fetch(`https://api.telegram.org/bot${tgToken}/sendMessage`, {
       method:'POST',
       headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ chat_id: '-5184944052', text: msg })
+      body: JSON.stringify({ chat_id: '-1003786268499', text: msg })
     }).catch(()=>{});
   }
 

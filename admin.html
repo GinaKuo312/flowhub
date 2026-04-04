@@ -50,6 +50,7 @@ tr:hover td{background:#FAFBFF;cursor:pointer}
 .b-contact{background:#F5F3FF;color:#5B21B6}
 .b-review{background:#EFF6FF;color:#1E40AF}
 .b-approve{background:#ECFDF5;color:#065F46}
+  .b-disbursed{background:#EDE9FE;color:#5B21B6}
 .b-reject{background:#FEF2F2;color:#991B1B}
 .dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:5px}
 .dot-g{background:#059669}.dot-y{background:#D97706}.dot-r{background:#DC2626}
@@ -396,6 +397,18 @@ tr:hover td{background:#FAFBFF;cursor:pointer}
                 style="width:100%;padding:10px 12px;border:1.5px solid #E5E7EB;border-radius:10px;font-size:13px;font-family:inherit;outline:none;box-sizing:border-box;letter-spacing:.06em"/>
             </div>
             <div>
+              <div style="font-size:12px;font-weight:700;color:#374151;margin-bottom:5px">📱 Telegram Chat ID <span style="color:#9CA3AF;font-weight:400">（選填）</span></div>
+              <input id="cs-tg" type="text" placeholder="例：-5012345678"
+                style="width:100%;padding:10px 12px;border:1.5px solid #E5E7EB;border-radius:10px;font-size:13px;font-family:inherit;outline:none;box-sizing:border-box"/>
+              <div style="font-size:11px;color:#9CA3AF;margin-top:4px">📌 取得方式：將 Bot 加入群組後，傳訊息給 Bot 再查 getUpdates</div>
+            </div>
+            <div>
+              <div style="font-size:12px;font-weight:700;color:#374151;margin-bottom:5px">🔗 LINE 官方帳號連結 <span style="color:#9CA3AF;font-weight:400">（選填）</span></div>
+              <input id="cs-line" type="text" placeholder="例：https://line.me/R/ti/p/@xxx"
+                style="width:100%;padding:10px 12px;border:1.5px solid #E5E7EB;border-radius:10px;font-size:13px;font-family:inherit;outline:none;box-sizing:border-box"/>
+              <div style="font-size:11px;color:#9CA3AF;margin-top:4px">📌 填入後客人送出表單的感謝頁會顯示 LINE 按鈕</div>
+            </div>
+            <div>
               <div style="font-size:12px;font-weight:700;color:#374151;margin-bottom:5px">產業類別 <span style="color:#DC2626">*</span></div>
               <select id="cs-cat" onchange="updateCsCode()"
                 style="width:100%;padding:10px 12px;border:1.5px solid #E5E7EB;border-radius:10px;font-size:13px;font-family:inherit;background:#fff;outline:none">
@@ -410,8 +423,8 @@ tr:hover td{background:#FAFBFF;cursor:pointer}
             <div>
               <div style="font-size:12px;font-weight:700;color:#374151;margin-bottom:5px">通路編號 <span style="color:#DC2626">*</span></div>
               <div style="display:flex;align-items:center;gap:8px">
-                <input id="cs-num" type="number" placeholder="01" min="1" max="99" oninput="updateCsCode()"
-                  style="width:70px;padding:10px 12px;border:1.5px solid #E5E7EB;border-radius:10px;font-size:13px;font-family:inherit;outline:none"/>
+                <input id="cs-num" type="number" placeholder="01" min="1" max="999" oninput="updateCsCode()"
+                  style="width:80px;padding:10px 12px;border:1.5px solid #E5E7EB;border-radius:10px;font-size:13px;font-family:inherit;outline:none"/>
                 <div style="font-size:13px;color:#6B7280">代碼：<strong id="cs-code-preview" style="color:#2563EB;font-size:15px">--</strong></div>
               </div>
             </div>
@@ -1208,7 +1221,7 @@ function gradeInfo(s){
 }
 
 function badgeClass(s){
-  var m={待處理:'b-wait',已聯繫:'b-contact',審核中:'b-review',已核准:'b-approve',婉拒:'b-reject'};
+  var m={待處理:'b-wait',已聯繫:'b-contact',審核中:'b-review',已核准:'b-approve',已撥款:'b-disbursed',不予承作:'b-reject',婉拒:'b-reject'};
   return m[s||'待處理']||'b-wait';
 }
 
@@ -1239,13 +1252,16 @@ function renderApproved(){
       '<td><div class="name-bold">'+(c.name||'—')+'</div><div class="date-sub">'+fmtDate(c.created_at)+'</div></td>'+
       '<td>'+(c.phone||'—')+'</td>'+
       '<td>'+(c.need_amount||'—')+'</td>'+
-      '<td style="color:#2563EB;font-weight:700">'+(c.approved_amount||'—')+'</td>'+
-      '<td><span class="dot '+gi.dot+'"></span>'+gi.g+' '+gi.label+'</td>'+
+      '<td style="color:#059669;font-weight:700">'+(c.approved_amount?'NT$ '+parseInt(c.approved_amount).toLocaleString():'—')+'</td>'+
+      '<td style="color:#D97706">'+(c.fee_amount?'NT$ '+parseInt(c.fee_amount).toLocaleString():'—')+'</td>'+
+      '<td style="color:#2563EB">'+(c.disbursed_amount?'NT$ '+parseInt(c.disbursed_amount).toLocaleString():'—')+'</td>'+
+      '<td style="font-size:12px;color:#6B7280">'+(c.disburse_date||'—')+'</td>'+
+      '<td><span class="dot '+gi.dot+'"></span>'+gi.g+'</td>'+
       (isAdmin?'<td style="font-size:11px;color:#6B7280">'+(c.channel? chName(c.channel):'FlowHub')+'</td>':'')+
     '</tr>';
   }).join('');
   document.getElementById('approved-tbody').innerHTML=
-    '<table><thead><tr><th>申請人</th><th>電話</th><th>申請金額</th><th>核准金額</th><th>風險評估</th>'+(isAdmin?'<th>通路</th>':'')+
+    '<table><thead><tr><th>申請人</th><th>電話</th><th>申請金額</th><th>核准金額</th><th>手續費</th><th>已撥款</th><th>撥款日期</th><th>評等</th>'+(isAdmin?'<th>通路</th>':'')+
     '</tr></thead><tbody>'+rows+'</tbody></table>';
 }
 
@@ -1267,13 +1283,16 @@ function filterApproved(ch){
       '<td><div class="name-bold">'+(c.name||'—')+'</div><div class="date-sub">'+fmtDate(c.created_at)+'</div></td>'+
       '<td>'+(c.phone||'—')+'</td>'+
       '<td>'+(c.need_amount||'—')+'</td>'+
-      '<td style="color:#2563EB;font-weight:700">'+(c.approved_amount||'—')+'</td>'+
-      '<td><span class="dot '+gi.dot+'"></span>'+gi.g+' '+gi.label+'</td>'+
+      '<td style="color:#059669;font-weight:700">'+(c.approved_amount?'NT$ '+parseInt(c.approved_amount).toLocaleString():'—')+'</td>'+
+      '<td style="color:#D97706">'+(c.fee_amount?'NT$ '+parseInt(c.fee_amount).toLocaleString():'—')+'</td>'+
+      '<td style="color:#2563EB">'+(c.disbursed_amount?'NT$ '+parseInt(c.disbursed_amount).toLocaleString():'—')+'</td>'+
+      '<td style="font-size:12px;color:#6B7280">'+(c.disburse_date||'—')+'</td>'+
+      '<td><span class="dot '+gi.dot+'"></span>'+gi.g+'</td>'+
       (isAdmin?'<td style="font-size:11px;color:#6B7280">'+(c.channel? chName(c.channel):'FlowHub')+'</td>':'')+
     '</tr>';
   }).join('');
   document.getElementById('approved-tbody').innerHTML=
-    '<table><thead><tr><th>申請人</th><th>電話</th><th>申請金額</th><th>核准金額</th><th>風險評估</th>'+(isAdmin?'<th>通路</th>':'')+
+    '<table><thead><tr><th>申請人</th><th>電話</th><th>申請金額</th><th>核准金額</th><th>手續費</th><th>已撥款</th><th>撥款日期</th><th>評等</th>'+(isAdmin?'<th>通路</th>':'')+
     '</tr></thead><tbody>'+rows+'</tbody></table>';
 }
 
@@ -1740,20 +1759,25 @@ function exportApprovedCSV(){
   });
   if(!list.length){ alert('目前沒有核准案件可匯出'); return; }
 
-  var headers = ['姓名','電話','申請金額','核准金額','已撥款','未撥款','公司','月收入','薪資方式','通路','核准時間'];
+  var headers = ['姓名','電話','申請金額','核准金額','手續費','實際撥款（核准-手續費）','已撥款','撥款日期','通路','申請時間','核准時間'];
   var salaryMap = {transfer:'薪轉', cash:'領現金'};
   var rows = list.map(function(c){
+    var sc = calcScore(c);
+    var gi = gradeInfo(sc);
+    var approved = parseFloat(c.approved_amount)||0;
+    var fee = parseFloat(c.fee_amount)||0;
+    var netAmount = approved > 0 ? (approved - fee) : '';
     return [
       c.name||'',
       c.phone||'',
       c.need_amount||'',
       c.approved_amount||'',
+      c.fee_amount||'',
+      netAmount||'',
       c.disbursed_amount||'',
-      c.undisbursed_amount||'',
-      c.company||'',
-      c.income?'NT$ '+parseInt(c.income).toLocaleString():'',
-      salaryMap[c.salary_type]||c.salary_type||'',
+      c.disburse_date||'',
       c.channel? chName(c.channel):'FlowHub',
+      c.created_at?new Date(c.created_at).toLocaleDateString('zh-TW'):'',
       c.updated_at?new Date(c.updated_at).toLocaleDateString('zh-TW'):''
     ].map(function(v){ return '"'+String(v||'').replace(/"/g,'""')+'"'; }).join(',');
   });
@@ -2026,20 +2050,36 @@ function openPanel(id){
     '<div class="sec-title">✍️ 審核操作</div>'+
     '<div style="font-size:12px;color:#9CA3AF;margin-bottom:10px">更新審核狀態與備註，點儲存後即時同步</div>'+
     '<select class="status-sel" id="ssel">'+
-      ['待處理','已聯繫','審核中','已核准','婉拒'].map(function(s){
+      ['待處理','已聯繫','審核中','已核准','已撥款','不予承作'].map(function(s){
         return '<option'+((c.status||'待處理')===s?' selected':'')+'>'+s+'</option>';
       }).join('')+
     '</select>'+
-    '<div id="approved-fields" style="'+(c.status==='已核准'?'display:block':'display:none')+'">'+
-      '<div style="background:#F0FDF4;border:1px solid #A7F3D0;border-radius:10px;padding:14px;margin-bottom:12px">'+
-        '<div style="font-size:12px;font-weight:700;color:#065F46;margin-bottom:10px">💰 撥款資訊</div>'+
-        '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">'+
-          '<div><div style="font-size:11px;font-weight:700;color:#6B7280;margin-bottom:4px">核准金額</div>'+
-            '<input id="s-approved" placeholder="例：50,000" value="'+(c.approved_amount||'')+'" style="width:100%;padding:8px 10px;border:1.5px solid #E5E7EB;border-radius:8px;font-size:13px;font-family:inherit;box-sizing:border-box"/></div>'+
-          '<div><div style="font-size:11px;font-weight:700;color:#059669;margin-bottom:4px">已撥款金額</div>'+
-            '<input id="s-disbursed" placeholder="例：30,000" value="'+(c.disbursed_amount||'')+'" style="width:100%;padding:8px 10px;border:1.5px solid #A7F3D0;border-radius:8px;font-size:13px;font-family:inherit;box-sizing:border-box"/></div>'+
-          '<div><div style="font-size:11px;font-weight:700;color:#D97706;margin-bottom:4px">未撥款金額</div>'+
-            '<input id="s-undisbursed" placeholder="例：20,000" value="'+(c.undisbursed_amount||'')+'" style="width:100%;padding:8px 10px;border:1.5px solid #FDE68A;border-radius:8px;font-size:13px;font-family:inherit;box-sizing:border-box"/></div>'+
+    '<div id="approved-fields" style="'+(c.status==='已核准'||c.status==='已撥款'?'display:block':'display:none')+'">'+
+      '<div style="background:#F0FDF4;border:1.5px solid #A7F3D0;border-radius:12px;padding:16px;margin-bottom:12px">'+
+        '<div style="font-size:13px;font-weight:800;color:#065F46;margin-bottom:12px">💰 核准 & 撥款資訊</div>'+
+        '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">'+
+          '<div>'+
+            '<div style="font-size:11px;font-weight:700;color:#374151;margin-bottom:4px">✅ 核准金額（元）</div>'+
+            '<input id="s-approved" type="number" placeholder="例：50000" value="'+(c.approved_amount||'')+'"'+
+              ' oninput="calcFeeAuto()"'+
+              ' style="width:100%;padding:8px 10px;border:1.5px solid #A7F3D0;border-radius:8px;font-size:14px;font-weight:700;color:#065F46;font-family:inherit;box-sizing:border-box"/></div>'+
+          '<div>'+
+            '<div style="font-size:11px;font-weight:700;color:#D97706;margin-bottom:4px">💸 手續費（元）</div>'+
+            '<input id="s-fee" type="number" placeholder="例：5000" value="'+(c.fee_amount||'')+'"'+
+              ' oninput="calcFeeAuto()"'+
+              ' style="width:100%;padding:8px 10px;border:1.5px solid #FDE68A;border-radius:8px;font-size:14px;font-weight:700;color:#92400E;font-family:inherit;box-sizing:border-box"/></div>'+
+        '</div>'+
+        '<div id="fee-summary" style="background:#ECFDF5;border-radius:8px;padding:10px 12px;margin-bottom:10px;font-size:12px;color:#065F46;display:none"></div>'+
+        '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">'+
+          '<div>'+
+            '<div style="font-size:11px;font-weight:700;color:#059669;margin-bottom:4px">📤 已撥款金額（元）</div>'+
+            '<input id="s-disbursed" type="number" placeholder="例：45000" value="'+(c.disbursed_amount||'')+'"'+
+              ' oninput="calcFeeAuto()"'+
+              ' style="width:100%;padding:8px 10px;border:1.5px solid #A7F3D0;border-radius:8px;font-size:13px;font-family:inherit;box-sizing:border-box"/></div>'+
+          '<div>'+
+            '<div style="font-size:11px;font-weight:700;color:#374151;margin-bottom:4px">📅 撥款日期</div>'+
+            '<input id="s-disburse-date" type="date" value="'+(c.disburse_date||'')+'"'+
+              ' style="width:100%;padding:8px 10px;border:1.5px solid #E5E7EB;border-radius:8px;font-size:13px;font-family:inherit;box-sizing:border-box"/></div>'+
         '</div>'+
       '</div>'+
     '</div>'+
@@ -2051,7 +2091,15 @@ function openPanel(id){
     var sel = document.getElementById('ssel');
     if(sel) sel.addEventListener('change', function(){
       var af = document.getElementById('approved-fields');
-      if(af) af.style.display = sel.value==='已核准' ? 'block' : 'none';
+      if(af) af.style.display = (sel.value==='已核准'||sel.value==='已撥款') ? 'block' : 'none';
+      // 已撥款狀態：自動填入撥款日期（如果還沒填）
+      if(sel.value==='已撥款'){
+        var dd = document.getElementById('s-disburse-date');
+        if(dd && !dd.value){
+          var today = new Date();
+          dd.value = today.getFullYear()+'-'+String(today.getMonth()+1).padStart(2,'0')+'-'+String(today.getDate()).padStart(2,'0');
+        }
+      }
     });
   }, 50);
 
@@ -2080,6 +2128,33 @@ async function setSc(id,field,val){
   renderStats();filter();openPanel(id);
 }
 
+function calcFeeAuto(){
+  var approved = parseFloat(document.getElementById('s-approved')?document.getElementById('s-approved').value:'') || 0;
+  var fee = parseFloat(document.getElementById('s-fee')?document.getElementById('s-fee').value:'') || 0;
+
+  // 顯示摘要
+  var sumEl = document.getElementById('fee-summary');
+  if(sumEl && approved > 0){
+    var netAmount = approved - fee;
+    sumEl.style.display = 'block';
+    sumEl.innerHTML =
+      '<div style="display:flex;justify-content:space-between;margin-bottom:4px">'+
+        '<span>核准金額</span><span style="font-weight:700">NT$ '+approved.toLocaleString()+'</span>'+
+      '</div>'+
+      (fee>0?
+        '<div style="display:flex;justify-content:space-between;margin-bottom:4px;color:#92400E">'+
+          '<span>手續費</span><span style="font-weight:700">− NT$ '+fee.toLocaleString()+'</span>'+
+        '</div>'+
+        '<div style="display:flex;justify-content:space-between;padding-top:6px;border-top:1px solid #A7F3D0;font-size:13px">'+
+          '<span style="font-weight:800">實際撥款金額</span><span style="font-weight:900;color:#065F46;font-size:15px">NT$ '+netAmount.toLocaleString()+'</span>'+
+        '</div>':
+        ''
+      );
+  } else if(sumEl){
+    sumEl.style.display = 'none';
+  }
+}
+
 async function saveCase(id){
   var btn=document.querySelector('.save');
   var status=document.getElementById('ssel').value;
@@ -2087,8 +2162,9 @@ async function saveCase(id){
   btn.textContent='儲存中...';btn.disabled=true;
   try {
     var approvedAmt = document.getElementById('s-approved') ? document.getElementById('s-approved').value : null;
+    var feeAmt = document.getElementById('s-fee') ? document.getElementById('s-fee').value : null;
     var disbursedAmt = document.getElementById('s-disbursed') ? document.getElementById('s-disbursed').value : null;
-    var undisbursedAmt = document.getElementById('s-undisbursed') ? document.getElementById('s-undisbursed').value : null;
+    var disburseDateAmt = document.getElementById('s-disburse-date') ? document.getElementById('s-disburse-date').value.trim() : null;
     // 備注歷史：加入時間戳記
     var c2 = cases.find(function(x){return x.id===id;});
     var oldNotes = c2 ? (c2.notes||'') : '';
@@ -2102,8 +2178,9 @@ async function saveCase(id){
     }
     var patchData = {status:status, notes:finalNotes};
     if(approvedAmt !== null) patchData.approved_amount = approvedAmt;
+    if(feeAmt !== null) patchData.fee_amount = feeAmt;
     if(disbursedAmt !== null) patchData.disbursed_amount = disbursedAmt;
-    if(undisbursedAmt !== null) patchData.undisbursed_amount = undisbursedAmt;
+    if(disburseDateAmt !== null) patchData.disburse_date = disburseDateAmt;
 
     // 修正客戶資料
     var editCarTime = document.getElementById('edit-car-time');
@@ -2171,7 +2248,8 @@ function updateCsCode(){
   var preview = document.getElementById('cs-code-preview');
   var linkPreview = document.getElementById('cs-link-preview');
   if(!cat||!num||!preview) return;
-  var code = num.value ? cat.value+String(parseInt(num.value)).padStart(2,'0') : '--';
+  var numVal = parseInt(num.value);
+  var code = num.value ? cat.value+String(numVal).padStart(numVal>=100?3:2,'0') : '--';
   preview.textContent = code;
   if(linkPreview && code!=='--'){
     linkPreview.textContent = SITE_URL+'?ch='+code;
@@ -2233,14 +2311,26 @@ async function doCreateChannel(){
   var bizId = document.getElementById('cs-bizid').value.trim();
   var cat   = document.getElementById('cs-cat').value;
   var num   = document.getElementById('cs-num').value;
+  var tgId  = document.getElementById('cs-tg') ? document.getElementById('cs-tg').value.trim() : '';
+  var lineUrl = document.getElementById('cs-line') ? document.getElementById('cs-line').value.trim() : '';
   var msg   = document.getElementById('cs-msg');
 
   if(!name||!bizId||!num){ msg.innerHTML='<span style="color:#DC2626">❌ 請填寫所有欄位</span>'; return; }
   if(bizId.length!==8||isNaN(bizId)){ msg.innerHTML='<span style="color:#DC2626">❌ 統編請輸入 8 碼數字</span>'; return; }
   var catMap = {'a':'美容類','b':'直銷類','c':'經銷商類','d':'課程類','e':'保健食品類','f':'其他類'};
   var catName = catMap[cat] || cat+'類';
-  var chCode = cat+String(parseInt(num)).padStart(2,'0');
-  if(CHANNELS[chCode]){ msg.innerHTML='<span style="color:#DC2626">❌ 通路代碼 '+chCode+' 已存在，請換一個編號</span>'; return; }
+  var numInt = parseInt(num);
+  var chCode = cat+String(numInt).padStart(numInt>=100?3:2,'0');
+  // 只檢查同產業類別的衝突（不同產業可以用同樣數字）
+  var catConflict = Object.keys(CHANNELS).some(function(k){
+    return k === chCode;
+  });
+  if(catConflict){ msg.innerHTML='<span style="color:#DC2626">❌ 代碼 '+chCode+' 已存在，請換一個編號（同類別'+catName+'中已有此號碼）</span>'; return; }
+
+  // 提示：如果同數字在其他類別有用過，只提示不阻止
+  var sameNumOtherCat = Object.keys(CHANNELS).some(function(k){
+    return k !== 'FlowPay' && k.slice(1) === String(numInt).padStart(numInt>=100?3:2,'0') && k.slice(0,1) !== cat;
+  });
 
   msg.innerHTML='<span style="color:#9CA3AF">建立中...</span>';
   var btn = document.querySelector('#page-channel-setup button[onclick="doCreateChannel()"]');
@@ -2248,13 +2338,32 @@ async function doCreateChannel(){
 
   try {
     // ① 加入 CHANNELS
-    CHANNELS[chCode] = {name:name, category:catName};
+    CHANNELS[chCode] = {name:name, category:catName, tgId:tgId, lineUrl:lineUrl};
 
     // ② 加入 CHANNEL_ACCOUNTS（帳號=統編，密碼=統編）
     CHANNEL_ACCOUNTS[bizId] = {pw:bizId, name:name, role:'channel', channel:chCode};
 
     // ③ 持久化到 localStorage
     saveChannelAccountsLocal();
+    // 同時把 CHANNELS 存到 localStorage（含 TG / LINE）
+    try { localStorage.setItem('fp_channels_extra', JSON.stringify(CHANNELS)); } catch(e){}
+
+    // 通知總公司 Telegram：新通路建立完成
+    var hqTgId = '-1003786268499';
+    var tgToken = '8711749215:AAHv0N1EpqPwMmBRgo-rDlnJSEC7AdtPKAU';
+    var notifyMsg = '🏢 新通路建立完成！\n'+
+      '商家名稱：'+name+'\n'+
+      '通路代碼：'+chCode+'\n'+
+      '產業類別：'+catName+'\n'+
+      '帳號/密碼：'+bizId+'\n'+
+      '填單連結：'+link+
+      (tgId?'\nTelegram：'+tgId:'')+
+      (lineUrl?'\nLINE：'+lineUrl:'');
+    fetch('https://api.telegram.org/bot'+tgToken+'/sendMessage',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({chat_id:hqTgId, text:notifyMsg})
+    }).catch(function(){});
 
     // ④ 顯示成功訊息
     var link = SITE_URL+'?ch='+chCode;
@@ -2269,6 +2378,8 @@ async function doCreateChannel(){
           '<a href="'+link+'" target="_blank" style="color:#2563EB;word-break:break-all;font-size:12px">'+link+'</a>'+
           ' <button id="cs-copy-btn" data-link="'+link+'" style="background:#fff;border:1px solid #059669;border-radius:6px;padding:2px 10px;font-size:12px;cursor:pointer;font-family:inherit;margin-top:4px">📋 複製連結</button>'+
         '</div>'+
+        (tgId?'<div style="margin-top:4px">📱 Telegram Chat ID：<strong>'+tgId+'</strong></div>':'')+
+        (lineUrl?'<div style="margin-top:4px">🟢 LINE 連結：<strong style="font-size:11px">'+lineUrl+'</strong></div>':'')+
       '</div>'+
       '<div style="margin-top:12px;padding-top:12px;border-top:1px solid #A7F3D0;font-size:12px;color:#6B7280">'+
         '💡 商家用此帳號登入後台，可看自己的案件、統計和核准撥款'+
@@ -2306,6 +2417,7 @@ async function doCreateChannel(){
 
     // ⑦ 更新通路明細和通路設定清單
     setTimeout(function(){
+      if(typeof renderChannelNav === 'function') renderChannelNav();
       if(typeof loadAccounts === 'function') loadAccounts();
       if(typeof renderChannelSetup === 'function') renderChannelSetup();
     }, 200);
