@@ -1,0 +1,975 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>FlowHub — 免費評估申請</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  :root{
+    --blue:#2563EB;
+    --blue-light:#EFF6FF;
+    --blue-dark:#1D4ED8;
+    --green:#059669;
+    --green-light:#ECFDF5;
+    --red:#DC2626;
+    --amber:#D97706;
+    --amber-light:#FFFBEB;
+    --gray-50:#F9FAFB;
+    --gray-100:#F3F4F6;
+    --gray-200:#E5E7EB;
+    --gray-300:#D1D5DB;
+    --gray-400:#9CA3AF;
+    --gray-500:#6B7280;
+    --gray-700:#374151;
+    --gray-900:#111827;
+    --radius:10px;
+    --radius-sm:6px;
+    --radius-full:9999px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  html,body{height:100%;background:#F0F4F8;font-family:'Noto Sans TC','PingFang TC','Microsoft JhengHei',sans-serif;color:var(--gray-900)}
+  body{display:flex;justify-content:center;align-items:flex-start;padding:24px 16px 60px}
+
+  .card{background:#fff;border-radius:16px;box-shadow:0 1px 3px rgba(0,0,0,.08),0 8px 32px rgba(0,0,0,.06);width:100%;max-width:520px;padding:28px 24px;min-height:auto}
+
+  /* Progress */
+  .prog-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+  .prog-chip{font-size:11px;color:var(--gray-400);font-weight:500;letter-spacing:.04em}
+  .prog-steps{display:flex;gap:3px}
+  .prog-dot{width:20px;height:3px;border-radius:2px;background:var(--gray-200);transition:background .3s}
+  .prog-dot.done{background:var(--green)}
+  .prog-dot.active{background:var(--blue)}
+  .step-title{font-size:20px;font-weight:700;color:var(--gray-900);margin-bottom:3px}
+  .step-sub{font-size:13px;color:var(--gray-500);margin-bottom:20px}
+
+  /* Trust box */
+  .trust-box{background:var(--blue-light);border-radius:var(--radius);padding:14px 16px;margin-bottom:20px;border:1px solid #DBEAFE}
+  .trust-row{display:flex;align-items:flex-start;gap:10px;margin-bottom:10px}
+  .trust-row:last-child{margin-bottom:0}
+  .trust-icon{width:22px;height:22px;border-radius:50%;background:var(--blue);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+  .trust-text{font-size:13px;color:#1E40AF;line-height:1.6}
+  .trust-text strong{color:#1E3A8A}
+
+  /* Fields */
+  .field{margin-bottom:14px}
+  .fl{font-size:12px;font-weight:600;color:var(--gray-500);margin-bottom:5px;letter-spacing:.02em;display:flex;align-items:center;gap:4px}
+  .req{color:var(--red);font-size:11px}
+  .opt{font-size:10px;color:var(--gray-400);background:var(--gray-100);padding:1px 7px;border-radius:var(--radius-full);font-weight:500}
+  input[type=text],input[type=tel],input[type=number],select,textarea{
+    width:100%;height:42px;padding:0 12px;
+    border:1.5px solid var(--gray-200);border-radius:var(--radius-sm);
+    font-size:14px;background:#fff;color:var(--gray-900);
+    font-family:inherit;transition:border-color .15s,box-shadow .15s;outline:none
+  }
+  input:focus,select:focus,textarea:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(37,99,235,.1)}
+  select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%239CA3AF'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;cursor:pointer}
+  textarea{height:80px;padding:10px 12px;resize:none;line-height:1.5}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+
+  /* Choice pills */
+  .choice-group{display:flex;flex-wrap:wrap;gap:7px}
+  .choice{padding:8px 16px;border:1.5px solid var(--gray-200);border-radius:var(--radius-full);font-size:13px;cursor:pointer;background:#fff;color:var(--gray-500);transition:all .15s;white-space:nowrap;font-family:inherit;font-weight:500}
+  .choice:hover{border-color:var(--blue);color:var(--blue)}
+  .choice.on{background:var(--blue-light);border-color:var(--blue);color:var(--blue-dark);font-weight:600}
+  .choice.on-warn{background:#FEF2F2;border-color:var(--red);color:#991B1B;font-weight:600}
+
+  /* Amount grid */
+  .amount-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-bottom:8px}
+  .amt-btn{padding:10px 4px;border:1.5px solid var(--gray-200);border-radius:var(--radius-sm);font-size:12px;font-weight:600;text-align:center;cursor:pointer;color:var(--gray-500);background:#fff;transition:all .15s;line-height:1.4;font-family:inherit}
+  .amt-btn:hover{border-color:var(--blue);color:var(--blue)}
+  .amt-btn.on{background:var(--blue);border-color:var(--blue-dark);color:#fff}
+  .amt-btn .sub{font-size:9px;opacity:.75;margin-top:2px;font-weight:400}
+  .amt-btn.on .sub{opacity:.9}
+  .amt-confirm{text-align:center;font-size:13px;color:var(--gray-500);padding:6px 0}
+  .amt-confirm strong{color:var(--blue-dark)}
+
+  /* Consent */
+  .consent-scroll{height:152px;overflow-y:auto;background:var(--gray-50);border:1.5px solid var(--gray-200);border-radius:var(--radius-sm);padding:12px 14px;font-size:12px;color:var(--gray-500);line-height:1.8;margin-bottom:10px}
+  .consent-scroll::-webkit-scrollbar{width:4px}
+  .consent-scroll::-webkit-scrollbar-track{background:transparent}
+  .consent-scroll::-webkit-scrollbar-thumb{background:var(--gray-300);border-radius:2px}
+  .consent-scroll strong{color:var(--gray-700)}
+  .consent-check{display:flex;align-items:flex-start;gap:10px;padding:12px 14px;border:1.5px solid var(--gray-200);border-radius:var(--radius-sm);cursor:pointer;transition:all .15s;background:#fff;margin-bottom:4px}
+  .consent-check.checked{background:var(--green-light);border-color:var(--green)}
+  .cb{width:20px;height:20px;border-radius:5px;border:2px solid var(--gray-300);flex-shrink:0;display:flex;align-items:center;justify-content:center;margin-top:1px;transition:all .15s;background:#fff}
+  .cb.checked{background:var(--green);border-color:var(--green)}
+  .cb svg{display:none}
+  .cb.checked svg{display:block}
+  .consent-label{font-size:12px;color:var(--gray-500);line-height:1.6}
+  .consent-check.checked .consent-label{color:#065F46}
+  .consent-check.checked .consent-label strong{color:#064E3B}
+  .consent-ts{font-size:11px;color:var(--gray-400);text-align:right;padding-top:3px}
+
+  /* Loan items */
+  .loan-item{background:var(--gray-50);border:1px solid var(--gray-200);border-radius:var(--radius-sm);padding:12px;margin-bottom:8px}
+  .loan-grid{display:grid;grid-template-columns:2fr 1fr 1fr;gap:8px;align-items:end}
+  .del{background:none;border:none;cursor:pointer;color:var(--gray-400);font-size:18px;padding:0;line-height:1;transition:color .15s}
+  .del:hover{color:var(--red)}
+  .add-row{width:100%;padding:10px;border:1.5px dashed var(--gray-300);border-radius:var(--radius-sm);background:transparent;font-size:13px;color:var(--gray-500);cursor:pointer;transition:all .15s;font-family:inherit;font-weight:500}
+  .add-row:hover{border-color:var(--blue);color:var(--blue);background:var(--blue-light)}
+  .empty-hint{text-align:center;padding:20px;font-size:13px;color:var(--gray-400)}
+
+  /* Upload */
+  .upload-label{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+  .upload-zone{border:2px dashed var(--gray-300);border-radius:var(--radius);padding:28px 16px;text-align:center;cursor:pointer;transition:all .2s;margin-bottom:8px;background:#fff}
+  .upload-zone:hover{border-color:var(--blue);background:var(--blue-light)}
+  .upload-zone.has-img{border-color:var(--green);border-style:solid;background:var(--green-light)}
+  .upload-zone img{max-width:100%;max-height:180px;border-radius:8px;margin-top:8px}
+  .upload-hint{font-size:12px;color:var(--gray-400);margin-bottom:10px;line-height:1.6}
+  .api-box{border-radius:var(--radius-sm);padding:12px;margin-bottom:12px}
+  .api-loading{background:var(--blue-light);border:1px solid #BFDBFE}
+  .api-done{background:var(--green-light);border:1px solid #A7F3D0}
+  .api-row{display:flex;justify-content:space-between;align-items:center;font-size:13px;padding:5px 0;border-bottom:1px solid rgba(0,0,0,.06)}
+  .api-row:last-child{border:none}
+  .api-k{color:var(--gray-500)}
+  .api-v{font-weight:600;color:var(--gray-900)}
+  .api-v.green{color:var(--green)}
+  .spin{width:14px;height:14px;border:2px solid var(--blue);border-top-color:transparent;border-radius:50%;animation:spin .8s linear infinite;display:inline-block}
+  @keyframes spin{to{transform:rotate(360deg)}}
+
+  /* Summary */
+  .divider{font-size:11px;font-weight:600;color:var(--gray-400);margin:16px 0 10px;padding-bottom:6px;border-bottom:1px solid var(--gray-200);letter-spacing:.06em;text-transform:uppercase}
+  .sum-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+  .sum-card{background:var(--gray-50);border:1px solid var(--gray-200);border-radius:var(--radius-sm);padding:10px 12px}
+  .sum-k{font-size:11px;color:var(--gray-400);margin-bottom:3px;font-weight:500}
+  .sum-v{font-size:14px;font-weight:700;color:var(--gray-900)}
+  .privacy-note{font-size:11px;color:var(--gray-400);line-height:1.7;padding:6px 0}
+
+  /* Nav */
+  .nav{display:flex;justify-content:space-between;align-items:center;margin-top:20px;padding-top:16px;border-top:1px solid var(--gray-100)}
+  .btn-ghost{padding:10px 18px;background:transparent;border:1.5px solid var(--gray-200);border-radius:var(--radius-sm);color:var(--gray-500);font-size:14px;cursor:pointer;font-family:inherit;font-weight:500;transition:all .15s}
+  .btn-ghost:hover{border-color:var(--gray-400);color:var(--gray-700)}
+  .btn-main{padding:11px 28px;background:var(--blue);border:none;border-radius:var(--radius-sm);color:#fff;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;transition:all .15s;box-shadow:0 2px 8px rgba(37,99,235,.25)}
+  .btn-main:hover{background:var(--blue-dark);box-shadow:0 4px 12px rgba(37,99,235,.35)}
+  .btn-main:disabled{opacity:.4;cursor:not-allowed;box-shadow:none}
+
+  /* Success */
+  .success-wrap{text-align:center;padding:20px 0}
+  .success-icon{width:64px;height:64px;border-radius:50%;background:var(--green-light);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;border:2px solid #A7F3D0}
+  .success-title{font-size:22px;font-weight:700;margin-bottom:8px}
+  .success-sub{font-size:14px;color:var(--gray-500);line-height:1.7;margin-bottom:24px}
+  .record-box{background:var(--gray-50);border:1px solid var(--gray-200);border-radius:var(--radius);padding:16px;text-align:left;margin-bottom:16px}
+  .record-title{font-size:11px;font-weight:600;color:var(--gray-400);margin-bottom:8px;letter-spacing:.06em;text-transform:uppercase}
+  .record-body{font-size:13px;color:var(--gray-600);line-height:1.8}
+
+  @media(max-width:400px){
+    .amount-grid{grid-template-columns:repeat(3,1fr)}
+    .grid2{grid-template-columns:1fr}
+  }
+</style>
+</head>
+<body>
+<div id="ch-banner"></div>
+<div class="card" id="wrap">
+  <div class="prog-header">
+    <span class="prog-chip" id="chip">步驟 1 / 5</span>
+    <div class="prog-steps" id="prog-dots"></div>
+  </div>
+  <div class="step-title" id="stitle"></div>
+  <div class="step-sub" id="ssub"></div>
+  <div id="body"></div>
+  <div class="nav" id="nav"></div>
+</div>
+
+<script>
+const AMOUNTS=[
+  {label:'3萬以內', sub:'30,000 以下', num:'NT$ 30,000 以下'},
+  {label:'5萬',     sub:'約 50,000',   num:'NT$ 50,000 左右'},
+  {label:'10萬',    sub:'約 100,000',  num:'NT$ 100,000 左右'},
+  {label:'10–20萬', sub:'10–20 萬',    num:'NT$ 100,000–200,000'},
+  {label:'30萬以上',sub:'300,000 以上',num:'NT$ 300,000 以上'},
+];
+
+const S={
+  name:'', phone:'', contact_time:'', need_idx:2,
+  agreed:false, agree_ts:'',
+  id_no:'', birth_y:'', birth_m:'', birth_d:'', reg_addr:'', same_addr:'no',
+  company:'', company_tel:'', income:'', tenure:'', has_job_tel:'',
+  is_alert:'no', fin_credit:'good',
+  salary_type:'', has_credit_card:'', credit_card_bank:'', credit_card_status:'',
+  has_car:'no', car_ok:'', car_time:'', car_quality:'',
+  has_moto:'no', moto_ok:'', moto_time:'', moto_quality:'',
+  has_property:'no',
+  has_loan:'', loan_burden:'',
+  recent_apply:'', recent_apply_type:'', recent_apply_count:'',
+  id_preview:null, id_preview_back:null,
+  api_done:false, api_name:'', api_dob:'', api_addr:'', api_idchange:'',
+};
+
+let cur=0;
+const STEPS=5;
+
+function ch(k,v,warn){
+  const on=S[k]===v;
+  const cls=on?(warn?'on-warn':'on'):'';
+  const label=v==='yes'?'是':v==='no'?'否':v;
+  return `<button class="choice ${cls}" onclick="S['${k}']='${v}';render()">${label}</button>`;
+}
+
+function toggleAgree(){
+  S.agreed=!S.agreed;
+  if(S.agreed){
+    const n=new Date();
+    S.agree_ts=[n.getFullYear(),(n.getMonth()+1).toString().padStart(2,'0'),n.getDate().toString().padStart(2,'0')].join('/')+' '+[n.getHours(),n.getMinutes(),n.getSeconds()].map(x=>x.toString().padStart(2,'0')).join(':');
+  } else S.agree_ts='';
+  render();
+}
+
+function loanDisplay(){
+  if(S.has_loan==='no') return '無';
+  if(S.has_loan==='yes') return S.loan_burden ? `每月約 ${S.loan_burden}` : '有（未填金額）';
+  return '—';
+}
+
+function mockApi(){
+  // 身分證上傳後只顯示「上傳成功」，不帶入假資料
+  S.api_done=true;
+  S.api_name='';
+  S.api_dob='';
+  S.api_addr='';
+  S.api_idchange='';
+  render();
+}
+
+function renderBody(){
+  const el=document.getElementById('body');
+  const ai=S.need_idx;
+
+  if(cur===0){
+    el.innerHTML=`
+      <div class="trust-box">
+        <div class="trust-row">
+          <div class="trust-icon"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+          <div class="trust-text"><strong>安全放心的友善窗口</strong><br>您所填寫的資料僅供內部人員評估使用，絕不對外流出，請安心填寫。</div>
+        </div>
+        <div class="trust-row">
+          <div class="trust-icon"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg></div>
+          <div class="trust-text"><strong>現在只是初步了解，不會馬上查詢紀錄</strong><br>此階段僅協助確認基本條件，不會立即調閱任何信用或融資查詢紀錄。</div>
+        </div>
+        <div class="trust-row">
+          <div class="trust-icon"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/></svg></div>
+          <div class="trust-text"><strong>商品消費分期協助</strong><br>本服務協助您透過與合作店家進行商品消費分期，以分期方式靈活運用資金，涉及相關手續費用，詳見下方條款。</div>
+        </div>
+      </div>
+
+      <div class="grid2">
+        <div class="field"><div class="fl">您的姓名 <span class="req">*</span></div><input type="text" value="${S.name}" placeholder="請輸入姓名" oninput="S.name=this.value"/></div>
+        <div class="field">
+          <div class="fl">聯絡電話 <span class="req">*</span></div>
+          <input type="tel" value="${S.phone}" placeholder="0912345678" oninput="S.phone=this.value;renderPhoneHint()" maxlength="12"
+            style="border-color:${S.phone&&!validPhone(S.phone)?'#DC2626':''}"/>
+          <div id="phone-hint" style="font-size:11px;margin-top:4px">
+            ${S.phone&&!validPhone(S.phone)?`<span style="color:#DC2626">請輸入正確的手機號碼（09 開頭，共 10 碼）</span>`:''}
+            ${validPhone(S.phone)?`<span style="color:#059669">✓ 格式正確</span>`:''}
+          </div>
+        </div>
+      </div>
+      <div class="field">
+        <div class="fl">方便聯絡時間 <span class="req">*</span></div>
+        <select onchange="S.contact_time=this.value">
+          <option value="">請選擇</option>
+          ${['09:00–12:00','12:00–14:00','14:00–18:00','18:00–21:00','隨時均可'].map(t=>`<option value="${t}" ${S.contact_time===t?'selected':''}>${t}</option>`).join('')}
+        </select>
+      </div>
+      <div class="field">
+        <div class="fl">希望申請金額 <span class="req">*</span></div>
+        <div class="amount-grid">
+          ${AMOUNTS.map((a,i)=>`<button class="amt-btn ${i===ai?'on':''}" onclick="S.need_idx=${i};render()">${a.label}<div class="sub">${a.sub}</div></button>`).join('')}
+        </div>
+        <div class="amt-confirm">已選擇：<strong>${AMOUNTS[ai].num}</strong></div>
+      </div>
+
+      <div class="fl" style="margin:16px 0 8px;font-size:12px">服務說明與同意條款</div>
+      <div class="consent-scroll">
+        <strong>一、服務性質說明</strong><br>本服務係由本公司協助申請人透過與合作特約店家共同進行<strong>商品消費分期</strong>之申辦流程。申請人以分期付款方式向合作店家購買商品，並依合約約定按期繳納分期款項，以此方式靈活運用資金。本服務不屬於銀行貸款或信用借貸，而係以消費分期為基礎之資金運用方案。<br><br>
+        <strong>二、手續費用說明</strong><br>申請人了解並同意，本服務依申辦流程及合作店家規定，將收取相關<strong>服務手續費</strong>。實際費率及金額將於正式簽約前由專員詳細說明，申請人有權於簽約前充分了解所有費用後，再決定是否進行後續流程，本公司不得以任何方式強迫或誘導申請人簽約。<br><br>
+        <strong>三、個人資料保護聲明</strong><br>依據《個人資料保護法》第7條，申請人同意本公司於評估申辦資格之必要範圍內，蒐集、處理及利用所填寫之個人資料（包含姓名、聯絡電話、身分證字號及相關財務資料）。上述資料<strong>僅限內部使用</strong>，不對外提供、出售或揭露予第三方，並於評估結束後依法定期限妥善保管或銷毀。<br><br>
+        <strong>四、查詢時機聲明</strong><br>申請人了解，本階段填寫之資料<strong>僅供初步條件確認</strong>，本公司不會於此階段進行任何信用查詢或融資紀錄調閱。後續若進入正式申辦流程，本公司將另行告知並取得申請人明確同意後，方進行相關查詢。<br><br>
+        <strong>五、自願填寫聲明</strong><br>申請人確認本表單係出於自願填寫，所填寫之資料均屬真實，如有不實，申請人願自負法律責任。<br><br>
+        <span style="font-size:11px;color:#9CA3AF">本條款依中華民國《民法》、《消費者保護法》及《個人資料保護法》相關規定訂立，具有法律效力。</span>
+      </div>
+      <div class="consent-check ${S.agreed?'checked':''}" onclick="toggleAgree()">
+        <div class="cb ${S.agreed?'checked':''}">
+          <svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="2 6 5 9 10 3"/></svg>
+        </div>
+        <div class="consent-label">本人已詳細閱讀上述服務說明與條款，了解本服務為<strong>商品消費分期</strong>性質、涉及手續費用，且本階段不會調閱信用紀錄，並同意個人資料依上述範圍使用。</div>
+      </div>
+      ${S.agree_ts?`<div class="consent-ts">同意時間：${S.agree_ts}</div>`:''}`;
+  }
+
+  else if(cur===1){
+    el.innerHTML=`
+      <div style="font-size:12px;font-weight:700;color:#6B7280;letter-spacing:.06em;text-transform:uppercase;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid #F3F4F6">基本資料</div>
+
+      <div class="grid2">
+        <div class="field">
+          <div class="fl">身分證字號 <span class="req">*</span></div>
+          <input type="text" value="${S.id_no}" placeholder="A123456789" maxlength="10" oninput="S.id_no=this.value.toUpperCase();this.value=S.id_no"/>
+        </div>
+        <div class="field">
+          <div class="fl">出生日期 <span class="req">*</span></div>
+          <div style="display:grid;grid-template-columns:2fr 1.5fr 1.5fr;gap:6px">
+            <input type="number" value="${S.birth_y}" placeholder="西元年" min="1930" max="2010" oninput="S.birth_y=this.value" style="text-align:center"/>
+            <input type="number" value="${S.birth_m}" placeholder="月" min="1" max="12" oninput="S.birth_m=this.value" style="text-align:center"/>
+            <input type="number" value="${S.birth_d}" placeholder="日" min="1" max="31" oninput="S.birth_d=this.value" style="text-align:center"/>
+          </div>
+        </div>
+      </div>
+
+      <div class="field">
+        <div class="fl" style="justify-content:space-between">
+          <span>戶籍地址 <span class="req">*</span></span>
+          
+        </div>
+        <input type="text" value="${S.reg_addr}" placeholder="例如：台北市中正區重慶南路一段1號" oninput="S.reg_addr=this.value"/>
+        <div style="display:flex;align-items:center;gap:8px;margin-top:8px;cursor:pointer" onclick="S.same_addr=S.same_addr==='yes'?'no':'yes';render()">
+          <div style="width:18px;height:18px;border-radius:4px;border:2px solid ${S.same_addr==='yes'?'#059669':'#D1D5DB'};background:${S.same_addr==='yes'?'#059669':'#fff'};display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s">
+            ${S.same_addr==='yes'?`<svg width="10" height="10" viewBox="0 0 12 12" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="2 6 5 9 10 3"/></svg>`:''}
+          </div>
+          <span style="font-size:13px;color:${S.same_addr==='yes'?'#065F46':'#6B7280'}">與現居住地相同</span>
+        </div>
+      </div>
+
+      <div style="font-size:12px;font-weight:700;color:#6B7280;letter-spacing:.06em;text-transform:uppercase;margin:20px 0 10px;padding-bottom:6px;border-bottom:1px solid #F3F4F6">職業資料</div>
+
+      <div class="field">
+        <div class="fl">公司名稱 <span class="req">*</span></div>
+        <input type="text" value="${S.company}" placeholder="例如：XX股份有限公司" oninput="S.company=this.value"/>
+      </div>
+
+      <div class="grid2">
+        <div class="field">
+          <div class="fl" style="justify-content:space-between">
+            <span>月薪（元）<span class="req">*</span></span>
+          </div>
+          <input type="number" value="${S.income}" placeholder="例如：45000" oninput="S.income=this.value"/>
+        </div>
+      </div>
+
+      <div class="field">
+        <div class="fl">工作年資 <span class="req">*</span></div>
+        <div class="choice-group">
+          ${['三個月內','半年','一年以上','三年以上'].map(t=>`<button class="choice ${S.tenure===t?'on':''}" onclick="S.tenure='${t}';render()">${t}</button>`).join('')}
+        </div>
+      </div>
+
+      <div class="field" style="margin-top:14px">
+        <div class="fl">薪資發放方式 <span class="req">*</span></div>
+        <div class="choice-group">
+          <button class="choice ${S.salary_type==='transfer'?'on':''}" onclick="S.salary_type='transfer';render()">薪轉（匯款入帳）</button>
+          <button class="choice ${S.salary_type==='cash'?'on':''}" onclick="S.salary_type='cash';render()">領現金</button>
+        </div>
+      </div>
+
+      <div class="field" style="margin-top:14px">
+        <div class="fl">是否有工作電話？</div>
+        <div class="choice-group">
+          <button class="choice ${S.has_job_tel==='yes'?'on':''}" onclick="S.has_job_tel='yes';render()">是</button>
+          <button class="choice ${S.has_job_tel==='no'?'on':''}" onclick="S.has_job_tel='no';render()">否</button>
+        </div>
+      </div>
+      ${S.has_job_tel==='yes'?`
+        <div class="field" style="margin-top:8px">
+          <input type="tel" value="${S.company_tel}" placeholder="公司電話，例如：02-2345-6789" oninput="S.company_tel=this.value"/>
+        </div>`:''}`;
+  }
+
+  else if(cur===2){
+    el.innerHTML=`
+      <div style="font-size:12px;font-weight:700;color:#6B7280;letter-spacing:.06em;text-transform:uppercase;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid #F3F4F6">信用狀況</div>
+
+      <div class="field">
+        <div class="fl">是否為警示戶？</div>
+        <div class="choice-group">${ch('is_alert','yes',true)}${ch('is_alert','no')}</div>
+      </div>
+      <div class="field" style="margin-top:14px">
+        <div class="fl">融資信用狀況（CCIS）</div>
+        <div class="choice-group">
+          <button class="choice ${S.fin_credit==='good'?'on':''}" onclick="S.fin_credit='good';render()">良好</button>
+          <button class="choice ${S.fin_credit==='fair'?'on-warn':''}" onclick="S.fin_credit='fair';render()">有遲繳紀錄</button>
+          <button class="choice ${S.fin_credit==='bad'?'on-warn':''}" onclick="S.fin_credit='bad';render()">不良 / 黑名單</button>
+          <button class="choice ${S.fin_credit==='none'?'on':''}" onclick="S.fin_credit='none';render()">無融資紀錄</button>
+        </div>
+      </div>
+
+      <div class="field" style="margin-top:14px">
+        <div class="fl">是否曾辦過信用卡？</div>
+        <div class="choice-group">
+          <button class="choice ${S.has_credit_card==='yes'?'on':''}" onclick="S.has_credit_card='yes';render()">有辦過</button>
+          <button class="choice ${S.has_credit_card==='no'?'on':''}" onclick="S.has_credit_card='no';render()">沒有</button>
+        </div>
+      </div>
+
+      ${S.has_credit_card==='yes'?`
+      <div class="field" style="margin-top:14px;padding-left:12px;border-left:3px solid #E5E7EB">
+        <div class="fl" style="font-size:13px;color:#6B7280;margin-bottom:6px">信用卡銀行（可填多家）</div>
+        <input type="text" value="${S.credit_card_bank||''}" placeholder="例：國泰、玉山、台新..." 
+          oninput="S.credit_card_bank=this.value"
+          style="width:100%;padding:10px 12px;border:1.5px solid #E5E7EB;border-radius:10px;font-size:14px;font-family:inherit;outline:none;box-sizing:border-box"/>
+        <div class="fl" style="font-size:13px;margin-top:12px;margin-bottom:6px">信用卡繳款狀況 <span class="req">*</span></div>
+        <div class="choice-group">
+          <button class="choice ${S.credit_card_status==='normal'?'on':''}" onclick="S.credit_card_status='normal';render()">正常全額繳清</button>
+          <button class="choice ${S.credit_card_status==='minimum'?'on-warn':''}" onclick="S.credit_card_status='minimum';render()">繳最低應繳</button>
+          <button class="choice ${S.credit_card_status==='unused'?'on':''}" onclick="S.credit_card_status='unused';render()">有卡沒在用</button>
+          <button class="choice ${S.credit_card_status==='suspended'?'on-warn':''}" onclick="S.credit_card_status='suspended';render()">被停卡</button>
+        </div>
+      </div>
+      `:''}
+
+      <div style="font-size:12px;font-weight:700;color:#6B7280;letter-spacing:.06em;text-transform:uppercase;margin:20px 0 10px;padding-bottom:6px;border-bottom:1px solid #F3F4F6">名下資產</div>
+
+      <div class="field">
+        <div class="fl" style="justify-content:space-between"><span>名下有無汽車？</span></div>
+        <div class="choice-group">${ch('has_car','yes')}${ch('has_car','no')}</div>
+      </div>
+      ${S.has_car==='yes'?`
+        <div style="background:#F9FAFB;border:1px solid #E5E7EB;border-radius:10px;padding:14px 16px;margin:4px 0 8px">
+          <div class="fl" style="font-size:13px;font-weight:700;color:#374151;margin-bottom:4px">繳款狀況</div>
+          <div style="font-size:11px;color:#DC2626;margin-bottom:10px">${!S.car_quality?'請選擇繳款品質（必填）':(!S.car_time&&S.car_quality!=='paid')?'請選擇繳款時間（必填）':''}</div>
+          <div style="font-size:11px;font-weight:700;color:'+(S.car_time?'#059669':'#6B7280')+';letter-spacing:.04em;margin-bottom:6px">繳款時間 ${S.car_time?'✓':S.car_quality==='paid'?'<span style=\'font-size:10px;color:#9CA3AF;font-weight:400\'>(已繳清可不選)</span>':''}</div>
+          <div class="choice-group" style="margin-bottom:14px">
+            <button class="choice ${S.car_time==='lt6'?'on':''}" onclick="S.car_time=S.car_time==='lt6'?'':'lt6';render()">未滿 6 期</button>
+            <button class="choice ${S.car_time==='over1y'?'on':''}" onclick="S.car_time=S.car_time==='over1y'?'':'over1y';render()">繳款 1 年以上</button>
+          </div>
+          <div style="height:1px;background:#E5E7EB;margin-bottom:12px"></div>
+          <div style="font-size:11px;font-weight:700;color:'+(S.car_quality?'#059669':'#6B7280')+';letter-spacing:.04em;margin-bottom:6px">繳款品質 ${S.car_quality?'✓':''}</div>
+          <div class="choice-group">
+            <button class="choice ${S.car_quality==='normal'?'on':''}" onclick="S.car_quality=S.car_quality==='normal'?'':'normal';render()">正常繳款</button>
+            <button class="choice ${S.car_quality==='late'?'on-warn':''}" onclick="S.car_quality=S.car_quality==='late'?'':'late';render()">偶爾遲繳</button>
+            <button class="choice ${S.car_quality==='late_often'?'on-warn':''}" onclick="S.car_quality=S.car_quality==='late_often'?'':'late_often';render()">常常遲繳</button>
+            <button class="choice ${S.car_quality==='paid'?'on':''}" onclick="S.car_quality=S.car_quality==='paid'?'':'paid';render()">已繳清</button>
+          </div>
+        </div>`:''}
+
+      <div class="field" style="margin-top:14px">
+        <div class="fl" style="justify-content:space-between"><span>名下有無機車？</span></div>
+        <div class="choice-group">${ch('has_moto','yes')}${ch('has_moto','no')}</div>
+      </div>
+      ${S.has_moto==='yes'?`
+        <div style="background:#F9FAFB;border:1px solid #E5E7EB;border-radius:10px;padding:14px 16px;margin:4px 0 8px">
+          <div class="fl" style="font-size:13px;font-weight:700;color:#374151;margin-bottom:4px">繳款狀況</div>
+          <div style="font-size:11px;color:#DC2626;margin-bottom:10px">${!S.moto_quality?'請選擇繳款品質（必填）':(!S.moto_time&&S.moto_quality!=='paid')?'請選擇繳款時間（必填）':''}</div>
+          <div style="font-size:11px;font-weight:700;color:'+(S.moto_time?'#059669':'#6B7280')+';letter-spacing:.04em;margin-bottom:6px">繳款時間 ${S.moto_time?'✓':S.moto_quality==='paid'?'<span style=\'font-size:10px;color:#9CA3AF;font-weight:400\'>(已繳清可不選)</span>':''}</div>
+          <div class="choice-group" style="margin-bottom:14px">
+            <button class="choice ${S.moto_time==='lt6'?'on':''}" onclick="S.moto_time=S.moto_time==='lt6'?'':'lt6';render()">未滿 6 期</button>
+            <button class="choice ${S.moto_time==='over1y'?'on':''}" onclick="S.moto_time=S.moto_time==='over1y'?'':'over1y';render()">繳款 1 年以上</button>
+          </div>
+          <div style="height:1px;background:#E5E7EB;margin-bottom:12px"></div>
+          <div style="font-size:11px;font-weight:700;color:'+(S.moto_quality?'#059669':'#6B7280')+';letter-spacing:.04em;margin-bottom:6px">繳款品質 ${S.moto_quality?'✓':''}</div>
+          <div class="choice-group">
+            <button class="choice ${S.moto_quality==='normal'?'on':''}" onclick="S.moto_quality=S.moto_quality==='normal'?'':'normal';render()">正常繳款</button>
+            <button class="choice ${S.moto_quality==='late'?'on-warn':''}" onclick="S.moto_quality=S.moto_quality==='late'?'':'late';render()">偶爾遲繳</button>
+            <button class="choice ${S.moto_quality==='late_often'?'on-warn':''}" onclick="S.moto_quality=S.moto_quality==='late_often'?'':'late_often';render()">常常遲繳</button>
+            <button class="choice ${S.moto_quality==='paid'?'on':''}" onclick="S.moto_quality=S.moto_quality==='paid'?'':'paid';render()">已繳清</button>
+          </div>
+        </div>`:''}
+
+      <div class="field" style="margin-top:14px">
+        <div class="fl" style="justify-content:space-between"><span>名下有無不動產？</span></div>
+        <div class="choice-group">${ch('has_property','yes')}${ch('has_property','no')}</div>
+      </div>`;
+  }
+
+  else if(cur===3){
+    el.innerHTML=`
+      <div class="field">
+        <div class="fl" style="margin-bottom:4px">最近有沒有送過銀行或分期呢？</div>
+        <div style="font-size:12px;color:#059669;margin-bottom:10px;display:flex;align-items:center;gap:5px">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><circle cx="12" cy="16" r="1" fill="#059669"/></svg>
+          我幫您選擇最適合的方案
+        </div>
+        <div class="choice-group">
+          <button class="choice ${S.recent_apply==='yes'?'on':''}" onclick="S.recent_apply='yes';render()">有</button>
+          <button class="choice ${S.recent_apply==='no'?'on':''}" onclick="S.recent_apply='no';render()">沒有</button>
+        </div>
+      </div>
+
+      ${S.recent_apply==='yes'?`
+        <div style="background:#F0F9FF;border:1px solid #BAE6FD;border-radius:10px;padding:14px 16px;margin-top:4px;margin-bottom:4px">
+          <div class="fl" style="margin-bottom:10px">大概幾次？</div>
+          <div style="font-size:12px;font-weight:700;color:#0369A1;margin-bottom:8px">資金需求方面</div>
+          <div class="choice-group" style="margin-bottom:12px">
+            ${['0次','1次','2次','3次以上'].map(v=>`
+              <button class="choice ${S.recent_apply_type==='資金_'+v?'on':''}" onclick="S.recent_apply_type='資金_${v}';render()">${v}</button>
+            `).join('')}
+          </div>
+          <div style="font-size:12px;font-weight:700;color:#0369A1;margin-bottom:8px">購買商品消費分期方面</div>
+          <div class="choice-group">
+            ${['0次','1次','2次','3次以上'].map(v=>`
+              <button class="choice ${S.recent_apply_count==='分期_'+v?'on':''}" onclick="S.recent_apply_count='分期_${v}';render()">${v}</button>
+            `).join('')}
+          </div>
+        </div>
+      `:''}
+
+      <div class="field" style="margin-top:${S.recent_apply?'16':'4'}px">
+        <div class="fl" style="margin-bottom:8px">目前是否有貸款或分期？</div>
+        <div class="choice-group">
+          <button class="choice ${S.has_loan==='yes'?'on':''}" onclick="S.has_loan='yes';render()">有</button>
+          <button class="choice ${S.has_loan==='no'?'on':''}" onclick="S.has_loan='no';render()">沒有</button>
+        </div>
+        <div style="font-size:12px;color:#059669;margin-top:8px;display:flex;align-items:center;gap:5px">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          有貸款也沒關係，我們會協助您一起評估最適合的方案！
+        </div>
+      </div>
+
+      ${S.has_loan==='yes'?`
+        <div style="background:#F0FDF4;border:1px solid #A7F3D0;border-radius:10px;padding:14px 16px;margin-top:4px">
+          <div style="font-size:12px;font-weight:700;color:#065F46;margin-bottom:4px;display:flex;align-items:center;gap:5px">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><circle cx="12" cy="16" r="1" fill="#059669"/></svg>
+            安心提示
+          </div>
+          <div style="font-size:12px;color:#047857;line-height:1.7">填寫越完整，我們越能協助您選擇最適合的核貸專案。不確定金額的話，填大概的就好，沒關係！</div>
+        </div>
+
+        <div class="field" style="margin-top:16px">
+          <div class="fl">每月大約負擔</div>
+          <div class="choice-group">
+            ${['5,000 以下','5,000–10,000','10,000–20,000','20,000 以上'].map(v=>`
+              <button class="choice ${S.loan_burden===v?'on':''}" onclick="S.loan_burden='${v}';render()">${v}</button>
+            `).join('')}
+          </div>
+          <div style="font-size:11px;color:#9CA3AF;margin-top:6px">不確定可以先填大概，專員會再與您確認</div>
+        </div>
+      `:''}
+
+      ${S.has_loan==='no'?`
+        <div style="background:#F0FDF4;border:1px solid #A7F3D0;border-radius:10px;padding:12px 16px;margin-top:4px">
+          <div style="font-size:13px;color:#047857;display:flex;align-items:center;gap:6px">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+            目前無負債，這是很好的條件，有助於順利評估！
+          </div>
+        </div>
+      `:''}`;
+  }
+
+  else if(cur===4){
+    el.innerHTML=`
+      <div class="upload-label">
+        <span class="fl" style="margin:0">上傳身分證</span>
+        
+      </div>
+      <div class="upload-hint">不上傳也可以直接送出。可以一次選兩張同時上傳，或分開各別上傳都可以。</div>
+
+      <!-- 身分證上傳（整合正反面） -->
+      <div style="background:#F8FAFF;border:1.5px solid #BFDBFE;border-radius:14px;padding:16px;margin-bottom:8px">
+        <div style="font-size:12px;font-weight:700;color:#1E40AF;margin-bottom:12px;display:flex;align-items:center;gap:6px">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+          身分證正面＋反面
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <!-- 正面 -->
+          <div>
+            <div style="font-size:11px;font-weight:700;color:#374151;margin-bottom:5px;display:flex;align-items:center;gap:4px">
+              正面 ${S.id_preview?'<span style="color:#059669">✓</span>':''}
+            </div>
+            <div class="upload-zone ${S.id_preview?'has-img':''}" onclick="document.getElementById('fid').click()" style="padding:14px 10px;margin-bottom:0;min-height:90px;display:flex;align-items:center;justify-content:center;flex-direction:column">
+              ${S.id_preview
+                ?`<img src="${S.id_preview}" alt="正面" style="max-width:100%;max-height:100px;border-radius:6px"/>`
+                :`<div style="font-size:18px;margin-bottom:3px">📄</div>
+                  <div style="font-size:11px;font-weight:600;color:#374151">點此上傳</div>`}
+            </div>
+            <input type="file" id="fid" accept="image/*" style="display:none" onchange="handleImg(this,'front')"/>
+          </div>
+          <!-- 反面 -->
+          <div>
+            <div style="font-size:11px;font-weight:700;color:#374151;margin-bottom:5px;display:flex;align-items:center;gap:4px">
+              反面 ${S.id_preview_back?'<span style="color:#059669">✓</span>':''}
+            </div>
+            <div class="upload-zone ${S.id_preview_back?'has-img':''}" onclick="document.getElementById('fid-back').click()" style="padding:14px 10px;margin-bottom:0;min-height:90px;display:flex;align-items:center;justify-content:center;flex-direction:column">
+              ${S.id_preview_back
+                ?`<img src="${S.id_preview_back}" alt="反面" style="max-width:100%;max-height:100px;border-radius:6px"/>`
+                :`<div style="font-size:18px;margin-bottom:3px">📄</div>
+                  <div style="font-size:11px;font-weight:600;color:#374151">點此上傳</div>`}
+            </div>
+            <input type="file" id="fid-back" accept="image/*" style="display:none" onchange="handleImg(this,'back')"/>
+          </div>
+        </div>
+        <div style="font-size:11px;color:#60A5FA;margin-top:8px;text-align:center">可個別點擊上傳，或一次選兩張（按住 Ctrl/Shift 多選）
+          <input type="file" id="fid-both" accept="image/*" multiple style="display:none" onchange="handleImgMulti(this)"/>
+        </div>
+      </div>
+
+      ${S.id_preview?`
+        <div style="background:#ECFDF5;border:1.5px solid #A7F3D0;border-radius:10px;padding:12px 14px;display:flex;align-items:center;gap:8px;font-size:13px;color:#065F46;font-weight:600">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+          身分證已上傳，資料將由專員核實
+        </div>`:''}
+
+      <div class="divider">確認填寫內容</div>
+      <div class="sum-grid">
+        <div class="sum-card"><div class="sum-k">姓名</div><div class="sum-v">${S.name||'—'}</div></div>
+        <div class="sum-card"><div class="sum-k">聯絡電話</div><div class="sum-v">${S.phone||'—'}</div></div>
+        <div class="sum-card"><div class="sum-k">月收入</div><div class="sum-v">${S.income?'NT$ '+parseInt(S.income).toLocaleString():'—'}</div></div>
+        <div class="sum-card"><div class="sum-k">現有貸款負擔</div><div class="sum-v">${loanDisplay()}</div></div>
+        <div class="sum-card" style="grid-column:1/-1"><div class="sum-k">希望申請金額</div><div class="sum-v">${AMOUNTS[S.need_idx].num}</div></div>
+      </div>
+      <div class="privacy-note">本資料依《個人資料保護法》保護，僅供評估使用。您已於 ${S.agree_ts} 完成條款同意，紀錄已保存。</div>`;
+  }
+}
+
+function handleImgMulti(input){
+  const files = Array.from(input.files);
+  if(!files.length) return;
+  const MAX = 500*1024;
+  const compress = (file, cb) => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      if(file.size <= MAX){ cb(e.target.result); return; }
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        let w=img.width, h=img.height;
+        if(w>1200){ h=Math.round(h*1200/w); w=1200; }
+        canvas.width=w; canvas.height=h;
+        canvas.getContext('2d').drawImage(img,0,0,w,h);
+        let out = canvas.toDataURL('image/jpeg',0.8);
+        if(out.length>MAX*1.37) out=canvas.toDataURL('image/jpeg',0.6);
+        if(out.length>MAX*1.37) out=canvas.toDataURL('image/jpeg',0.4);
+        cb(out);
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  };
+  if(files.length >= 2){
+    // 兩張：第一張正面，第二張反面
+    compress(files[0], out => { S.id_preview = out; render(); mockApi(); });
+    compress(files[1], out => { S.id_preview_back = out; render(); });
+  } else {
+    // 只選一張：放正面
+    compress(files[0], out => { S.id_preview = out; render(); mockApi(); });
+  }
+}
+
+function handleImg(input, side){
+  const file=input.files[0]; if(!file) return;
+  const MAX=500*1024;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    const compress=(src)=>{
+      const img=new Image();
+      img.onload=()=>{
+        const canvas=document.createElement('canvas');
+        let w=img.width, h=img.height;
+        if(w>1200){ h=Math.round(h*1200/w); w=1200; }
+        canvas.width=w; canvas.height=h;
+        canvas.getContext('2d').drawImage(img,0,0,w,h);
+        let out=canvas.toDataURL('image/jpeg',0.8);
+        if(out.length>MAX*1.37) out=canvas.toDataURL('image/jpeg',0.6);
+        if(out.length>MAX*1.37) out=canvas.toDataURL('image/jpeg',0.4);
+        if(side==='back'){ S.id_preview_back=out; render(); }
+        else { S.id_preview=out; render(); mockApi(); }
+      };
+      img.src=src;
+    };
+    if(file.size<=MAX){
+      if(side==='back'){ S.id_preview_back=e.target.result; render(); }
+      else { S.id_preview=e.target.result; render(); mockApi(); }
+    } else {
+      compress(e.target.result);
+    }
+  };
+  reader.readAsDataURL(file);
+}
+
+function renderMeta(){
+  const labels=['基本資訊','個人 & 職業資料','信用 & 資產','現有貸款','身分驗證'];
+  const subs=['請放心填寫，資料安全保密','建立客戶基本資料','信用狀況與名下資產','有貸款也沒關係，填大概就好','上傳身分證，其餘資料自動帶入'];
+  document.getElementById('chip').textContent=`步驟 ${cur+1} / ${STEPS}`;
+  document.getElementById('stitle').textContent=labels[cur];
+  document.getElementById('ssub').textContent=subs[cur];
+  document.getElementById('prog-dots').innerHTML=Array.from({length:STEPS},(_,i)=>`<div class="prog-dot ${i<cur?'done':i===cur?'active':''}"></div>`).join('');
+}
+
+function validPhone(p){
+  const cleaned = p.replace(/[-\s]/g,'');
+  return /^09\d{8}$/.test(cleaned);
+}
+
+function canNext(){
+  if(cur===0) return S.name.trim()!==''&&validPhone(S.phone)&&S.contact_time!==''&&S.agreed;
+  if(cur===1){
+    if(!S.id_no.trim()||S.id_no.trim().length!==10) return false;
+    if(!S.birth_y||!S.birth_m||!S.birth_d) return false;
+    if(!S.reg_addr||!S.reg_addr.trim()) return false; // 戶籍地址必填
+    if(!S.company.trim()) return false;
+    if(!S.income) return false; // 月薪必填
+    if(!S.salary_type) return false; // 薪資方式必填
+    return true;
+  }
+  if(cur===2){
+    // 有汽車 → 繳款品質必選；若非已繳清，繳款時間也必選
+    if(S.has_car==='yes'){
+      if(!S.car_quality) return false;
+      if(S.car_quality!=='paid' && !S.car_time) return false;
+    }
+    // 有機車 → 同上
+    if(S.has_moto==='yes'){
+      if(!S.moto_quality) return false;
+      if(S.moto_quality!=='paid' && !S.moto_time) return false;
+    }
+    // 信用卡：有辦過的話需選繳款狀況
+    if(!S.has_credit_card) return false;
+    if(S.has_credit_card==='yes' && !S.credit_card_status) return false;
+    return true;
+  }
+  return true;
+}
+
+function renderNav(){
+  const isLast=cur===STEPS-1;
+  document.getElementById('nav').innerHTML=`
+    <button class="btn-ghost" ${cur===0?'style="visibility:hidden"':''} onclick="if(cur>0){cur--;render()}">← 上一步</button>
+    ${isLast
+      ?`<button class="btn-main" onclick="submit()">送出免費評估</button>`
+      :`<button class="btn-main" ${canNext()?'':'disabled'} onclick="if(canNext()){cur++;render()}">${cur===0&&!S.agreed?'請先勾選同意':'下一步 →'}</button>`}`;
+}
+
+const SUPABASE_URL = 'https://zqwzmlythbcspoqfmamt.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inpxd3ptbHl0aGJjc3BvcWZtYW10Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUxNzIwMzgsImV4cCI6MjA5MDc0ODAzOH0.64Qp1tqtZswhidf16QhX11_y614DDZHM4AUDKHFa-GM';
+const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const CH_CODE = new URLSearchParams(window.location.search).get('ch') || 'FlowPay';
+
+// 通路代碼對照表
+const CH_MAP = {
+  'FlowPay': {name:'FlowPay', category:'', line: null},
+  'e01': {
+    name:'得人疼企業社',
+    category:'保健食品類',
+    line: {
+      url: 'https://line.me/R/ti/p/@670bfbsp',
+      msg: '請加入我們的 LINE 群，傳個大名、手機號碼給我們，方便後續為您服務唷！謝謝 😊'
+    }
+  },
+};
+
+const CH_INFO = CH_MAP[CH_CODE] || {name: CH_CODE, category:''};
+const CH = CH_CODE; // 存入資料庫用代碼
+const CH_NAME = CH_INFO.name; // 顯示用名稱
+
+document.title = 'FlowHub — 免費評估申請';
+
+let isSubmitting = false;
+async function submit(){
+  if(isSubmitting) return;
+  isSubmitting = true;
+  const displayName = S.name;  // 直接用客人填寫的姓名
+  const birthStr = S.birth_y&&S.birth_m&&S.birth_d ? `${S.birth_y}/${String(S.birth_m).padStart(2,'0')}/${String(S.birth_d).padStart(2,'0')}` : '';
+
+  document.getElementById('wrap').innerHTML=`
+    <div class="success-wrap">
+      <div style="text-align:center;padding:40px 20px">
+        <div style="width:48px;height:48px;border:3px solid #2563EB;border-top-color:transparent;border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 16px"></div>
+        <div style="font-size:15px;color:#6B7280">資料儲存中，請稍候...</div>
+      </div>
+    </div>`;
+
+  const tenureScore = {'三個月內':'<3月','半年':'6-12月','一年以上':'≥12月','三年以上':'≥12月'}[S.tenure]||'';
+  const payload = {
+    name: S.name,
+    phone: S.phone,
+    contact_time: S.contact_time,
+    need_amount: AMOUNTS[S.need_idx].num,
+    agreed_at: S.agree_ts,
+    id_no: S.id_no,
+    birth_date: birthStr,
+    reg_addr: S.reg_addr,
+    same_addr: S.same_addr,
+    company: S.company,
+    company_tel: S.company_tel,
+    income: S.income,
+    tenure: S.tenure,
+    has_job_tel: S.has_job_tel,
+    is_alert: S.is_alert,
+    fin_credit: S.fin_credit,
+    has_car: S.has_car,
+    car_ok: S.car_ok,
+    car_time: S.car_time,
+    car_quality: S.car_quality,
+    has_moto: S.has_moto,
+    moto_ok: S.moto_ok,
+    moto_time: S.moto_time,
+    moto_quality: S.moto_quality,
+    has_property: S.has_property,
+    has_loan: S.has_loan,
+    loan_burden: S.loan_burden,
+    salary_type: S.salary_type||'',
+    has_credit_card: S.has_credit_card||'',
+    credit_card_bank: S.credit_card_bank||'',
+    credit_card_status: S.credit_card_status||'',
+    recent_apply: S.recent_apply,
+    recent_apply_type: S.recent_apply_type,
+    recent_apply_count: S.recent_apply_count,
+    id_verified: S.api_done,
+    id_image: S.id_preview || null,
+    id_image_back: S.id_preview_back || null,
+    api_name: '',
+    api_dob: '',
+    api_addr: '',
+    api_idchange: S.api_idchange,
+    status: '待處理',
+    channel: CH_CODE,
+    sc_tenure: tenureScore,
+    sc_job_tel: S.has_job_tel==='yes'?'是':S.has_job_tel==='no'?'否':'',
+  };
+
+  const insertRes = await fetch(`${SUPABASE_URL}/rest/v1/applications`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'apikey': SUPABASE_KEY,
+      'Authorization': `Bearer ${SUPABASE_KEY}`,
+      'Prefer': 'return=minimal'
+    },
+    body: JSON.stringify(payload)
+  });
+
+  if(!insertRes.ok){
+    const errText = await insertRes.text();
+    isSubmitting = false;
+    document.getElementById('wrap').innerHTML=`
+      <div class="success-wrap">
+        <div style="text-align:center;padding:2rem">
+          <div style="font-size:40px;margin-bottom:12px">⚠️</div>
+          <div style="font-size:16px;font-weight:600;color:#DC2626;margin-bottom:8px">儲存時發生錯誤</div>
+          <div style="font-size:13px;color:#6B7280">請截圖此畫面聯繫服務員<br>${errText}</div>
+        </div>
+      </div>`;
+    return;
+  }
+
+  const tgToken = '8711749215:AAHv0N1EpqPwMmBRgo-rDlnJSEC7AdtPKAU';
+  // 每個通路對應自己的 Telegram 群組
+  const TG_CHATS = {
+    'FlowPay': '-5184944052',
+    'e01':     '-5058252988',
+  };
+  const tgChatId = TG_CHATS[CH_CODE] || '-5184944052';
+  const creditMap = {good:'良好', fair:'有遲繳紀錄', bad:'不良/黑名單', none:'無融資紀錄'};
+  const chDisplayName = (typeof CH_MAP !== 'undefined' && CH_MAP[CH_CODE]) ? CH_MAP[CH_CODE].name : (CH_CODE || 'FlowPay');
+  // 風險評等（精準計算）
+  let base = 50;
+
+  // ① 薪資發放方式（新增）
+  if(S.salary_type==='transfer') base+=15;      // 薪轉：最強還款來源證明
+  else if(S.salary_type==='cash') base-=5;       // 領現金：較難核實
+
+  // ② 信用卡繳款狀況（新增）
+  if(S.has_credit_card==='yes'){
+    if(S.credit_card_status==='normal')    base+=10;  // 正常全額：良好習慣
+    if(S.credit_card_status==='minimum')   base-=15;  // 繳最低：有循環利息壓力
+    if(S.credit_card_status==='unused')    base+=2;   // 有卡沒在用：中性
+    if(S.credit_card_status==='suspended') base-=30;  // 被停卡：高風險
+  } else if(S.has_credit_card==='no'){
+    base+=0; // 沒辦過：中性，不加不扣
+  }
+
+  const loanBurdenMap = {'5,000 以下':3000,'5,000–10,000':7500,'10,000–20,000':15000,'20,000 以上':25000};
+  const amtMap = {'NT$ 30,000 以下':30000,'NT$ 50,000 左右':50000,'NT$ 100,000 左右':100000,'NT$ 100,000–200,000':150000,'NT$ 300,000 以上':300000};
+  const income = parseInt(S.income)||0;
+  const reqAmt = amtMap[AMOUNTS[S.need_idx].num]||0;
+  const totalPay = (loanBurdenMap[S.loan_burden]||0) + Math.round(reqAmt/24);
+  if(income>0){
+    const r = totalPay/income;
+    if(r<0.3) base+=15; else if(r<0.5) base+=3; else base-=20;
+    if(reqAmt<=income*6) base+=10; else if(reqAmt>income*12) base-=12;
+  }
+  if((S.recent_apply_type||'').indexOf('3次以上')>=0) base-=20;
+  else if((S.recent_apply_type||'').indexOf('2次')>=0) base-=12;
+  else if((S.recent_apply_type||'').indexOf('1次')>=0) base-=5;
+  else if((S.recent_apply_type||'').indexOf('0次')>=0) base+=3;
+  if((S.recent_apply_count||'').indexOf('3次以上')>=0) base-=8;
+  else if((S.recent_apply_count||'').indexOf('2次')>=0) base-=4;
+  else if((S.recent_apply_count||'').indexOf('1次')>=0) base-=1;
+  else if((S.recent_apply_count||'').indexOf('0次')>=0) base+=2;
+  if(S.fin_credit==='fair') base-=20;
+  if(S.fin_credit==='bad') base-=50;
+  if(S.same_addr==='yes') base+=5; else if(S.same_addr==='no') base-=5;
+  const ts = t => t==='over1y'?10:t==='lt6'?-3:0;
+  const qs = q => q==='normal'?8:q==='paid'?5:q==='late'?-20:q==='late_often'?-40:0;
+  if(S.has_car==='yes'){ base+=ts(S.car_time||''); base+=qs(S.car_quality||''); }
+  if(S.has_moto==='yes'){ base+=ts(S.moto_time||''); base+=qs(S.moto_quality||''); }
+  if(S.is_alert==='yes') base=0;
+  const score = Math.min(100,Math.max(0,base));
+  const gradeLabel = score>=82?'A｜穩定可承作':score>=68?'B｜建議可承作，需確認收入':score>=55?'C｜建議降額或補件':score>=40?'D｜高風險，需補強':'E｜不建議送件';
+  const gradeEmoji = score>=68?'🟢':score>=40?'🟡':'🔴';
+
+  const msg = `🔔 新案件通知 ［${chDisplayName}］\n`+
+    `━━━━━━━━━━━━━━━\n`+
+    `👤 ${S.name}\n`+
+    `📞 ${S.phone}\n`+
+    `⏰ 方便聯絡：${S.contact_time}\n`+
+    `💰 申請金額：${AMOUNTS[S.need_idx].num}\n`+
+    `━━━━━━━━━━━━━━━\n`+
+    `${gradeEmoji} 風險評分：${score} 分\n`+
+    `評等 ${gradeLabel}\n`+
+    (S.is_alert==='yes'?`⚠️ 警示戶\n`:'')+
+    (S.fin_credit==='bad'?`⚠️ CCIS 不良\n`:'')+
+    (S.fin_credit==='fair'?`📌 CCIS 有遲繳紀錄\n`:'')+
+    `━━━━━━━━━━━━━━━\n`+
+    `📋 後台查看：https://elaborate-cassata-0ced26.netlify.app/admin.html`;
+
+  await fetch(`https://api.telegram.org/bot${tgToken}/sendMessage`, {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ chat_id: tgChatId, text: msg })
+  }).catch(()=>{});
+
+  document.getElementById('wrap').innerHTML=`
+    <div class="success-wrap">
+      <div class="success-icon">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+      </div>
+      <div class="success-title">感謝您的免費評估申請！</div>
+      <div class="success-sub">
+        <strong>${displayName}</strong> 您好，感謝您撥冗填寫！<br>
+        本次為初步條件評估，資料已安全收到。<br><br>
+        接下來請靜候您的<strong>專屬服務員</strong>主動與您聯繫，<br>
+        請留意陌生來電，<br>
+        預計於 <strong>${S.contact_time}</strong> 時段致電。<br><br>
+        <span style="color:#059669;font-weight:600">祝您申辦順利，Have a nice day！</span>
+      </div>
+      ${CH_MAP[CH_CODE] && CH_MAP[CH_CODE].line ? `
+      <div style="margin-top:24px;background:#F0FFF4;border:1.5px solid #A7F3D0;border-radius:16px;padding:20px 16px;text-align:center">
+        <div style="font-size:15px;font-weight:800;color:#065F46;margin-bottom:6px">📱 加入 LINE 官方帳號</div>
+        <div style="font-size:13px;color:#047857;line-height:1.8;margin-bottom:16px">${CH_MAP[CH_CODE].line.msg}</div>
+        <a href="${CH_MAP[CH_CODE].line.url}" target="_blank"
+          style="display:inline-flex;align-items:center;gap:8px;background:#06C755;color:#fff;padding:12px 28px;border-radius:99px;font-size:15px;font-weight:800;text-decoration:none;box-shadow:0 4px 16px rgba(6,199,85,.35);margin-bottom:14px">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M24 10.314C24 4.943 18.615.572 12 .572S0 4.943 0 10.314c0 4.811 4.27 8.842 10.035 9.608.391.082.923.258 1.058.59.12.301.079.766.038 1.08l-.164 1.02c-.045.301-.24 1.186 1.049.645 1.291-.539 6.916-4.078 9.436-6.975C23.176 14.393 24 12.458 24 10.314"/></svg>
+          加入 LINE 官方帳號
+        </a>
+        <div style="font-size:12px;color:#6B7280;margin-bottom:10px">電腦用戶請掃描下方 QR Code</div>
+        <div style="background:#fff;border-radius:12px;padding:12px;display:inline-block;box-shadow:0 2px 8px rgba(0,0,0,.08)">
+          <img src="https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=https://line.me/R/ti/p/@670bfbsp&bgcolor=ffffff&color=000000&margin=2"
+            alt="LINE QR Code" style="width:140px;height:140px;display:block;border-radius:6px"/>
+        </div>
+      </div>` : ''}
+    </div>`;
+}
+
+function renderPhoneHint(){
+  const hint = document.getElementById('phone-hint');
+  const input = hint&&hint.previousElementSibling;
+  if(!hint) return;
+  if(!S.phone){ hint.innerHTML=''; if(input) input.style.borderColor=''; return; }
+  if(validPhone(S.phone)){
+    hint.innerHTML='<span style="color:#059669">✓ 格式正確</span>';
+    if(input) input.style.borderColor='#059669';
+  } else {
+    hint.innerHTML='<span style="color:#DC2626">請輸入正確的手機號碼（09 開頭，共 10 碼）</span>';
+    if(input) input.style.borderColor='#DC2626';
+  }
+  renderNav();
+}
+
+function render(){renderMeta();renderBody();renderNav();}
+render();
+
+// 通路才顯示名稱，總公司不顯示
+// 通路名稱不顯示在客戶表單上
+</script>
+</body>
+</html>
