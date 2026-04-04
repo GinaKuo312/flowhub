@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>FlowHub 風控系統 — 邀請訂閱</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --cream:#FFF8F0;
+  --peach:#FFD6C0;
+  --peach-dark:#FFB899;
+  --mint:#C8F0E8;
+  --mint-dark:#8DDDD0;
+  --lavender:#E8D8F8;
+  --lavender-dark:#C4A8E8;
+  --rose:#FFD8E4;
+  --rose-dark:#FFAFC8;
+  --yellow:#FFF0C0;
+  --yellow-dark:#FFE080;
+  --brown:#7A5C4A;
+  --brown-mid:#A07860;
+  --brown-light:#C8A898;
+  --text:#3D2B1F;
+  --text-mid:#7A5C4A;
+  --text-light:#B89880;
+  --white:#FFFFFF;
+  --border:#F0E0D0;
+}
+html{scroll-behavior:smooth}
+body{font-family:'Noto Sans TC',sans-serif;background:var(--cream);color:var(--text);overflow-x:hidden}
+
+/* Nav */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:14px 32px;display:flex;align-items:center;justify-content:space-between;background:rgba(255,248,240,.95);backdrop-filter:blur(10px);border-bottom:1px solid var(--border)}
+.nav-logo{font-size:18px;font-weight:900;color:var(--brown)}
+.nav-logo span{color:var(--peach-dark)}
+.nav-cta{background:var(--peach-dark);color:#fff;padding:9px 22px;border-radius:99px;font-size:13px;font-weight:700;text-decoration:none;transition:all .15s;box-shadow:0 3px 12px rgba(255,184,153,.4)}
+.nav-cta:hover{background:var(--brown);transform:translateY(-1px)}
+
+/* Hero */
+.hero{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:100px 24px 60px;position:relative;overflow:hidden;text-align:center;
+  background:linear-gradient(160deg,var(--cream) 0%,#FFF0E8 40%,#F8F0FF 100%)}
+.hero-blob1{position:absolute;width:500px;height:500px;background:radial-gradient(circle,rgba(255,214,192,.6) 0%,transparent 70%);top:-100px;left:-100px;pointer-events:none}
+.hero-blob2{position:absolute;width:400px;height:400px;background:radial-gradient(circle,rgba(232,216,248,.5) 0%,transparent 70%);bottom:-50px;right:-50px;pointer-events:none}
+.hero-blob3{position:absolute;width:300px;height:300px;background:radial-gradient(circle,rgba(200,240,232,.5) 0%,transparent 70%);top:30%;right:10%;pointer-events:none}
+.hero-content{position:relative;z-index:1;max-width:760px}
+.hero-badge{display:inline-flex;align-items:center;gap:6px;background:#fff;color:var(--brown);border:1.5px solid var(--peach-dark);border-radius:99px;padding:6px 16px;font-size:12px;font-weight:700;margin-bottom:28px;letter-spacing:.04em;box-shadow:0 2px 8px rgba(255,184,153,.2)}
+.hero-title{font-size:clamp(34px,5.5vw,62px);font-weight:900;line-height:1.1;letter-spacing:-.02em;margin-bottom:20px;color:var(--text)}
+.hero-title .hl-peach{color:var(--peach-dark)}
+.hero-title .hl-lavender{color:#9B6FD0}
+.hero-sub{font-size:clamp(14px,2vw,17px);color:var(--text-mid);line-height:1.8;max-width:540px;margin:0 auto 40px}
+.hero-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.btn-warm{display:inline-flex;align-items:center;gap:8px;background:var(--peach-dark);color:#fff;padding:14px 32px;border-radius:99px;font-size:15px;font-weight:700;text-decoration:none;box-shadow:0 6px 20px rgba(255,184,153,.5);transition:all .2s}
+.btn-warm:hover{background:var(--brown);transform:translateY(-2px);box-shadow:0 10px 28px rgba(122,92,74,.3)}
+.btn-soft{display:inline-flex;align-items:center;gap:8px;background:#fff;color:var(--brown);padding:14px 28px;border-radius:99px;font-size:15px;font-weight:700;text-decoration:none;border:1.5px solid var(--border);transition:all .2s;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+.btn-soft:hover{border-color:var(--peach-dark);color:var(--peach-dark)}
+.hero-pills{display:flex;gap:16px;justify-content:center;margin-top:56px;padding-top:44px;border-top:1px solid var(--border);flex-wrap:wrap}
+.pill{background:#fff;border-radius:16px;padding:14px 20px;text-align:center;border:1.5px solid var(--border);box-shadow:0 2px 8px rgba(0,0,0,.04)}
+.pill-num{font-size:26px;font-weight:900;color:var(--peach-dark)}
+.pill-label{font-size:11px;color:var(--text-light);margin-top:3px;font-weight:600}
+
+/* Section */
+section{padding:90px 24px}
+.container{max-width:1080px;margin:0 auto}
+.sec-tag{display:inline-block;font-size:11px;font-weight:700;color:var(--brown-mid);background:var(--peach);padding:4px 12px;border-radius:99px;letter-spacing:.08em;margin-bottom:14px}
+.sec-title{font-size:clamp(26px,3.5vw,40px);font-weight:900;letter-spacing:-.02em;margin-bottom:14px;color:var(--text)}
+.sec-sub{font-size:15px;color:var(--text-mid);line-height:1.75}
+
+/* Features */
+.feat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:48px}
+@media(max-width:900px){.feat-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:560px){.feat-grid{grid-template-columns:1fr}}
+.feat-card{border-radius:20px;padding:26px;transition:transform .2s,box-shadow .2s;border:1.5px solid transparent}
+.feat-card:hover{transform:translateY(-4px);box-shadow:0 12px 32px rgba(0,0,0,.08)}
+.feat-card.c-peach{background:var(--peach);border-color:var(--peach-dark)}
+.feat-card.c-mint{background:var(--mint);border-color:var(--mint-dark)}
+.feat-card.c-lavender{background:var(--lavender);border-color:var(--lavender-dark)}
+.feat-card.c-rose{background:var(--rose);border-color:var(--rose-dark)}
+.feat-card.c-yellow{background:var(--yellow);border-color:var(--yellow-dark)}
+.feat-card.c-cream{background:#FFF0E8;border-color:var(--peach-dark)}
+.feat-icon{font-size:32px;margin-bottom:12px}
+.feat-name{font-size:15px;font-weight:700;color:var(--text);margin-bottom:8px}
+.feat-desc{font-size:13px;color:var(--text-mid);line-height:1.65}
+
+/* 邀請碼 */
+.invite-wrap{background:linear-gradient(135deg,#3D2B1F 0%,#6B4035 100%);border-radius:28px;padding:56px;position:relative;overflow:hidden;color:#fff}
+.invite-wrap::before{content:'🌸';position:absolute;font-size:120px;opacity:.08;top:-20px;right:30px}
+.invite-wrap::after{content:'🌷';position:absolute;font-size:80px;opacity:.06;bottom:-10px;left:20px}
+.invite-input-row{display:flex;gap:12px;margin-top:20px}
+.invite-input{flex:1;padding:14px 18px;border:none;border-radius:14px;font-size:15px;font-family:inherit;outline:none;letter-spacing:.08em;background:rgba(255,255,255,.12);color:#fff;border:1.5px solid rgba(255,255,255,.2)}
+.invite-input::placeholder{color:rgba(255,255,255,.4)}
+.invite-input:focus{background:rgba(255,255,255,.18);border-color:var(--peach)}
+.invite-verify-btn{background:var(--peach-dark);color:#fff;border:none;border-radius:14px;padding:14px 24px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap;transition:all .15s}
+.invite-verify-btn:hover{background:var(--peach);color:var(--text)}
+.benefit-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:24px}
+.benefit-item{display:flex;align-items:center;gap:8px;font-size:13px;color:rgba(255,255,255,.85);background:rgba(255,255,255,.08);border-radius:10px;padding:10px 14px}
+
+/* Pricing */
+.pricing-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;max-width:800px;margin:48px auto 0}
+@media(max-width:600px){.pricing-grid{grid-template-columns:1fr}}
+.plan{background:#fff;border:2px solid var(--border);border-radius:24px;padding:36px;position:relative;transition:all .2s}
+.plan:hover{box-shadow:0 12px 40px rgba(122,92,74,.12);transform:translateY(-4px)}
+.plan.featured{border-color:var(--peach-dark);box-shadow:0 4px 24px rgba(255,184,153,.25)}
+.plan-badge{position:absolute;top:-14px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,var(--peach-dark),#C4A8E8);color:#fff;font-size:11px;font-weight:700;padding:5px 16px;border-radius:99px;white-space:nowrap}
+.plan-name{font-size:12px;font-weight:700;color:var(--text-light);letter-spacing:.1em;text-transform:uppercase;margin-bottom:10px}
+.plan-price{display:flex;align-items:baseline;gap:2px;margin-bottom:4px}
+.plan-curr{font-size:16px;font-weight:700;color:var(--text-light);margin-top:6px}
+.plan-amt{font-size:52px;font-weight:900;letter-spacing:-.04em;line-height:1;color:var(--text)}
+.plan-period{font-size:14px;color:var(--text-light)}
+.plan-yearly{font-size:12px;color:#059669;font-weight:600;background:#ECFDF5;padding:3px 10px;border-radius:99px;display:inline-block;margin-bottom:22px}
+.plan-line{height:1px;background:var(--border);margin:18px 0}
+.plan-list{list-style:none;margin-bottom:26px}
+.plan-list li{display:flex;align-items:flex-start;gap:8px;font-size:13px;color:var(--text-mid);padding:5px 0;line-height:1.5}
+.plan-list li.off{color:var(--text-light)}
+.ck{color:var(--peach-dark);font-weight:700;flex-shrink:0}
+.cx{color:#D0C0B8;flex-shrink:0}
+.plan-btn{display:block;text-align:center;padding:13px;border-radius:14px;font-size:14px;font-weight:700;text-decoration:none;transition:all .2s;border:none;cursor:pointer;font-family:inherit;width:100%}
+.plan-btn.pri{background:var(--peach-dark);color:#fff;box-shadow:0 4px 16px rgba(255,184,153,.4)}
+.plan-btn.pri:hover{background:var(--brown)}
+.plan-btn.out{background:#fff;color:var(--brown);border:1.5px solid var(--peach-dark)}
+.plan-btn.out:hover{background:var(--peach)}
+
+/* Testimonials */
+.testi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:48px}
+@media(max-width:768px){.testi-grid{grid-template-columns:1fr}}
+.testi{background:#fff;border-radius:20px;padding:24px;border:1.5px solid var(--border)}
+.testi-stars{color:var(--peach-dark);font-size:14px;margin-bottom:10px}
+.testi-text{font-size:13px;line-height:1.75;color:var(--text-mid);margin-bottom:16px}
+.testi-author{display:flex;align-items:center;gap:10px}
+.testi-av{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;font-weight:700;flex-shrink:0}
+
+/* FAQ */
+.faq-list{max-width:680px;margin:48px auto 0}
+.faq-item{border-bottom:1.5px solid var(--border);padding:18px 0}
+.faq-q{font-size:15px;font-weight:700;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:16px;color:var(--text)}
+.faq-a{font-size:13px;color:var(--text-mid);line-height:1.75;margin-top:10px;display:none}
+.faq-a.open{display:block}
+
+/* CTA */
+.cta-box{background:linear-gradient(135deg,var(--peach) 0%,var(--lavender) 50%,var(--mint) 100%);border-radius:28px;padding:64px 40px;text-align:center;border:1.5px solid var(--border)}
+
+footer{text-align:center;padding:36px 24px;border-top:1px solid var(--border);color:var(--text-light);font-size:13px}
+
+.fade{opacity:0;transform:translateY(20px);transition:opacity .55s ease,transform .55s ease}
+.fade.in{opacity:1;transform:none}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo">Flow<span>Pay</span> 🌸</div>
+  <a href="#invite" class="nav-cta">使用邀請碼</a>
+</nav>
+
+<!-- Hero -->
+<div class="hero">
+  <div class="hero-blob1"></div>
+  <div class="hero-blob2"></div>
+  <div class="hero-blob3"></div>
+  <div class="hero-content">
+    <div class="hero-badge">🎀 商品消費分期 風控管理系統</div>
+    <h1 class="hero-title">讓風控變得<br><span class="hl-peach">輕鬆溫暖</span>，<span class="hl-lavender">精準有效</span></h1>
+    <p class="hero-sub">FlowHub 專為商品消費分期業者打造，整合初審評分、案件管理、即時通知，讓每一筆申請的評估都更輕鬆、更有效率。</p>
+    <div class="hero-btns">
+      <a href="#invite" class="btn-warm">
+        🎟️ 輸入邀請碼開始
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+      </a>
+      <a href="#pricing" class="btn-soft">查看方案</a>
+    </div>
+    <div class="hero-pills">
+      <div class="pill"><div class="pill-num">5 分鐘</div><div class="pill-label">完成申辦流程</div></div>
+      <div class="pill"><div class="pill-num">13 項</div><div class="pill-label">初審評分指標</div></div>
+      <div class="pill"><div class="pill-num">即時</div><div class="pill-label">Telegram 通知</div></div>
+      <div class="pill"><div class="pill-num">A – E</div><div class="pill-label">自動風險評等</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- Features -->
+<section style="background:#fff">
+  <div class="container fade">
+    <div class="sec-tag">核心功能</div>
+    <h2 class="sec-title">一個平台，解決所有風控需求 🌷</h2>
+    <p class="sec-sub">從客戶填單到核准撥款，全流程溫暖陪伴</p>
+    <div class="feat-grid">
+      <div class="feat-card c-peach fade">
+        <div class="feat-icon">📋</div>
+        <div class="feat-name">專屬申辦表單</div>
+        <div class="feat-desc">5 步驟引導填寫，手機友善設計，身分證正反面上傳，自動壓縮保護資料。</div>
+      </div>
+      <div class="feat-card c-lavender fade">
+        <div class="feat-icon">📊</div>
+        <div class="feat-name">初審評分工具</div>
+        <div class="feat-desc">13 項評分指標，涵蓋年資、薪轉、CCIS 信用、汽機車繳款，自動計算 A–E 評等。</div>
+      </div>
+      <div class="feat-card c-mint fade">
+        <div class="feat-icon">💬</div>
+        <div class="feat-name">Telegram 即時通知</div>
+        <div class="feat-desc">新案件即時推播，分通路各自群組，不漏接任何申請，公司電話一鍵撥打。</div>
+      </div>
+      <div class="feat-card c-rose fade">
+        <div class="feat-icon">🏡</div>
+        <div class="feat-name">多通路管理</div>
+        <div class="feat-desc">每個合作店家獨立申辦連結，後台自動分類，管理員統覽所有案件。</div>
+      </div>
+      <div class="feat-card c-yellow fade">
+        <div class="feat-icon">💰</div>
+        <div class="feat-name">核准撥款追蹤</div>
+        <div class="feat-desc">記錄核准、已撥款、未撥款，設定每月撥款目標，追蹤進度達成率。</div>
+      </div>
+      <div class="feat-card c-cream fade">
+        <div class="feat-icon">🔐</div>
+        <div class="feat-name">資料安全保護</div>
+        <div class="feat-desc">身分證圖片加密，60天資料保護，審核備注時間戳記，完整留存紀錄。</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 邀請碼 -->
+<section id="invite" style="background:var(--cream)">
+  <div class="container">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center" class="fade">
+      <div>
+        <div class="sec-tag">限量邀請 🎀</div>
+        <h2 class="sec-title">你收到邀請啦！</h2>
+        <p class="sec-sub">FlowHub 目前採邀請制開放，輸入您的專屬邀請碼即可立即啟用，享有優先使用資格與特別優惠，讓我們一起讓風控變得更溫暖！</p>
+        <div style="margin-top:28px">
+          <div style="font-size:13px;font-weight:700;color:var(--brown);margin-bottom:8px">✨ 輸入邀請碼</div>
+          <div class="invite-input-row" style="background:none;padding:0">
+            <input id="invite-input" type="text" placeholder="例：FP-XXXXX" maxlength="10"
+              style="flex:1;padding:12px 16px;border:1.5px solid var(--border);border-radius:12px;font-size:15px;font-family:inherit;outline:none;letter-spacing:.08em;background:#fff;color:var(--text)"
+              oninput="this.value=this.value.toUpperCase()"/>
+            <button onclick="checkInvite()" style="background:var(--peach-dark);color:#fff;border:none;border-radius:12px;padding:12px 22px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit">驗證</button>
+          </div>
+          <div id="invite-result" style="margin-top:10px;font-size:13px;min-height:20px"></div>
+        </div>
+      </div>
+      <div class="invite-wrap">
+        <div style="font-size:22px;font-weight:900;margin-bottom:8px">🎟️ 邀請專屬優惠</div>
+        <div style="font-size:14px;color:rgba(255,255,255,.75);line-height:1.7">持有效邀請碼的用戶可享以下優惠，名額有限！</div>
+        <div style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:16px;padding:20px;margin-top:20px">
+          <div style="font-size:28px;font-weight:900;letter-spacing:.12em;font-family:monospace;color:#FFD6C0">FP-XXXXX</div>
+          <div style="font-size:12px;color:rgba(255,255,255,.5);margin-top:4px;margin-bottom:14px">有效期限：請洽詢業務</div>
+          <div class="benefit-grid">
+            <div class="benefit-item">🌸 首月 85 折優惠</div>
+            <div class="benefit-item">💝 免費設定教學</div>
+            <div class="benefit-item">⭐ 優先客服支援</div>
+            <div class="benefit-item">🎯 專屬通路設定</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Pricing -->
+<section id="pricing" style="background:#fff">
+  <div class="container fade" style="text-align:center">
+    <div class="sec-tag">訂閱方案</div>
+    <h2 class="sec-title">選擇適合的方案 🌷</h2>
+    <p class="sec-sub" style="margin:0 auto">月繳或年繳皆可，隨時升級，無綁約壓力</p>
+    <div class="pricing-grid">
+      <div class="plan">
+        <div class="plan-name">基本版</div>
+        <div class="plan-price"><span class="plan-curr">NT$</span><span class="plan-amt">688</span><span class="plan-period">/月</span></div>
+        <div class="plan-yearly">年繳 NT$6,600（省 NT$1,656）</div>
+        <div class="plan-line"></div>
+        <ul class="plan-list">
+          <li><span class="ck">✓</span>專屬客戶申辦表單</li>
+          <li><span class="ck">✓</span>案件管理後台</li>
+          <li><span class="ck">✓</span>Telegram 即時通知</li>
+          <li><span class="ck">✓</span>審核狀態管理</li>
+          <li><span class="ck">✓</span>最多 3 個後台帳號</li>
+          <li class="off"><span class="cx">✕</span>初審評分工具</li>
+          <li class="off"><span class="cx">✕</span>統計總覽 & 目標追蹤</li>
+          <li class="off"><span class="cx">✕</span>多通路管理</li>
+        </ul>
+        <a href="#invite" class="plan-btn out">輸入邀請碼開始</a>
+      </div>
+      <div class="plan featured">
+        <div class="plan-badge">🌸 最多人選擇</div>
+        <div class="plan-name">進階版</div>
+        <div class="plan-price"><span class="plan-curr">NT$</span><span class="plan-amt">888</span><span class="plan-period">/月</span></div>
+        <div class="plan-yearly">年繳 NT$8,500（省 NT$2,156）</div>
+        <div class="plan-line"></div>
+        <ul class="plan-list">
+          <li><span class="ck">✓</span>專屬客戶申辦表單</li>
+          <li><span class="ck">✓</span>案件管理後台</li>
+          <li><span class="ck">✓</span>Telegram 即時通知</li>
+          <li><span class="ck">✓</span>審核狀態管理</li>
+          <li><span class="ck">✓</span>最多 5 個後台帳號</li>
+          <li><span class="ck">✓</span><strong>初審評分工具（A–E）</strong></li>
+          <li><span class="ck">✓</span><strong>統計總覽 & 月目標追蹤</strong></li>
+          <li><span class="ck">✓</span><strong>多通路管理</strong></li>
+        </ul>
+        <a href="#invite" class="plan-btn pri">輸入邀請碼開始</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Testimonials -->
+<section style="background:var(--cream)">
+  <div class="container fade">
+    <div class="sec-tag" style="display:block;text-align:center">用戶心聲 💌</div>
+    <h2 class="sec-title" style="text-align:center">他們這樣說</h2>
+    <div class="testi-grid">
+      <div class="testi fade">
+        <div class="testi-stars">★★★★★</div>
+        <div class="testi-text">「以前每筆申請都要手動整理，現在客人填完馬上收到 Telegram，後台一鍵看到所有資料，效率提升很多，感覺好輕鬆！」</div>
+        <div class="testi-author">
+          <div class="testi-av" style="background:linear-gradient(135deg,var(--peach-dark),var(--rose-dark))">陳</div>
+          <div><div style="font-size:13px;font-weight:700;color:var(--text)">陳老闆</div><div style="font-size:12px;color:var(--text-light)">保健食品通路</div></div>
+        </div>
+      </div>
+      <div class="testi fade">
+        <div class="testi-stars">★★★★★</div>
+        <div class="testi-text">「初審評分功能真的超實用！A 到 E 的評等讓我一眼就能判斷，省了很多溝通時間，推薦給所有做分期的朋友！」</div>
+        <div class="testi-author">
+          <div class="testi-av" style="background:linear-gradient(135deg,var(--mint-dark),#5BBCB0)">王</div>
+          <div><div style="font-size:13px;font-weight:700;color:var(--text)">王店長</div><div style="font-size:12px;color:var(--text-light)">美容產品通路</div></div>
+        </div>
+      </div>
+      <div class="testi fade">
+        <div class="testi-stars">★★★★★</div>
+        <div class="testi-text">「多通路管理超方便，每個合作店家有自己的連結，案件自動分類，後台一目瞭然，真的很貼心的設計！」</div>
+        <div class="testi-author">
+          <div class="testi-av" style="background:linear-gradient(135deg,var(--lavender-dark),#9B6FD0)">林</div>
+          <div><div style="font-size:13px;font-weight:700;color:var(--text)">林業務</div><div style="font-size:12px;color:var(--text-light)">課程推廣通路</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section style="background:#fff">
+  <div class="container fade">
+    <div style="text-align:center">
+      <div class="sec-tag">常見問題 🌼</div>
+      <h2 class="sec-title">你可能想問</h2>
+    </div>
+    <div class="faq-list">
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">邀請碼哪裡取得？<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg></div>
+        <div class="faq-a">邀請碼由 FlowHub 業務人員提供，請直接聯繫我們的業務團隊，確認合作資格後即可取得專屬邀請碼。</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">可以先試用再付費嗎？<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg></div>
+        <div class="faq-a">持邀請碼的用戶可享有首月優惠，歡迎聯繫業務了解詳細試用條件，我們會很開心地為你說明！</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">客戶資料安全嗎？<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg></div>
+        <div class="faq-a">所有資料依《個人資料保護法》保護，身分證圖片加密儲存，60天資料保護機制，僅授權人員可存取，請放心使用！</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">可以管理多個合作通路嗎？<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg></div>
+        <div class="faq-a">進階版支援多通路管理，每個合作店家有獨立申辦連結，後台自動分類來源，管理員可統覽所有通路案件。</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">如何取消訂閱？<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg></div>
+        <div class="faq-a">隨時可以取消，無綁約壓力。取消後服務於當期結束時停止。有任何問題都可以聯繫我們喔！</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section style="background:var(--cream)">
+  <div class="container fade">
+    <div class="cta-box">
+      <div style="font-size:40px;margin-bottom:16px">🌸</div>
+      <h2 style="font-size:clamp(22px,3vw,34px);font-weight:900;letter-spacing:-.02em;margin-bottom:14px;color:var(--text)">準備好一起讓風控更輕鬆了嗎？</h2>
+      <p style="font-size:15px;color:var(--text-mid);line-height:1.7;max-width:460px;margin:0 auto 32px">輸入邀請碼立即開始，或聯繫業務了解更多方案細節，我們很期待和你合作！</p>
+      <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+        <a href="#invite" class="btn-warm">🎟️ 輸入邀請碼</a>
+        <a href="tel:+886" class="btn-soft">📞 聯繫業務</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>© 2026 FlowHub 🌸 商品消費分期風控管理系統 · All Rights Reserved</footer>
+
+<script>
+var VALID_CODES = {
+  'FP-BASIC1':{plan:'基本版',discount:'首月85折'},
+  'FP-PRO001':{plan:'進階版',discount:'首月85折'},
+};
+function checkInvite(){
+  var code=document.getElementById('invite-input').value.trim().toUpperCase();
+  var res=document.getElementById('invite-result');
+  if(!code){res.innerHTML='<span style="color:#DC2626">請輸入邀請碼</span>';return;}
+  var info=VALID_CODES[code];
+  if(info){
+    res.innerHTML='<span style="color:#059669;font-weight:700">🌸 邀請碼有效！方案：'+info.plan+'，優惠：'+info.discount+'</span>';
+  } else {
+    res.innerHTML='<span style="color:#DC2626">❌ 邀請碼無效，請確認後重試</span>';
+  }
+}
+document.getElementById('invite-input').addEventListener('keydown',function(e){if(e.key==='Enter')checkInvite();});
+function toggleFaq(el){el.nextElementSibling.classList.toggle('open');}
+var obs=new IntersectionObserver(function(e){e.forEach(function(x){if(x.isIntersecting)x.target.classList.add('in');});},{threshold:0.1});
+document.querySelectorAll('.fade').forEach(function(el){obs.observe(el);});
+</script>
+</body>
+</html>
