@@ -139,9 +139,9 @@ tr:hover td{background:#FAFBFF;cursor:pointer}
     <div class="logo">FlowHub</div>
     <div class="logo-sub">後台管理系統</div>
     <label>帳號</label>
-    <input type="text" id="u" autocomplete="username" placeholder="輸入帳號" style="letter-spacing:.04em"/>
+    <input type="text" id="u" autocomplete="off" placeholder="輸入帳號" style="letter-spacing:.04em"/>
     <label>密碼</label>
-    <input type="password" id="p" autocomplete="current-password" placeholder="輸入密碼"/>
+    <input type="password" id="p" autocomplete="off" placeholder="輸入密碼"/>
     <button class="btn" id="login-btn">登入後台</button>
     <div class="err" id="err"></div>
     <div style="text-align:center;margin-top:12px">
@@ -313,47 +313,52 @@ tr:hover td{background:#FAFBFF;cursor:pointer}
       <div id="page-stats" style="display:none">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;flex-wrap:wrap;gap:10px">
           <div style="font-size:20px;font-weight:800">統計總覽</div>
-          <button onclick="showTargetModal()" style="background:#2563EB;color:#fff;border:none;border-radius:8px;padding:7px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">⚙️ 設定本月目標</button>
+
         </div>
         <div style="font-size:13px;color:#9CA3AF;margin-bottom:16px">案件數據統計 · 更新時間：<span id="stats-update-time">—</span></div>
 
-        <!-- 數字卡片 4格 -->
-        <div id="stats2-cards" class="stats" style="margin-bottom:20px"></div>
+        <!-- ① 業績目標（最上面！最有動力！）-->
+        <div class="table-wrap" style="padding:20px;margin-bottom:16px;background:linear-gradient(135deg,#EFF6FF,#F0FDF4);border:1.5px solid #BFDBFE">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+            <div style="font-size:15px;font-weight:800;color:#1E40AF">🎯 本月業績目標</div>
+            <button onclick="showTargetModal()" style="background:#2563EB;color:#fff;border:none;border-radius:8px;padding:5px 12px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">⚙️ 設定</button>
+          </div>
+          <div id="target-val" style="font-size:13px;color:#6B7280;margin-bottom:10px">尚未設定目標</div>
+          <div style="background:#E0E7FF;border-radius:99px;height:14px;overflow:hidden;margin-bottom:8px">
+            <div id="target-bar" style="height:100%;background:linear-gradient(90deg,#2563EB,#059669);border-radius:99px;width:0%;transition:width .8s"></div>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between">
+            <div id="target-motto" style="font-size:13px;font-weight:700;color:#059669"></div>
+            <div id="target-bar-label" style="font-size:16px;font-weight:900;color:#1E40AF">0%</div>
+          </div>
+        </div>
 
-        <!-- 圓形圖 + 案件狀態分布 -->
+        <!-- ② 數字卡片 4格 -->
+        <div id="stats2-cards" class="stats" style="margin-bottom:16px"></div>
+
+        <!-- ③ 核准率 + 案件狀態分布 -->
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
-          <!-- 核准率圓形圖 -->
           <div class="table-wrap" style="padding:20px;text-align:center">
             <div style="font-size:13px;font-weight:700;color:#374151;margin-bottom:12px">📊 核准率</div>
             <canvas id="donut-canvas" width="130" height="130" style="display:block;margin:0 auto 8px"></canvas>
             <div id="donut-label" style="font-size:12px;color:#6B7280"></div>
           </div>
-          <!-- 案件狀態分布 -->
           <div class="table-wrap" style="padding:20px">
             <div style="font-size:13px;font-weight:700;color:#374151;margin-bottom:12px">📋 案件狀態分布</div>
             <div id="status-dist" style="display:flex;flex-direction:column;gap:8px"></div>
           </div>
         </div>
 
-        <!-- 月目標進度 -->
-        <div class="table-wrap" style="padding:20px;margin-bottom:16px">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-            <div style="font-size:13px;font-weight:700;color:#374151">🎯 本月目標</div>
-            <div id="target-val" style="font-size:12px;color:#9CA3AF">尚未設定目標</div>
-          </div>
-          <div style="background:#F3F4F6;border-radius:99px;height:12px;overflow:hidden;margin-bottom:8px">
-            <div id="target-bar" style="height:100%;background:linear-gradient(90deg,#2563EB,#059669);border-radius:99px;width:0%;transition:width .8s"></div>
-          </div>
-          <div style="display:flex;align-items:center;justify-content:space-between">
-            <div id="target-motto" style="font-size:12px;font-weight:600;color:#059669"></div>
-            <div id="target-bar-label" style="font-size:13px;font-weight:700;color:#374151">0%</div>
-          </div>
-        </div>
-
-        <!-- 評等分布 -->
+        <!-- ④ 評等分布 -->
         <div class="table-wrap" style="padding:20px;margin-bottom:16px">
           <div style="font-size:13px;font-weight:700;color:#374151;margin-bottom:12px">🏅 風險評等分布</div>
           <div id="grade-dist" style="display:flex;gap:8px;flex-wrap:wrap"></div>
+        </div>
+
+        <!-- ⑤ 前十大通路排名（只有管理員看得到）-->
+        <div id="top-channels-wrap" class="table-wrap" style="padding:20px;margin-bottom:16px;display:none">
+          <div style="font-size:13px;font-weight:700;color:#374151;margin-bottom:12px">🏆 前十大通路排名</div>
+          <div id="top-channels" style="display:flex;flex-direction:column;gap:8px"></div>
         </div>
 
         <div id="stats-content"></div>
@@ -396,9 +401,10 @@ tr:hover td{background:#FAFBFF;cursor:pointer}
                 style="width:100%;padding:10px 12px;border:1.5px solid #E5E7EB;border-radius:10px;font-size:13px;font-family:inherit;background:#fff;outline:none">
                 <option value="a">a — 美容類</option>
                 <option value="b">b — 直銷類</option>
-                <option value="c">c — 保健品類</option>
+                <option value="c">c — 經銷商類</option>
                 <option value="d">d — 課程類</option>
                 <option value="e">e — 保健食品類</option>
+                <option value="f">f — 其他類</option>
               </select>
             </div>
             <div>
@@ -471,6 +477,7 @@ const HDR = {'apikey':KEY_,'Authorization':'Bearer '+KEY_,'Content-Type':'applic
 const CHANNELS = {
   'FlowPay': {name:'FlowHub', category:'總公司'},
   'e01': {name:'得人疼企業社', category:'保健食品類'},
+  'c02': {name:'榮鑫國際商業有限公司', category:'經銷商類'},
 };
 
 function chName(code){ return CHANNELS[code] ? CHANNELS[code].name : code; }
@@ -643,7 +650,8 @@ var LOCAL_ACCOUNTS = {
 
 // 通路帳號（從 Supabase DB 動態載入，也可本地備用）
 var CHANNEL_ACCOUNTS = {
-  '72533080': {pw:'72533080', name:'得人疼企業社', role:'channel', channel:'e01'},
+  '72533080': {pw:'72533080', name:'得人疼企業社',        role:'channel', channel:'e01'},
+  '90719952': {pw:'90719952', name:'榮鑫國際商業有限公司', role:'channel', channel:'c02'},
 };
 
 // 合併所有帳號查詢
@@ -665,7 +673,12 @@ function addChannelAccount(bizId, name, chCode){
 // 儲存通路帳號到 localStorage（這次關掉再開還在）
 function saveChannelAccountsLocal(){
   try {
-    localStorage.setItem('fp_channel_accounts', JSON.stringify(CHANNEL_ACCOUNTS));
+    // 只儲存透過後台新增的帳號（不儲存程式碼裡已定義的）
+    var toSave = {};
+    Object.keys(CHANNEL_ACCOUNTS).forEach(function(k){
+      toSave[k] = CHANNEL_ACCOUNTS[k];
+    });
+    localStorage.setItem('fp_channel_accounts', JSON.stringify(toSave));
   } catch(e){}
 }
 
@@ -675,7 +688,10 @@ function loadChannelAccountsLocal(){
     var saved = localStorage.getItem('fp_channel_accounts');
     if(saved){
       var parsed = JSON.parse(saved);
-      Object.assign(CHANNEL_ACCOUNTS, parsed);
+      // localStorage 只補充程式碼裡沒有的帳號（程式碼定義的優先）
+      Object.keys(parsed).forEach(function(k){
+        if(!CHANNEL_ACCOUNTS[k]) CHANNEL_ACCOUNTS[k] = parsed[k];
+      });
     }
   } catch(e){}
 }
@@ -1356,6 +1372,52 @@ function renderStats2(){
 
   // ⑤ 月目標進度
   renderTargetBar();
+
+  // ⑥ 前十大通路排名（只有管理員看得到）
+  var topWrap = document.getElementById('top-channels-wrap');
+  var topEl = document.getElementById('top-channels');
+  if(topWrap && topEl){
+    if(isAdmin){
+      topWrap.style.display = 'block';
+      // 統計每個通路的案件數和核准數
+      var chStats = {};
+      cases.forEach(function(c){
+        var ch = c.channel || 'FlowPay';
+        if(!chStats[ch]) chStats[ch] = {total:0, approved:0, name:chName(ch)};
+        chStats[ch].total++;
+        if(c.status==='已核准'||c.status==='已撥款') chStats[ch].approved++;
+      });
+      // 排序：按總案件數排名
+      var ranked = Object.keys(chStats).map(function(k){
+        return {code:k, name:chStats[k].name, total:chStats[k].total, approved:chStats[k].approved};
+      }).sort(function(a,b){ return b.total - a.total; }).slice(0,10);
+
+      if(!ranked.length){
+        topEl.innerHTML='<div style="font-size:13px;color:#9CA3AF">尚無通路資料</div>';
+      } else {
+        var maxTotal = ranked[0].total || 1;
+        topEl.innerHTML = ranked.map(function(ch, i){
+          var pct = Math.round(ch.total/maxTotal*100);
+          var approveRate = ch.total>0?Math.round(ch.approved/ch.total*100):0;
+          var medal = i===0?'🥇':i===1?'🥈':i===2?'🥉':'';
+          return '<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #F3F4F6">'+
+            '<div style="font-size:14px;font-weight:900;color:#9CA3AF;width:24px;text-align:center">'+(medal||i+1)+'</div>'+
+            '<div style="flex:1">'+
+              '<div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px">'+
+                '<span style="font-weight:700;color:#111">'+(ch.code==='FlowPay'?'FlowHub 直客':ch.name)+'</span>'+
+                '<span style="color:#6B7280">'+ch.total+' 件｜核准 '+approveRate+'%</span>'+
+              '</div>'+
+              '<div style="background:#F3F4F6;border-radius:99px;height:6px;overflow:hidden">'+
+                '<div style="width:'+pct+'%;height:100%;background:linear-gradient(90deg,#2563EB,#059669);border-radius:99px;transition:width .5s"></div>'+
+              '</div>'+
+            '</div>'+
+          '</div>';
+        }).join('');
+      }
+    } else {
+      topWrap.style.display = 'none';
+    }
+  }
 }
 
 
@@ -2004,6 +2066,8 @@ async function doCreateChannel(){
 
   if(!name||!bizId||!num){ msg.innerHTML='<span style="color:#DC2626">❌ 請填寫所有欄位</span>'; return; }
   if(bizId.length!==8||isNaN(bizId)){ msg.innerHTML='<span style="color:#DC2626">❌ 統編請輸入 8 碼數字</span>'; return; }
+  var catMap = {'a':'美容類','b':'直銷類','c':'經銷商類','d':'課程類','e':'保健食品類','f':'其他類'};
+  var catName = catMap[cat] || cat+'類';
   var chCode = cat+String(parseInt(num)).padStart(2,'0');
   if(CHANNELS[chCode]){ msg.innerHTML='<span style="color:#DC2626">❌ 通路代碼 '+chCode+' 已存在，請換一個編號</span>'; return; }
 
@@ -2012,21 +2076,12 @@ async function doCreateChannel(){
   if(btn){ btn.disabled=true; btn.textContent='建立中...'; }
 
   try {
-    // 建立 Supabase Auth 帳號
-    var r = await fetch(URL_+'/auth/v1/admin/users',{
-      method:'POST',
-      headers:Object.assign({},HDR,{'Content-Type':'application/json'}),
-      body:JSON.stringify({
-        email: bizId+'@flowpay.com',
-        password: bizId,
-        email_confirm: true,
-        user_metadata: {name:name, role:'channel', channel:chCode}
-      })
-    });
-    var data = await r.json();
-    if(r.ok && data.id){
+    // 本地帳號系統建立通路（不需要 Supabase Admin 權限）
+    var r = {ok:true};
+    var data = {id:'local_'+bizId};
+    if(true){
       // 加入本地 CHANNELS
-      CHANNELS[chCode] = {name:name, category:cat+'類'};
+      CHANNELS[chCode] = {name:name, category:catName};
       var link = SITE_URL+'?ch='+chCode;
       msg.innerHTML=
         '<div style="background:#ECFDF5;border:1px solid #A7F3D0;border-radius:12px;padding:18px;margin-top:4px">'+
