@@ -727,7 +727,7 @@ function renderNav(){
     <button class="btn-ghost" ${cur===0?'style="visibility:hidden"':''} onclick="if(cur>0){cur--;render()}">← 上一步</button>
     ${isLast
       ?`<button class="btn-main" onclick="submit()">送出免費評估</button>`
-      :`<button class="btn-main" ${canNext()?'':'disabled'} onclick="if(canNext()){cur++;render()}">${cur===0&&!S.agreed?'請先勾選同意':'下一步 →'}</button>`}`;
+      :`<button class="btn-main" ${canNext()?'':'disabled'} onclick="if(canNext()){cur++;render()}">${cur===0&&!S.agreed?'請先勾選同意':cur===0&&!S.phone_owner?'請選擇門號狀態':'下一步 →'}</button>`}`;
 }
 
 const SUPABASE_URL = 'https://zqwzmlythbcspoqfmamt.supabase.co';
@@ -821,7 +821,7 @@ async function submit(){
     channel: CH_CODE,
     sc_tenure: tenureScore,
     sc_job_tel: S.has_job_tel==='yes'?'是':S.has_job_tel==='no'?'否':'',
-    phone_owner: S.phone_owner||'',
+    sc_phone_owner: S.phone_owner||'',
   };
 
   const insertRes = await fetch(`${SUPABASE_URL}/rest/v1/applications`, {

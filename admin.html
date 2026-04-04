@@ -1113,8 +1113,8 @@ function calcScore(c){
   }
 
   // ⑬ 門號本人評分
-  if(c.phone_owner === 'yes') base += 10;   // 本人門號：聯絡真實性高
-  else if(c.phone_owner === 'no') base -= 20; // 非本人門號：聯絡真實性低
+  if(c.sc_phone_owner === 'yes') base += 10;   // 本人門號：聯絡真實性高
+  else if(c.sc_phone_owner === 'no') base -= 20; // 非本人門號：聯絡真實性低
 
   // ⑭ 公司行業穩定度評估
   if(c.company){
@@ -1898,7 +1898,7 @@ function openPanel(id){
 
       '<div class="info"><div class="info-k">現有貸款</div><div class="info-v">'+(c.has_loan==='yes'?'有，每月約 '+(c.loan_burden||'未填'):c.has_loan==='no'?'✓ 無':'—')+'</div></div>'+
       '<div class="info"><div class="info-k">居住＝戶籍</div><div class="info-v" style="color:'+(c.same_addr==='yes'?'#059669':c.same_addr==='no'?'#D97706':'#9CA3AF')+';font-weight:600">'+(c.same_addr==='yes'?'✓ 相同':c.same_addr==='no'?'⚠ 不同':'未填')+'</div></div>'+
-      '<div class="info"><div class="info-k">門號本人</div><div class="info-v" style="color:'+(c.phone_owner==='yes'?'#059669':c.phone_owner==='no'?'#DC2626':'#9CA3AF')+';font-weight:600">'+(c.phone_owner==='yes'?'✓ 本人門號':c.phone_owner==='no'?'✕ 非本人':'未填')+'</div></div>'+
+      '<div class="info"><div class="info-k">門號本人</div><div class="info-v" style="color:'+(c.sc_phone_owner==='yes'?'#059669':c.sc_phone_owner==='no'?'#DC2626':'#9CA3AF')+';font-weight:600">'+(c.sc_phone_owner==='yes'?'✓ 本人門號':c.sc_phone_owner==='no'?'✕ 非本人':'未填')+'</div></div>'+
       '<div class="info"><div class="info-k">身分證</div><div class="info-v" style="color:'+(c.id_verified?'#059669':'#9CA3AF')+'">'+(c.id_verified?'✓ 已上傳':'未上傳')+'</div></div>'+
     '</div>'+
 
