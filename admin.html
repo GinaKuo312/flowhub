@@ -720,11 +720,13 @@ document.getElementById('login-btn').onclick = async function(){
     document.title = 'FlowHub';
     var logoEl2 = document.getElementById('top-logo');
     if(logoEl2) logoEl2.textContent = 'FlowHub';
-    if(isAdmin){
+    if(isAdmin || isStaff){
       document.getElementById('nav-channel').style.display='flex';
-      document.getElementById('nav-accounts').style.display='flex';
       document.getElementById('nav-channel-setup').style.display='flex';
       renderChannelNav();
+    }
+    if(isAdmin){
+      document.getElementById('nav-accounts').style.display='flex';
     }
     // 通路帳號顯示核准案件選單
     var navApproved = document.getElementById('nav-approved');
@@ -777,10 +779,15 @@ document.getElementById('login-btn').onclick = async function(){
     if(isAdmin || isStaff || (role==='channel')){
       document.getElementById('nav-approved').style.display='flex';
     }
-    if(isAdmin){
+    if(isAdmin || isStaff){
       document.getElementById('nav-channel').style.display='flex';
-      document.getElementById('nav-accounts').style.display='flex';
       document.getElementById('nav-channel-setup').style.display='flex';
+      renderChannelNav();
+    }
+    if(isAdmin){
+      document.getElementById('nav-accounts').style.display='flex';
+    }
+    if(isAdmin || isStaff){
       var sidebar = document.getElementById('sidebar');
       var sep = document.createElement('div');
       sep.style.cssText='font-size:10px;font-weight:700;color:#C4C9D4;letter-spacing:.08em;padding:12px 12px 4px;text-transform:uppercase';
@@ -1105,7 +1112,44 @@ function calcScore(c){
     base += vehicleCalc({time: c.moto_time, quality: c.moto_quality, ok: c.moto_ok});
   }
 
-  // ⑬ 警示戶 → 直接歸 E
+  // ⑬ 公司行業穩定度評估
+  if(c.company){
+    var co = c.company.trim();
+    // 穩定行業關鍵字（加分）
+    var stableKeys = ['股份有限公司','有限公司','企業社','企業行','國際','實業','科技','工程','建設','營造','醫療','醫院','診所','藥局','學校','幼兒園','補習班','政府','公所','鄉公所','市政府','銀行','金融','保險','證券','投資','百貨','連鎖','超市','便利商店','量販','飯店','酒店','旅館','航空','運輸','物流'];
+    var stableMatch = stableKeys.some(function(k){ return co.indexOf(k) >= 0; });
+    if(stableMatch) base += 8;  // 正規公司組織，穩定性高
+
+    // 自營/工作室（輕微扣分，並列提醒）
+    var selfKeys = ['工作室','個人工作室','個人','自營','獨資','攤販','小吃','夜市','早餐店','路邊攤','地攤'];
+    var selfMatch = selfKeys.some(function(k){ return co.indexOf(k) >= 0; });
+    if(selfMatch) base -= 5;  // 自營收入較不穩定
+
+    // 家管/學生（不扣分，但會提醒）
+    var noIncomeKeys = ['家管','家庭主婦','家庭主夫','家庭主','學生','在學','就學','無業','待業','失業','退休','無','none'];
+    // 這類不影響評分，但在 alertBar 提醒
+  }
+
+  // ⑭ 年齡評估（根據西元生日）
+  if(c.birth_date){
+    var bdStr = String(c.birth_date).replace(/[-\/]/g,'');  // 統一去除分隔符
+    var birthYear = parseInt(bdStr.substring(0,4));
+    var birthMonth = parseInt(bdStr.substring(4,6));
+    var birthDay = parseInt(bdStr.substring(6,8));
+    if(!isNaN(birthYear) && birthYear > 1900 && birthYear < 2100){
+      var now = new Date();
+      var age = now.getFullYear() - birthYear;
+      // 精確計算（考慮今年還沒過生日）
+      if(now.getMonth()+1 < birthMonth || (now.getMonth()+1 === birthMonth && now.getDate() < birthDay)){
+        age--;
+      }
+      if(age < 18) base -= 50;       // 未成年，不符申辦資格
+      else if(age > 65) base -= 20;  // 超過65歲，謹慎評估
+      else if(age >= 25 && age <= 55) base += 5;  // 黃金工作年齡
+    }
+  }
+
+  // ⑮ 警示戶 → 直接歸 E
   if(c.is_alert === 'yes') return 0;
 
   return Math.min(100, Math.max(0, base));
@@ -1786,6 +1830,46 @@ function openPanel(id){
     alertBar+='<div style="background:#FFF7ED;border:1.5px solid #FED7AA;border-radius:8px;padding:10px 14px;margin-bottom:8px;display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:#92400E">'+w+'</div>';
   });
   if(c.is_alert==='yes') alertBar+='<div style="background:#FEF2F2;border:1.5px solid #FECACA;border-radius:8px;padding:10px 14px;margin-bottom:8px;display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:#991B1B"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#DC2626" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><circle cx="12" cy="17" r="1" fill="#DC2626"/></svg>⚠️ 警示戶，請謹慎評估</div>';
+  // ===== 公司行業提醒 =====
+  if(c.company){
+    var co2 = c.company.trim();
+    var selfKeys2 = ['工作室','個人','自營','獨資','攤販','小吃','夜市'];
+    var noIncomeKeys2 = ['家管','家庭主婦','家庭主夫','學生','在學','無業','待業'];
+    var selfMatch2 = selfKeys2.some(function(k){ return co2.indexOf(k) >= 0; });
+    var noIncomeMatch2 = noIncomeKeys2.some(function(k){ return co2.indexOf(k) >= 0; });
+    if(noIncomeMatch2){
+      alertBar+='<div style="background:#FEF3C7;border:1.5px solid #FDE68A;border-radius:8px;padding:10px 14px;margin-bottom:8px;display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:#92400E">'+
+        '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#D97706" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><circle cx="12" cy="16" r="1" fill="#D97706"/></svg>'+
+        '申請人填寫職業為「'+co2+'」，請確認還款來源</div>';
+    } else if(selfMatch2){
+      alertBar+='<div style="background:#FFF7ED;border:1.5px solid #FED7AA;border-radius:8px;padding:10px 14px;margin-bottom:8px;display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:#92400E">'+
+        '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#EA580C" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><circle cx="12" cy="16" r="1" fill="#EA580C"/></svg>'+
+        '自營/工作室（'+co2+'），建議確認有明確固定收入來源</div>';
+    }
+  }
+
+  // ===== 年齡警告 =====
+  if(c.birth_date){
+    var bdStr2 = String(c.birth_date).replace(/[-\/]/g,'');
+    var bYear = parseInt(bdStr2.substring(0,4));
+    var bMonth = parseInt(bdStr2.substring(4,6));
+    var bDay2 = parseInt(bdStr2.substring(6,8));
+    if(!isNaN(bYear) && bYear > 1900){
+      var now2 = new Date();
+      var age2 = now2.getFullYear() - bYear;
+      if(now2.getMonth()+1 < bMonth || (now2.getMonth()+1 === bMonth && now2.getDate() < bDay2)) age2--;
+      if(age2 < 18){
+        alertBar+='<div style="background:#FEF2F2;border:1.5px solid #FECACA;border-radius:8px;padding:10px 14px;margin-bottom:8px;display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;color:#DC2626">'+
+          '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#DC2626" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><circle cx="12" cy="16" r="1" fill="#DC2626"/></svg>'+
+          '⚠️ 年齡未滿 18 歲（'+age2+'歲），不符合申辦資格</div>';
+      } else if(age2 > 65){
+        alertBar+='<div style="background:#FEF2F2;border:1.5px solid #FECACA;border-radius:8px;padding:10px 14px;margin-bottom:8px;display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;color:#DC2626">'+
+          '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#DC2626" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><circle cx="12" cy="16" r="1" fill="#DC2626"/></svg>'+
+          '⚠️ 年齡超過 65 歲（'+age2+'歲），請謹慎評估還款能力</div>';
+      }
+    }
+  }
+
   // CCIS 不良警示移除（未實際串接查詢）
   if(sc>=70&&c.is_alert!=='yes') alertBar+='<div style="background:#ECFDF5;border:1.5px solid #A7F3D0;border-radius:8px;padding:10px 14px;margin-bottom:8px;display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:#065F46"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>初步條件良好，建議優先處理</div>';
 
@@ -1851,13 +1935,39 @@ function openPanel(id){
       '<div class="info"><div class="info-k">姓名</div><div class="info-v">'+(c.api_name||c.name||'—')+'</div></div>'+
       '<div class="info"><div class="info-k">電話</div><div class="info-v">'+(c.phone||'—')+'</div></div>'+
       '<div class="info"><div class="info-k">身分證</div><div class="info-v">'+(c.id_no||'—')+'</div></div>'+
-      '<div class="info"><div class="info-k">出生日期</div><div class="info-v">'+(c.birth_date||'—')+'</div></div>'+
+      '<div class="info"><div class="info-k">出生日期</div><div class="info-v">'+
+        (function(){
+          if(!c.birth_date) return '—';
+          var bdS=String(c.birth_date).replace(/[-\/]/g,'');
+          var bY=parseInt(bdS.substring(0,4));
+          var bMo=parseInt(bdS.substring(4,6));
+          var bDy=parseInt(bdS.substring(6,8));
+          if(isNaN(bY)||bY<1900) return c.birth_date;
+          var now3=new Date();
+          var age3=now3.getFullYear()-bY;
+          if(now3.getMonth()+1<bMo||(now3.getMonth()+1===bMo&&now3.getDate()<bDy)) age3--;
+          var color = age3<18?'#DC2626':age3>65?'#DC2626':'#374151';
+          var warn = age3<18?' ⚠️未成年':age3>65?' ⚠️超過65歲':'';
+          return '<span style="color:'+color+';font-weight:'+(age3<18||age3>65?'700':'400')+'">'+c.birth_date+'（'+age3+'歲'+warn+'）</span>';
+        })()+
+      '</div></div>'+
       '<div class="info full"><div class="info-k">戶籍地址</div><div class="info-v">'+(c.reg_addr||'—')+'</div></div>'+
     '</div>'+
 
     '<div class="sec-title">職業資料</div>'+
     '<div class="grid2">'+
       '<div class="info full"><div class="info-k">公司名稱</div><div class="info-v" style="display:flex;align-items:center;gap:8px">'+(c.company||'—')+
+        (function(){
+          if(!c.company) return '';
+          var co=c.company.trim();
+          var stableK=['股份有限公司','有限公司','企業社','企業行','國際','實業','科技','工程','建設','營造','醫療','醫院','診所','藥局','學校','幼兒園','補習班','政府','公所','銀行','金融','保險','證券','百貨','連鎖','超市','便利商店','量販','飯店','酒店','航空','物流'];
+          var selfK=['工作室','個人工作室','個人','自營','獨資','攤販','小吃','夜市','早餐店','路邊攤','地攤'];
+          var noIncK=['家管','家庭主婦','家庭主夫','家庭主','學生','在學','就學','無業','待業','失業','退休'];
+          if(stableK.some(function(k){return co.indexOf(k)>=0;})) return ' <span style="font-size:11px;background:#ECFDF5;color:#059669;padding:1px 7px;border-radius:99px;font-weight:700">✓ 正規公司</span>';
+          if(noIncK.some(function(k){return co.indexOf(k)>=0;})) return ' <span style="font-size:11px;background:#FEF3C7;color:#92400E;padding:1px 7px;border-radius:99px;font-weight:700">⚠ 確認還款來源</span>';
+          if(selfK.some(function(k){return co.indexOf(k)>=0;})) return ' <span style="font-size:11px;background:#FFF7ED;color:#EA580C;padding:1px 7px;border-radius:99px;font-weight:700">⚠ 自營</span>';
+          return '';
+        })()+
         (c.company?'<a href="https://www.google.com/search?q='+encodeURIComponent(c.company)+'" target="_blank" style="background:#EFF6FF;border:1px solid #BFDBFE;color:#1E40AF;padding:2px 8px;border-radius:6px;font-size:11px;font-weight:700;text-decoration:none">Google</a>':'')+'</div></div>'+
       '<div class="info"><div class="info-k">公司電話</div><div class="info-v" style="display:flex;align-items:center;gap:8px;color:'+(c.company_tel?'#2563EB':'#9CA3AF')+'">'+(c.company_tel||'未填')+
         (c.company_tel?'<a href="tel:'+c.company_tel+'" style="background:#ECFDF5;border:1px solid #A7F3D0;color:#065F46;padding:2px 8px;border-radius:6px;font-size:11px;font-weight:700;text-decoration:none">撥打</a>':'')+'</div></div>'+
@@ -2076,53 +2186,71 @@ async function doCreateChannel(){
   if(btn){ btn.disabled=true; btn.textContent='建立中...'; }
 
   try {
-    // 本地帳號系統建立通路（不需要 Supabase Admin 權限）
-    var r = {ok:true};
-    var data = {id:'local_'+bizId};
-    if(true){
-      // 加入本地 CHANNELS
-      CHANNELS[chCode] = {name:name, category:catName};
-      var link = SITE_URL+'?ch='+chCode;
-      msg.innerHTML=
-        '<div style="background:#ECFDF5;border:1px solid #A7F3D0;border-radius:12px;padding:18px;margin-top:4px">'+
-        '<div style="font-size:15px;font-weight:800;color:#065F46;margin-bottom:12px">✅ 通路建立成功！</div>'+
-        '<div style="display:grid;gap:8px;font-size:13px;color:#047857;line-height:1.8">'+
-          '<div>🏢 商家名稱：<strong>'+name+'</strong></div>'+
-          '<div>👤 後台帳號：<strong>'+bizId+'</strong></div>'+
-          '<div>🔑 初始密碼：<strong>'+bizId+'</strong>（請商家登入後自行修改）</div>'+
-          '<div>🔗 客戶填單連結：<br><a href="'+link+'" target="_blank" style="color:#2563EB;word-break:break-all;font-size:12px">'+link+'</a>'+
-            ' <button id="cs-copy-btn" data-link="'+link+'" style="background:#fff;border:1px solid #059669;border-radius:6px;padding:2px 10px;font-size:12px;cursor:pointer;font-family:inherit;margin-top:4px">📋 複製連結</button>'+
-          '</div>'+
+    // ① 加入 CHANNELS
+    CHANNELS[chCode] = {name:name, category:catName};
+
+    // ② 加入 CHANNEL_ACCOUNTS（帳號=統編，密碼=統編）
+    CHANNEL_ACCOUNTS[bizId] = {pw:bizId, name:name, role:'channel', channel:chCode};
+
+    // ③ 持久化到 localStorage
+    saveChannelAccountsLocal();
+
+    // ④ 顯示成功訊息
+    var link = SITE_URL+'?ch='+chCode;
+    msg.innerHTML=
+      '<div style="background:#ECFDF5;border:1px solid #A7F3D0;border-radius:12px;padding:18px;margin-top:4px">'+
+      '<div style="font-size:15px;font-weight:800;color:#065F46;margin-bottom:12px">✅ 通路建立成功！</div>'+
+      '<div style="display:grid;gap:8px;font-size:13px;color:#047857;line-height:1.8">'+
+        '<div>🏢 商家名稱：<strong>'+name+'</strong></div>'+
+        '<div>👤 後台帳號：<strong>'+bizId+'</strong></div>'+
+        '<div>🔑 初始密碼：<strong>'+bizId+'</strong>（請商家登入後自行修改）</div>'+
+        '<div>🔗 客戶填單連結：<br>'+
+          '<a href="'+link+'" target="_blank" style="color:#2563EB;word-break:break-all;font-size:12px">'+link+'</a>'+
+          ' <button id="cs-copy-btn" data-link="'+link+'" style="background:#fff;border:1px solid #059669;border-radius:6px;padding:2px 10px;font-size:12px;cursor:pointer;font-family:inherit;margin-top:4px">📋 複製連結</button>'+
         '</div>'+
-        '<div style="margin-top:12px;padding-top:12px;border-top:1px solid #A7F3D0;font-size:12px;color:#6B7280">'+
-          '💡 商家用此帳號登入後台，可看自己的案件、統計和核准撥款'+
-        '</div>'+
-        '</div>';
-      // 綁定複製按鈕
-      setTimeout(function(){
-        if(cBtn) cBtn.onclick = function(){ copyLink(cBtn.getAttribute('data-link')); };
-      }, 100);
-      // 動態加通路選單
-      var sidebar = document.getElementById('sidebar');
-      if(isAdmin && sidebar){
-        var existBtn = document.getElementById('nav-ch-'+chCode);
-        if(!existBtn){
-          var newBtn = document.createElement('button');
-          newBtn.className='nav-btn'; newBtn.id='nav-ch-'+chCode;
-          var code2 = chCode;
-          newBtn.onclick=function(){showChannelPage(code2);};
-          newBtn.innerHTML='<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg>'+
-            '<span style="flex:1;text-align:left;font-size:13px">'+name+'</span>';
-          sidebar.appendChild(newBtn);
+      '</div>'+
+      '<div style="margin-top:12px;padding-top:12px;border-top:1px solid #A7F3D0;font-size:12px;color:#6B7280">'+
+        '💡 商家用此帳號登入後台，可看自己的案件、統計和核准撥款'+
+      '</div>'+
+      '</div>';
+
+    // ⑤ 綁定複製按鈕
+    setTimeout(function(){
+      var cBtn = document.getElementById('cs-copy-btn');
+      if(cBtn) cBtn.onclick = function(){ copyLink(cBtn.getAttribute('data-link')); };
+    }, 100);
+
+    // ⑥ 動態加入側邊欄通路選單
+    var sidebar = document.getElementById('sidebar');
+    if(isAdmin && sidebar){
+      var existBtn = document.getElementById('nav-ch-'+chCode);
+      if(!existBtn){
+        // 加分隔線（如果還沒有）
+        if(!sidebar.querySelector('.ch-sep')){
+          var sep=document.createElement('div');
+          sep.className='ch-sep';
+          sep.style.cssText='font-size:10px;font-weight:700;color:#C4C9D4;letter-spacing:.08em;padding:12px 12px 4px;text-transform:uppercase';
+          sep.textContent='通路';
+          sidebar.appendChild(sep);
         }
+        var newBtn = document.createElement('button');
+        newBtn.className='nav-btn'; newBtn.id='nav-ch-'+chCode;
+        var code2 = chCode;
+        newBtn.onclick=function(){showChannelPage(code2);};
+        newBtn.innerHTML='<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg>'+
+          '<span style="flex:1;text-align:left;font-size:13px">'+name+'</span>';
+        sidebar.appendChild(newBtn);
       }
-    } else {
-      var errMsg = (data.message||'建立失敗');
-      if(errMsg.includes('already')) errMsg='此統編帳號已存在！';
-      msg.innerHTML='<span style="color:#DC2626">❌ '+errMsg+'</span>';
     }
+
+    // ⑦ 更新通路明細和通路設定清單
+    setTimeout(function(){
+      if(typeof loadAccounts === 'function') loadAccounts();
+      if(typeof renderChannelSetup === 'function') renderChannelSetup();
+    }, 200);
+
   } catch(e){
-    msg.innerHTML='<span style="color:#DC2626">❌ 網路錯誤，請稍後再試</span>';
+    msg.innerHTML='<span style="color:#DC2626">❌ 錯誤：'+e.message+'</span>';
   }
   if(btn){ btn.disabled=false; btn.textContent='🚀 建立通路 + 帳號'; }
 }
