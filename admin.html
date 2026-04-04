@@ -1953,8 +1953,8 @@ function openPanel(id){
       '<div class="info"><div class="info-k">信用卡</div><div class="info-v">'+(c.has_credit_card==='yes'?'有（'+(c.credit_card_status==='normal'?'✅ 正常繳清':c.credit_card_status==='minimum'?'⚠️ 繳最低':c.credit_card_status==='unused'?'沒在用':c.credit_card_status==='suspended'?'🔴 被停卡':'—')+(c.credit_card_bank?' · '+c.credit_card_bank:'')+'）':c.has_credit_card==='no'?'未辦過':'—')+'</div></div>'+
       '<div class="info"><div class="info-k">警示戶</div><div class="info-v" style="color:'+(c.is_alert==='yes'?'#DC2626':'#059669')+'">'+(c.is_alert==='yes'?'⚠ 是':'否')+'</div></div>'+
 
-      '<div class="info"><div class="info-k">汽車</div><div class="info-v">'+(c.has_car==='yes'?'有（'+(c.car_ok||'未填')+'）':'無')+'</div></div>'+
-      '<div class="info"><div class="info-k">機車</div><div class="info-v">'+(c.has_moto==='yes'?'有（'+(c.moto_ok||'未填')+'）':'無')+'</div></div>'+
+      '<div class="info"><div class="info-k">汽車</div><div class="info-v">'+vehicleDisplay(c.has_car,c.car_time,c.car_quality,c.car_ok)+'</div></div>'+
+      '<div class="info"><div class="info-k">機車</div><div class="info-v">'+vehicleDisplay(c.has_moto,c.moto_time,c.moto_quality,c.moto_ok)+'</div></div>'+
       '<div class="info"><div class="info-k">不動產</div><div class="info-v">'+(c.has_property==='yes'?'有':'無')+'</div></div>'+
       '<div class="info"><div class="info-k">現有貸款</div><div class="info-v">'+(c.has_loan==='yes'?'有，每月約 '+(c.loan_burden||'未填'):c.has_loan==='no'?'無':'—')+'</div></div>'+
       '<div class="info full"><div class="info-k">身分證上傳</div>'+buildIdButtons(c)+'</div>'+
@@ -1970,6 +1970,58 @@ function openPanel(id){
 
     // 初審評分工具已移除，改由客戶填寫表單自動帶入評分
     // (原手動評分工具移除，評分完全由 calcScore 自動計算)
+
+    '<div class="sec-title">✏️ 修正客戶資料</div>'+
+    '<div style="font-size:12px;color:#6B7280;margin-bottom:10px">如客戶口頭確認資料有誤，可在此修正後重新評分</div>'+
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">'+
+      '<div><div style="font-size:11px;font-weight:700;color:#374151;margin-bottom:4px">汽車繳款時間</div>'+
+        '<select id="edit-car-time" style="width:100%;padding:7px 10px;border:1px solid #E5E7EB;border-radius:8px;font-size:12px;font-family:inherit">'+
+          '<option value="">無/未填</option><option value="lt6"'+(c.car_time==='lt6'?' selected':'')+'>未滿 6 期</option>'+
+          '<option value="over1y"'+(c.car_time==='over1y'?' selected':'')+'>繳款 1 年以上</option></select></div>'+
+      '<div><div style="font-size:11px;font-weight:700;color:#374151;margin-bottom:4px">汽車繳款品質</div>'+
+        '<select id="edit-car-quality" style="width:100%;padding:7px 10px;border:1px solid #E5E7EB;border-radius:8px;font-size:12px;font-family:inherit">'+
+          '<option value="">無/未填</option><option value="normal"'+(c.car_quality==='normal'?' selected':'')+'>正常繳款</option>'+
+          '<option value="late"'+(c.car_quality==='late'?' selected':'')+'>偶爾遲繳</option>'+
+          '<option value="late_often"'+(c.car_quality==='late_often'?' selected':'')+'>常常遲繳</option>'+
+          '<option value="paid"'+(c.car_quality==='paid'?' selected':'')+'>已繳清</option></select></div>'+
+      '<div><div style="font-size:11px;font-weight:700;color:#374151;margin-bottom:4px">機車繳款時間</div>'+
+        '<select id="edit-moto-time" style="width:100%;padding:7px 10px;border:1px solid #E5E7EB;border-radius:8px;font-size:12px;font-family:inherit">'+
+          '<option value="">無/未填</option><option value="lt6"'+(c.moto_time==='lt6'?' selected':'')+'>未滿 6 期</option>'+
+          '<option value="over1y"'+(c.moto_time==='over1y'?' selected':'')+'>繳款 1 年以上</option></select></div>'+
+      '<div><div style="font-size:11px;font-weight:700;color:#374151;margin-bottom:4px">機車繳款品質</div>'+
+        '<select id="edit-moto-quality" style="width:100%;padding:7px 10px;border:1px solid #E5E7EB;border-radius:8px;font-size:12px;font-family:inherit">'+
+          '<option value="">無/未填</option><option value="normal"'+(c.moto_quality==='normal'?' selected':'')+'>正常繳款</option>'+
+          '<option value="late"'+(c.moto_quality==='late'?' selected':'')+'>偶爾遲繳</option>'+
+          '<option value="late_often"'+(c.moto_quality==='late_often'?' selected':'')+'>常常遲繳</option>'+
+          '<option value="paid"'+(c.moto_quality==='paid'?' selected':'')+'>已繳清</option></select></div>'+
+      '<div><div style="font-size:11px;font-weight:700;color:#374151;margin-bottom:4px">薪資方式</div>'+
+        '<select id="edit-salary-type" style="width:100%;padding:7px 10px;border:1px solid #E5E7EB;border-radius:8px;font-size:12px;font-family:inherit">'+
+          '<option value="">未填</option><option value="transfer"'+(c.salary_type==='transfer'?' selected':'')+'>薪轉</option>'+
+          '<option value="cash"'+(c.salary_type==='cash'?' selected':'')+'>領現金</option></select></div>'+
+      '<div><div style="font-size:11px;font-weight:700;color:#374151;margin-bottom:4px">門號本人</div>'+
+        '<select id="edit-phone-owner" style="width:100%;padding:7px 10px;border:1px solid #E5E7EB;border-radius:8px;font-size:12px;font-family:inherit">'+
+          '<option value="">未填</option><option value="yes"'+(c.sc_phone_owner==='yes'?' selected':'')+'>是，本人門號</option>'+
+          '<option value="no"'+(c.sc_phone_owner==='no'?' selected':'')+'>否，非本人</option></select></div>'+
+    '</div>'+
+
+    '<div style="margin-bottom:16px">'+
+      '<div style="font-size:12px;font-weight:700;color:#374151;margin-bottom:8px">⭐ 加分資料（客戶可提供）</div>'+
+      (function(){
+        var bonusItems=['財力證明（存封+近半年存摺）','信用卡對帳單','勞保明細/健保快易通','有不動產'];
+        var savedBonus=(c.bonus_docs||'').split(',').filter(Boolean);
+        var html='<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px">';
+        bonusItems.forEach(function(item){
+          var checked=savedBonus.indexOf(item)>=0;
+          html+='<label style="display:flex;align-items:center;gap:5px;background:'+(checked?'#ECFDF5':'#F9FAFB')+';border:1px solid '+(checked?'#A7F3D0':'#E5E7EB')+';border-radius:8px;padding:6px 10px;cursor:pointer;font-size:12px">'+
+            '<input type="checkbox" id="bonus-'+item+'" '+(checked?'checked':'')+' style="cursor:pointer">'+item+'</label>';
+        });
+        html+='</div>';
+        html+='<div style="display:flex;gap:6px;align-items:center">'+
+          '<input id="bonus-other" type="text" placeholder="其他（請填寫）" value="'+(c.bonus_other||'')+'" style="flex:1;padding:6px 10px;border:1px solid #E5E7EB;border-radius:8px;font-size:12px;font-family:inherit">'+
+          '</div>';
+        return html;
+      })()+
+    '</div>'+
 
     '<div class="sec-title">✍️ 審核操作</div>'+
     '<div style="font-size:12px;color:#9CA3AF;margin-bottom:10px">更新審核狀態與備註，點儲存後即時同步</div>'+
@@ -2052,6 +2104,42 @@ async function saveCase(id){
     if(approvedAmt !== null) patchData.approved_amount = approvedAmt;
     if(disbursedAmt !== null) patchData.disbursed_amount = disbursedAmt;
     if(undisbursedAmt !== null) patchData.undisbursed_amount = undisbursedAmt;
+
+    // 修正客戶資料
+    var editCarTime = document.getElementById('edit-car-time');
+    var editCarQuality = document.getElementById('edit-car-quality');
+    var editMotoTime = document.getElementById('edit-moto-time');
+    var editMotoQuality = document.getElementById('edit-moto-quality');
+    var editSalaryType = document.getElementById('edit-salary-type');
+    var editPhoneOwner = document.getElementById('edit-phone-owner');
+    if(editCarTime) patchData.car_time = editCarTime.value;
+    if(editCarQuality) patchData.car_quality = editCarQuality.value;
+    if(editMotoTime) patchData.moto_time = editMotoTime.value;
+    if(editMotoQuality) patchData.moto_quality = editMotoQuality.value;
+    if(editSalaryType) patchData.salary_type = editSalaryType.value;
+    if(editPhoneOwner) patchData.sc_phone_owner = editPhoneOwner.value;
+
+    // 加分資料
+    var bonusItems=['財力證明（存封+近半年存摺）','信用卡對帳單','勞保明細/健保快易通','有不動產'];
+    var checkedBonus=bonusItems.filter(function(item){
+      var cb=document.getElementById('bonus-'+item); return cb&&cb.checked;
+    });
+    var bonusOtherEl = document.getElementById('bonus-other');
+    var bonusOtherVal = bonusOtherEl ? bonusOtherEl.value.trim() : '';
+    patchData.bonus_docs = checkedBonus.join(',');
+    patchData.bonus_other = bonusOtherVal;
+
+    // 即時更新 cases 陣列（讓評分重算）
+    var cObj = cases.find(function(x){return x.id===id;});
+    if(cObj){
+      if(editCarTime) cObj.car_time = editCarTime.value;
+      if(editCarQuality) cObj.car_quality = editCarQuality.value;
+      if(editMotoTime) cObj.moto_time = editMotoTime.value;
+      if(editMotoQuality) cObj.moto_quality = editMotoQuality.value;
+      if(editSalaryType) cObj.salary_type = editSalaryType.value;
+      if(editPhoneOwner) cObj.sc_phone_owner = editPhoneOwner.value;
+      if(bonusOtherVal) cObj.bonus_other = bonusOtherVal;
+    }
     var r=await fetch(URL_+'/rest/v1/applications?id=eq.'+id,{
       method:'PATCH',headers:HDR,body:JSON.stringify(patchData)
     });
