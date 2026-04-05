@@ -2711,169 +2711,74 @@ function renderAccountsList(){
   var el = document.getElementById('accounts-list');
   if(!el) return;
 
-  // 本地帳號：管理員、員工、通路
-  var localRows = [];
-
-  // 管理員/員工
-  Object.keys(LOCAL_ACCOUNTS).forEach(function(acct){
-    var u = LOCAL_ACCOUNTS[acct];
-    localRows.push({acct:acct, name:u.name, role:u.role, channel:u.channel, isLocal:true, bizId:''});
-  });
-
-  // 通路帳號
-  Object.keys(CHANNEL_ACCOUNTS).forEach(function(bizId){
+  // 只顯示通路帳號（CHANNEL_ACCOUNTS）
+  // 管理員/員工帳號密碼只能透過 SQL 更改
+  var rows = Object.keys(CHANNEL_ACCOUNTS).map(function(bizId){
     var u = CHANNEL_ACCOUNTS[bizId];
-    localRows.push({acct:bizId, name:u.name, role:'channel', channel:u.channel, isLocal:true, bizId:bizId});
+    return {acct:bizId, name:u.name, bizId:bizId, channel:u.channel};
   });
 
-  var html = localRows.map(function(u){
-    var roleColor = u.role==='admin'?'#1E40AF':u.role==='channel'?'#065F46':'#374151';
-    var roleBg   = u.role==='admin'?'#EFF6FF':u.role==='channel'?'#ECFDF5':'#F3F4F6';
-    var roleLabel= u.role==='admin'?'👑 管理員':u.role==='channel'?'🏢 通路帳號':'👤 服務員';
-    var chCode   = u.channel||'';
-    var chName2  = chCode && CHANNELS[chCode] ? CHANNELS[chCode].name : '';
-    return '<div class="table-wrap" style="padding:16px 20px">'+
-      '<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">'+
-        '<div style="display:flex;align-items:center;gap:12px">'+
-          '<div style="width:40px;height:40px;border-radius:50%;background:'+roleBg+';display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">'+
-            (u.role==='admin'?'👑':u.role==='channel'?'🏢':'👤')+
-          '</div>'+
-          '<div>'+
-            '<div style="font-size:14px;font-weight:700;color:#111">'+u.name+'</div>'+
-            '<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:4px">'+
-              '<span style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:99px;background:'+roleBg+';color:'+roleColor+'">'+roleLabel+'</span>'+
-              (u.bizId?'<span style="font-size:11px;background:#FEF3C7;color:#92400E;padding:2px 8px;border-radius:99px;font-weight:700">統編：'+u.bizId+'</span>':'')+
-              (chCode?'<span style="font-size:11px;background:#EFF6FF;color:#1E40AF;padding:2px 8px;border-radius:99px;font-weight:700">代碼：'+chCode+'</span>':'')+
-              (chName2?'<span style="font-size:11px;color:#6B7280">'+chName2+'</span>':'')+
-            '</div>'+
-            '<div style="font-size:11px;color:#9CA3AF;margin-top:3px">帳號：'+u.acct+'</div>'+
-          '</div>'+
-        '</div>'+
-        '<div style="display:flex;gap:6px;flex-direction:column;align-items:flex-end">'+
-          (u.bizId?
-            '<button data-acct="'+u.acct+'" data-bizid="'+u.bizId+'" class="restore-default-pw-btn"'+
-              ' style="background:#ECFDF5;border:1.5px solid #A7F3D0;border-radius:8px;padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;color:#065F46;white-space:nowrap">'+
-              '🔄 恢復預設（統編）</button>':'')+
-          '<button data-acct="'+u.acct+'" data-name="'+u.name+'" class="local-reset-pw-btn"'+
-            ' style="background:#FEF3C7;border:1.5px solid #FDE68A;border-radius:8px;padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;color:#92400E;white-space:nowrap">'+
-            '🔑 自訂密碼</button>'+
-        '</div>'+
-      '</div>'+
-    '</div>';
+  if(!rows.length){
+    el.innerHTML='<div class="empty" style="color:#9CA3AF;padding:20px;text-align:center">尚未建立任何通路帳號</div>';
+    return;
+  }
+
+  el.innerHTML = rows.map(function(u){
+    var chName2 = (u.channel && CHANNELS[u.channel]) ? CHANNELS[u.channel].name : '';
+    var html = '<div class="table-wrap" style="padding:16px 20px;margin-bottom:8px">';
+    html += '<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">';
+
+    // 左側：帳號資訊
+    html += '<div style="display:flex;align-items:center;gap:12px">';
+    html += '<div style="width:42px;height:42px;border-radius:50%;background:#ECFDF5;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">🏢</div>';
+    html += '<div>';
+    html += '<div style="font-size:14px;font-weight:800;color:#111">'+u.name+'</div>';
+    html += '<div style="margin-top:5px;display:flex;flex-wrap:wrap;gap:5px;align-items:center">';
+    html += '<span style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:99px;background:#FEF3C7;color:#92400E">統編：'+u.bizId+'</span>';
+    if(u.channel) html += '<span style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:99px;background:#EFF6FF;color:#1E40AF">代碼：'+u.channel+'</span>';
+    if(chName2) html += '<span style="font-size:11px;color:#6B7280">'+chName2+'</span>';
+    html += '</div>';
+    html += '<div style="font-size:11px;color:#9CA3AF;margin-top:3px">帳號：'+u.acct+'　密碼預設為統編</div>';
+    html += '</div></div>';
+
+    // 右側：操作按鈕
+    html += '<div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end">';
+    html += '<button class="restore-btn" data-acct="'+u.acct+'" data-bizid="'+u.bizId+'"'+
+      ' style="background:#ECFDF5;border:1.5px solid #A7F3D0;border-radius:8px;padding:7px 16px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;color:#065F46;white-space:nowrap">'+
+      '🔄 恢復預設密碼（統編）</button>';
+    html += '<button class="custom-pw-btn" data-acct="'+u.acct+'" data-name="'+u.name+'"'+
+      ' style="background:#FEF3C7;border:1.5px solid #FDE68A;border-radius:8px;padding:7px 16px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;color:#92400E;white-space:nowrap">'+
+      '🔑 自訂密碼</button>';
+    html += '</div>';
+
+    html += '</div></div>';
+    return html;
   }).join('');
 
-  el.innerHTML = html || '<div class="empty">尚無帳號</div>';
-
-  // 綁定重設密碼按鈕
-  setTimeout(function(){
-    el.querySelectorAll('.local-reset-pw-btn').forEach(function(btn){
-      btn.onclick=function(){
-        showLocalResetPw(btn.getAttribute('data-acct'), btn.getAttribute('data-name'));
-      };
-    });
-    el.querySelectorAll('.restore-default-pw-btn').forEach(function(btn){
-      btn.onclick=function(){
-        var acct = btn.getAttribute('data-acct');
-        var bizId = btn.getAttribute('data-bizid');
-        if(!confirm('確定要將「'+acct+'」的密碼恢復為統編（'+bizId+'）嗎？')) return;
-        if(CHANNEL_ACCOUNTS[acct]){
-          CHANNEL_ACCOUNTS[acct].pw = bizId;
-          saveChannelAccountsLocal();
-          btn.textContent = '✅ 已恢復';
-          btn.style.background = '#ECFDF5';
-          setTimeout(function(){ btn.textContent = '🔄 恢復預設（統編）'; },2000);
-        }
-      };
-    });
-  },50);
-}
-
-
-function renderAccounts(){
-  var el = document.getElementById('accounts-list');
-  if(!accountsList.length){ el.innerHTML='<div class="empty">尚無帳號</div>'; return; }
-  el.innerHTML = accountsList.map(function(u){
-    var meta = u.user_metadata||{};
-    var role = meta.role||'staff';
-    var roleColor = role==='admin'?'#1E40AF':role==='channel'?'#065F46':'#374151';
-    var roleBg = role==='admin'?'#EFF6FF':role==='channel'?'#ECFDF5':'#F3F4F6';
-    var roleLabel = role==='admin'?'管理員':role==='channel'?'通路帳號':'服務員';
-    var lastSign = u.last_sign_in_at ? new Date(u.last_sign_in_at).toLocaleDateString('zh-TW') : '從未登入';
-    var bizId = u.email ? u.email.replace('@flowpay.com','') : '';
-    return '<div class="table-wrap" style="padding:16px 20px">'+
-      '<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">'+
-        '<div style="display:flex;align-items:center;gap:12px">'+
-          '<div style="width:40px;height:40px;border-radius:50%;background:'+roleBg+';display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">'+
-            (role==='admin'?'👑':role==='channel'?'🏢':'👤')+
-          '</div>'+
-          '<div>'+
-            '<div style="font-size:14px;font-weight:700;color:#111">'+(meta.name||u.email)+'</div>'+
-            '<div style="font-size:12px;color:#6B7280">'+u.email+'</div>'+
-            '<div style="margin-top:4px;display:flex;align-items:center;gap:6px">'+
-              '<span style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:99px;background:'+roleBg+';color:'+roleColor+'">'+roleLabel+'</span>'+
-              (meta.channel?'<span style="font-size:10px;color:#9CA3AF">通路：'+meta.channel+'</span>':'')+
-              '<span style="font-size:10px;color:#9CA3AF">最後登入：'+lastSign+'</span>'+
-            '</div>'+
-          '</div>'+
-        '</div>'+
-        '<button data-uid="'+u.id+'" data-email="'+u.email+'" data-bizid="'+bizId+'" class="reset-pw-btn" '+
-          'style="background:#FEF3C7;border:1.5px solid #FDE68A;color:#92400E;padding:7px 16px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap">'+
-          '🔑 重設密碼'+
-        '</button>'+
-      '</div>'+
-    '</div>';
-  }).join('');
-  setTimeout(function(){
-    el.querySelectorAll('.reset-pw-btn').forEach(function(btn){
-      btn.onclick = function(){ showResetPwModal(btn.getAttribute('data-uid'), btn.getAttribute('data-email'), btn.getAttribute('data-bizid')); };
-    });
-  }, 50);
-}
-
-function showResetPwModal(uid, email, bizId){
-  var old = document.getElementById('reset-pw-modal');
-  if(old) old.remove();
-  var overlay = document.createElement('div');
-  overlay.id='reset-pw-modal';
-  overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:300;display:flex;align-items:center;justify-content:center';
-  overlay.onclick=function(e){ if(e.target===overlay) overlay.remove(); };
-  overlay.innerHTML=
-    '<div style="background:#fff;border-radius:16px;padding:28px;width:380px;max-width:90vw">'+
-      '<div style="font-size:16px;font-weight:800;margin-bottom:4px">🔑 重設密碼</div>'+
-      '<div style="font-size:13px;color:#6B7280;margin-bottom:16px">'+email+'</div>'+
-      (bizId?'<div style="background:#FFF7ED;border:1px solid #FED7AA;border-radius:10px;padding:10px 14px;margin-bottom:12px;font-size:13px;color:#92400E">'+
-        '📌 快速重置：將密碼重設回 <strong>'+bizId+'</strong>（統編）'+
-        '<button id="reset-to-default-btn" data-uid="'+uid+'" data-bizid="'+bizId+'" style="margin-left:10px;background:#D97706;color:#fff;border:none;border-radius:8px;padding:3px 10px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">重置回統編</button>'+
-      '</div>':'')+
-      '<hr style="border:none;border-top:1px solid #E5E7EB;margin-bottom:12px"/>'+
-      '<div style="font-size:12px;font-weight:700;color:#374151;margin-bottom:6px">或自訂新密碼</div>'+
-      '<input id="new-pw-input" type="password" placeholder="輸入新密碼（至少8碼）" '+
-        'style="width:100%;padding:10px 14px;border:1.5px solid #E5E7EB;border-radius:10px;font-size:14px;font-family:inherit;outline:none;margin-bottom:6px;box-sizing:border-box"/>'+
-      '<input id="new-pw-confirm" type="password" placeholder="再次輸入新密碼" '+
-        'style="width:100%;padding:10px 14px;border:1.5px solid #E5E7EB;border-radius:10px;font-size:14px;font-family:inherit;outline:none;margin-bottom:12px;box-sizing:border-box"/>'+
-      '<div style="display:flex;gap:8px">'+
-        '<button id="confirm-reset-btn" data-uid="'+uid+'" '+
-          'style="flex:1;background:#2563EB;color:#fff;border:none;border-radius:10px;padding:11px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit">確認重設</button>'+
-        '<button id="cancel-reset-btn" '+
-          'style="flex:1;background:#F3F4F6;color:#374151;border:none;border-radius:10px;padding:11px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit">取消</button>'+
-      '</div>'+
-      '<div id="reset-pw-msg" style="text-align:center;font-size:13px;margin-top:10px;min-height:18px"></div>'+
-    '</div>';
-  document.body.appendChild(overlay);
-  setTimeout(function(){
-    document.getElementById('new-pw-input').focus();
-    var confirmBtn = document.getElementById('confirm-reset-btn');
-    if(confirmBtn) confirmBtn.onclick = function(){ doResetPw(confirmBtn.getAttribute('data-uid')); };
-    var cancelBtn = document.getElementById('cancel-reset-btn');
-    if(cancelBtn) cancelBtn.onclick = function(){ document.getElementById('reset-pw-modal').remove(); };
-    var resetDefaultBtn = document.getElementById('reset-to-default-btn');
-    if(resetDefaultBtn) resetDefaultBtn.onclick = function(){
-      resetToDefault(resetDefaultBtn.getAttribute('data-uid'), resetDefaultBtn.getAttribute('data-bizid'));
+  // 事件綁定
+  el.querySelectorAll('.restore-btn').forEach(function(btn){
+    btn.onclick = function(){
+      var acct = btn.getAttribute('data-acct');
+      var bizId = btn.getAttribute('data-bizid');
+      if(!confirm('確定要將「'+acct+'」的密碼恢復為統編（'+bizId+'）嗎？')) return;
+      if(CHANNEL_ACCOUNTS[acct]){
+        CHANNEL_ACCOUNTS[acct].pw = bizId;
+        saveChannelAccountsLocal();
+        btn.textContent = '✅ 已恢復！';
+        btn.style.background = '#D1FAE5';
+        setTimeout(function(){ btn.textContent = '🔄 恢復預設密碼（統編）'; btn.style.background = '#ECFDF5'; }, 2000);
+      }
     };
-  },100);
+  });
+
+  el.querySelectorAll('.custom-pw-btn').forEach(function(btn){
+    btn.onclick = function(){
+      showLocalResetPw(btn.getAttribute('data-acct'), btn.getAttribute('data-name'));
+    };
+  });
 }
 
-async function showLocalResetPw(acct, name){
+function showLocalResetPw(acct, name){
   var old = document.getElementById('local-reset-pw-modal');
   if(old) old.remove();
   var overlay = document.createElement('div');

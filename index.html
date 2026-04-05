@@ -749,7 +749,10 @@ const CH_MAP = {
   'c02': {
     name:'榮鑫國際商業有限公司',
     category:'經銷商類',
-    line: null
+    line: {
+      url: 'https://lin.ee/gCjKtDi',
+      msg: '請加入我們的 LINE 官方帳號，傳個大名、手機號碼給我們，方便後續為您服務唷！謝謝 😊'
+    }
   },
 };
 
@@ -975,12 +978,7 @@ async function submit(){
           <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M24 10.314C24 4.943 18.615.572 12 .572S0 4.943 0 10.314c0 4.811 4.27 8.842 10.035 9.608.391.082.923.258 1.058.59.12.301.079.766.038 1.08l-.164 1.02c-.045.301-.24 1.186 1.049.645 1.291-.539 6.916-4.078 9.436-6.975C23.176 14.393 24 12.458 24 10.314"/></svg>
           加入 LINE 官方帳號
         </a>
-        <div style="font-size:12px;color:#6B7280;margin-bottom:10px">電腦用戶請掃描下方 QR Code</div>
-        <div style="background:#fff;border-radius:12px;padding:12px;display:inline-block;box-shadow:0 2px 8px rgba(0,0,0,.08)">
-          <img src="https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=https://line.me/R/ti/p/@670bfbsp&bgcolor=ffffff&color=000000&margin=2"
-            alt="LINE QR Code" style="width:140px;height:140px;display:block;border-radius:6px"/>
-        </div>
-      </div>` : ''}
+        </div>` : ''}
     </div>`;
 }
 
