@@ -699,6 +699,15 @@ function saveChannelAccountsLocal(){
 }
 
 // 載入通路帳號從 localStorage
+function loadChannelsExtra(){
+  try {
+    var saved = JSON.parse(localStorage.getItem('fp_channels_extra')||'{}');
+    Object.keys(saved).forEach(function(k){
+      if(k!=='FlowPay' && !CHANNELS[k]) CHANNELS[k] = saved[k];
+    });
+  } catch(e){}
+}
+
 function loadChannelAccountsLocal(){
   try {
     var saved = localStorage.getItem('fp_channel_accounts');
@@ -711,6 +720,10 @@ function loadChannelAccountsLocal(){
     }
   } catch(e){}
 }
+
+// 載入 localStorage 中的新增通路帳號（頁面初始化時執行）
+loadChannelAccountsLocal();
+loadChannelsExtra(); // 同時載入 CHANNELS 資訊（含 TG/LINE）
 
 // ===== Supabase Auth 登入（統編/帳號 + 密碼）=====
 document.getElementById('login-btn').onclick = async function(){
@@ -1660,83 +1673,187 @@ function renderChannel(){
   if(!el) return;
   var chKeys = Object.keys(CHANNELS).filter(function(k){ return k!=='FlowPay'; });
   if(!chKeys.length){ el.innerHTML='<div class="empty">尚未建立任何通路</div>'; return; }
-  el.innerHTML = chKeys.map(function(code){
-    var ch=CHANNELS[code];
-    var chCases=cases.filter(function(c){return (c.channel||'FlowPay')===code;});
-    var total=chCases.length;
-    var approved=chCases.filter(function(c){return c.status==='已核准'||c.status==='已撥款';}).length;
-    var disbursed=chCases.filter(function(c){return c.status==='已撥款';}).length;
-    var pending=chCases.filter(function(c){return c.status==='待處理'||c.status==='已聯繫'||c.status==='審核中';}).length;
-    var rejected=chCases.filter(function(c){return c.status==='不予承作';}).length;
-    var approveRate=total>0?Math.round(approved/total*100):0;
-    var totalAmt=chCases.reduce(function(s,c){return s+(parseFloat(c.approved_amount)||0);},0);
-    var disbursedAmt=chCases.reduce(function(s,c){return s+(parseFloat(c.disbursed_amount)||0);},0);
-    var avgScore=total>0?Math.round(chCases.reduce(function(s,c){return s+calcScore(c);},0)/total):0;
-    var bizId=ch.bizId||'';
+
+  // 30天前
+  var now = new Date();
+  var d30 = new Date(now.getTime() - 30*24*60*60*1000);
+
+  // 全通路排名（前10大）
+  var rankData = chKeys.map(function(code){
+    var ch = CHANNELS[code];
+    var chCases = cases.filter(function(c){ return (c.channel||'FlowPay')===code; });
+    var approved = chCases.filter(function(c){ return c.status==='已核准'||c.status==='已撥款'; });
+    var disbursed = chCases.filter(function(c){ return c.status==='已撥款'; });
+    var approvedAmt = approved.reduce(function(s,c){ return s+(parseFloat(c.approved_amount)||0); },0);
+    var disbursedAmt = disbursed.reduce(function(s,c){ return s+(parseFloat(c.disbursed_amount)||0); },0);
+    return { code:code, name:ch.name, total:chCases.length, approvedCnt:approved.length,
+             approvedAmt:approvedAmt, disbursedAmt:disbursedAmt };
+  }).sort(function(a,b){ return b.approvedAmt - a.approvedAmt; }).slice(0,10);
+
+  // ① 排名區塊
+  var rankHtml = '<div class="table-wrap" style="padding:20px;margin-bottom:16px">'+
+    '<div style="font-size:15px;font-weight:800;margin-bottom:14px">🏆 通路核准金額排名（前10大）</div>'+
+    '<div style="display:grid;gap:8px">';
+
+  rankData.forEach(function(r, i){
+    var color = i===0?'#F59E0B':i===1?'#6B7280':i===2?'#B45309':'#2563EB';
+    var medal = i===0?'🥇':i===1?'🥈':i===2?'🥉':'';
+    var maxAmt = rankData[0].approvedAmt||1;
+    var pct = Math.round(r.approvedAmt/maxAmt*100);
+    rankHtml += '<div style="display:flex;align-items:center;gap:10px">'+
+      '<div style="font-size:13px;font-weight:800;color:'+color+';width:28px;text-align:center">'+(medal||('#'+(i+1)))+'</div>'+
+      '<div style="flex:1">'+
+        '<div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px">'+
+          '<span style="font-weight:700">'+r.name+'</span>'+
+          '<span style="color:#059669;font-weight:700">'+(r.approvedAmt>0?'NT$ '+r.approvedAmt.toLocaleString():'尚無核准')+'</span>'+
+        '</div>'+
+        '<div style="background:#F3F4F6;border-radius:99px;height:6px">'+
+          '<div style="width:'+pct+'%;height:100%;background:linear-gradient(90deg,#2563EB,#059669);border-radius:99px"></div>'+
+        '</div>'+
+        '<div style="font-size:11px;color:#9CA3AF;margin-top:2px">送件 '+r.total+' 件 · 核准 '+r.approvedCnt+' 件 · 已撥款 NT$ '+(r.disbursedAmt>0?r.disbursedAmt.toLocaleString():'0')+'</div>'+
+      '</div>'+
+    '</div>';
+  });
+  rankHtml += '</div></div>';
+
+  // ② 各通路詳細卡片
+  var cardsHtml = chKeys.map(function(code){
+    var ch = CHANNELS[code];
+    var bizId = ch.bizId||'';
+    var chCases = cases.filter(function(c){ return (c.channel||'FlowPay')===code; });
+    var total = chCases.length;
+
+    // 30天內案件
+    var recent = chCases.filter(function(c){
+      var d = c.created_at ? new Date(c.created_at) : null;
+      return d && d >= d30;
+    });
+
+    var approved   = chCases.filter(function(c){ return c.status==='已核准'||c.status==='已撥款'; });
+    var disbursed  = chCases.filter(function(c){ return c.status==='已撥款'; });
+    var pending    = chCases.filter(function(c){ return c.status==='待處理'||c.status==='已聯繫'||c.status==='審核中'; });
+    var rejected   = chCases.filter(function(c){ return c.status==='不予承作'; });
+    var approveRate = total>0?Math.round(approved.length/total*100):0;
+    var approvedAmt = approved.reduce(function(s,c){ return s+(parseFloat(c.approved_amount)||0); },0);
+    var disbursedAmt= disbursed.reduce(function(s,c){ return s+(parseFloat(c.disbursed_amount)||0); },0);
+    var feeAmt     = approved.reduce(function(s,c){ return s+(parseFloat(c.fee_amount)||0); },0);
+    var avgScore   = total>0?Math.round(chCases.reduce(function(s,c){ return s+calcScore(c); },0)/total):0;
+
+    // 風險分析
+    var gradeCount = {A:0,B:0,C:0,D:0,E:0};
+    chCases.forEach(function(c){ var g=gradeInfo(calcScore(c)).g; gradeCount[g]=(gradeCount[g]||0)+1; });
+    var highRisk = chCases.filter(function(c){ return calcScore(c)<50||c.is_alert==='yes'; }).length;
+    var alertCount = chCases.filter(function(c){ return c.is_alert==='yes'; }).length;
+
+    // 30天送件
+    var recentAmt = recent.filter(function(c){return c.status==='已核准'||c.status==='已撥款';})
+                         .reduce(function(s,c){return s+(parseFloat(c.approved_amount)||0);},0);
+
+    var gradeColors = {A:'#059669',B:'#2563EB',C:'#D97706',D:'#E97010',E:'#DC2626'};
+
     return '<div class="table-wrap" style="padding:20px;margin-bottom:16px">'+
       // 標題列
-      '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;cursor:pointer" data-chcode="'+code+'" class="ch-overview-hd">'+
+      '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">'+
         '<div style="display:flex;align-items:center;gap:12px">'+
-          '<div style="width:40px;height:40px;border-radius:10px;background:#EFF6FF;display:flex;align-items:center;justify-content:center;font-size:18px">🏢</div>'+
+          '<div style="width:42px;height:42px;border-radius:10px;background:#EFF6FF;display:flex;align-items:center;justify-content:center;font-size:20px">🏢</div>'+
           '<div>'+
             '<div style="font-size:15px;font-weight:800">'+ch.name+'</div>'+
-            '<div style="display:flex;gap:6px;margin-top:3px;flex-wrap:wrap">'+
+            '<div style="display:flex;gap:5px;margin-top:3px;flex-wrap:wrap">'+
               '<span style="font-size:11px;font-weight:700;padding:1px 8px;border-radius:99px;background:#EFF6FF;color:#1E40AF">'+code+'</span>'+
               (bizId?'<span style="font-size:11px;font-weight:700;padding:1px 8px;border-radius:99px;background:#FEF3C7;color:#92400E">'+bizId+'</span>':'')+
               '<span style="font-size:11px;color:#9CA3AF">'+ch.category+'</span>'+
             '</div>'+
           '</div>'+
         '</div>'+
-        '<span style="font-size:11px;color:#2563EB;font-weight:700">查看案件 →</span>'+
+        '<button class="ch-detail-btn" data-code="'+code+'"'+
+          ' style="background:#EFF6FF;border:1.5px solid #BFDBFE;border-radius:8px;padding:7px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;color:#1E40AF">'+
+          '查看案件列表 →</button>'+
       '</div>'+
-      // 統計數字
-      '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px">'+
+
+      // 統計數字（4格）
+      '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px">'+
         '<div style="background:#F9FAFB;border-radius:10px;padding:10px;text-align:center">'+
           '<div style="font-size:22px;font-weight:900;color:#111">'+total+'</div>'+
           '<div style="font-size:11px;color:#9CA3AF;margin-top:2px">總案件</div>'+
         '</div>'+
         '<div style="background:#ECFDF5;border-radius:10px;padding:10px;text-align:center">'+
-          '<div style="font-size:22px;font-weight:900;color:#059669">'+approved+'</div>'+
+          '<div style="font-size:22px;font-weight:900;color:#059669">'+approved.length+'</div>'+
           '<div style="font-size:11px;color:#059669;margin-top:2px">已核准</div>'+
         '</div>'+
         '<div style="background:#EDE9FE;border-radius:10px;padding:10px;text-align:center">'+
-          '<div style="font-size:22px;font-weight:900;color:#7C3AED">'+disbursed+'</div>'+
+          '<div style="font-size:22px;font-weight:900;color:#7C3AED">'+disbursed.length+'</div>'+
           '<div style="font-size:11px;color:#7C3AED;margin-top:2px">已撥款</div>'+
         '</div>'+
         '<div style="background:#FEF2F2;border-radius:10px;padding:10px;text-align:center">'+
-          '<div style="font-size:22px;font-weight:900;color:#DC2626">'+rejected+'</div>'+
-          '<div style="font-size:11px;color:#DC2626;margin-top:2px">不予承作</div>'+
+          '<div style="font-size:22px;font-weight:900;color:#DC2626">'+highRisk+'</div>'+
+          '<div style="font-size:11px;color:#DC2626;margin-top:2px">高風險</div>'+
         '</div>'+
       '</div>'+
+
       // 核准率進度條
       '<div style="margin-bottom:12px">'+
         '<div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px">'+
-          '<span style="color:#374151;font-weight:600">核准率</span>'+
-          '<span style="color:#059669;font-weight:700">'+approveRate+'%</span>'+
+          '<span style="font-weight:700;color:#374151">核准率</span>'+
+          '<span style="font-weight:800;color:#059669">'+approveRate+'%</span>'+
         '</div>'+
         '<div style="background:#E5E7EB;border-radius:99px;height:8px;overflow:hidden">'+
-          '<div style="width:'+approveRate+'%;height:100%;background:linear-gradient(90deg,#059669,#34D399);border-radius:99px;transition:width .5s"></div>'+
+          '<div style="width:'+approveRate+'%;height:100%;background:linear-gradient(90deg,#059669,#34D399);border-radius:99px"></div>'+
         '</div>'+
       '</div>'+
+
+      // 評等分布
+      (total>0?
+        '<div style="margin-bottom:12px">'+
+          '<div style="font-size:11px;font-weight:700;color:#374151;margin-bottom:6px">風險評等分布</div>'+
+          '<div style="display:flex;gap:4px;align-items:center">'+
+            ['A','B','C','D','E'].map(function(g){
+              var cnt = gradeCount[g]||0;
+              var pct2 = total>0?Math.round(cnt/total*100):0;
+              return '<div style="flex:'+Math.max(cnt,0.3)+';background:'+(gradeColors[g]||'#E5E7EB')+';height:12px;border-radius:4px;position:relative" title="'+g+'級 '+cnt+'件">'+
+                '</div>';
+            }).join('')+
+          '</div>'+
+          '<div style="display:flex;gap:8px;margin-top:4px;flex-wrap:wrap">'+
+            ['A','B','C','D','E'].map(function(g){
+              var cnt = gradeCount[g]||0;
+              return cnt>0?'<span style="font-size:10px;color:'+(gradeColors[g]||'#9CA3AF')+'">'+g+': '+cnt+'件</span>':'';
+            }).join('')+
+          '</div>'+
+        '</div>':'') +
+
+      // 30天動態
+      '<div style="background:#F8FAFC;border-radius:8px;padding:10px 12px;margin-bottom:12px">'+
+        '<div style="font-size:11px;font-weight:700;color:#374151;margin-bottom:6px">📅 近30天</div>'+
+        '<div style="display:flex;gap:16px;font-size:12px;flex-wrap:wrap">'+
+          '<span>送件：<strong>'+recent.length+'</strong> 件</span>'+
+          '<span>核准金額：<strong style="color:#059669">'+(recentAmt>0?'NT$ '+recentAmt.toLocaleString():'—')+'</strong></span>'+
+          (alertCount>0?'<span style="color:#DC2626">⚠ 警示戶：<strong>'+alertCount+'</strong> 件</span>':'')+
+        '</div>'+
+      '</div>'+
+
       // 金額資訊
-      (totalAmt>0?
-        '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;padding-top:12px;border-top:1px solid #F3F4F6">'+
-          '<div style="font-size:12px;color:#374151"><span style="color:#9CA3AF">核准金額合計</span><br><strong style="color:#059669">NT$ '+totalAmt.toLocaleString()+'</strong></div>'+
-          (disbursedAmt>0?'<div style="font-size:12px;color:#374151"><span style="color:#9CA3AF">已撥款合計</span><br><strong style="color:#7C3AED">NT$ '+disbursedAmt.toLocaleString()+'</strong></div>':'<div style="font-size:12px;color:#9CA3AF">暫無撥款紀錄</div>')+
-        '</div>':
-        '<div style="font-size:12px;color:#9CA3AF;padding-top:8px;border-top:1px solid #F3F4F6">尚無核准案件</div>'
-      )+
+      '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;padding-top:10px;border-top:1px solid #F3F4F6">'+
+        '<div style="font-size:12px"><div style="color:#9CA3AF;font-size:11px">核准金額合計</div>'+
+          '<div style="font-weight:800;color:#059669;margin-top:2px">'+(approvedAmt>0?'NT$ '+approvedAmt.toLocaleString():'—')+'</div></div>'+
+        '<div style="font-size:12px"><div style="color:#9CA3AF;font-size:11px">手續費合計</div>'+
+          '<div style="font-weight:800;color:#D97706;margin-top:2px">'+(feeAmt>0?'NT$ '+feeAmt.toLocaleString():'—')+'</div></div>'+
+        '<div style="font-size:12px"><div style="color:#9CA3AF;font-size:11px">已撥款合計</div>'+
+          '<div style="font-weight:800;color:#7C3AED;margin-top:2px">'+(disbursedAmt>0?'NT$ '+disbursedAmt.toLocaleString():'—')+'</div></div>'+
+      '</div>'+
+
     '</div>';
   }).join('');
+
+  el.innerHTML = rankHtml + cardsHtml;
+
+  // 事件綁定：查看案件列表
   setTimeout(function(){
-    el.querySelectorAll('.ch-row').forEach(function(div){
-      div.onclick=function(){ showChannelPage(div.getAttribute('data-code')); };
+    el.querySelectorAll('.ch-detail-btn').forEach(function(btn){
+      btn.onclick = function(){ showChannelPage(btn.getAttribute('data-code')); };
     });
-    el.querySelectorAll('.ch-overview-hd').forEach(function(div){
-      div.onclick=function(){ showChannelPage(div.getAttribute('data-chcode')||div.getAttribute('data-chcode')); };
-    });
-  },50);
+  }, 50);
 }
+
 
 function renderChannelNav(){
   var sidebar = document.getElementById('sidebar');
@@ -2014,6 +2131,31 @@ function openPanel(id){
   }
 
   // CCIS 不良警示移除（未實際串接查詢）
+    // ===== 月付比例風險評估 =====
+  var loanBurdenMap2={'5,000 以下':3000,'5,000–10,000':7500,'10,000–20,000':15000,'20,000 以上':25000};
+  var loanBurden2 = loanBurdenMap2[c.loan_burden]||0;
+  var income2 = parseInt(c.income)||0;
+  if(income2>0 && loanBurden2>0){
+    var burdenRatio = Math.round(loanBurden2/income2*100);
+    if(burdenRatio>=60){
+      alertBar+='<div style="background:#FEF2F2;border:1.5px solid #FECACA;border-radius:8px;padding:10px 14px;margin-bottom:8px;font-size:13px;font-weight:600;color:#991B1B">'+
+        '💸 現有月付比例已達 '+burdenRatio+'%（月收 NT$'+income2.toLocaleString()+' / 月付 NT$'+loanBurden2.toLocaleString()+'），超過60%高風險，建議降額評估</div>';
+    } else if(burdenRatio>=40){
+      alertBar+='<div style="background:#FFFBEB;border:1.5px solid #FDE68A;border-radius:8px;padding:10px 14px;margin-bottom:8px;font-size:13px;font-weight:600;color:#92400E">'+
+        '💸 現有月付比例 '+burdenRatio+'%（月收 NT$'+income2.toLocaleString()+' / 月付 NT$'+loanBurden2.toLocaleString()+'），建議確認還款能力</div>';
+    }
+  }
+
+  // ===== 近期送件次數提醒 =====
+  var recentCnt = parseInt(c.recent_apply_count)||0;
+  if(recentCnt>=3){
+    alertBar+='<div style="background:#FEF2F2;border:1.5px solid #FECACA;border-radius:8px;padding:10px 14px;margin-bottom:8px;font-size:13px;font-weight:600;color:#991B1B">'+
+      '📋 近期送件 '+recentCnt+' 次，請確認是否多頭借貸</div>';
+  } else if(recentCnt>=1){
+    alertBar+='<div style="background:#FFFBEB;border:1.5px solid #FDE68A;border-radius:8px;padding:10px 14px;margin-bottom:8px;font-size:13px;font-weight:600;color:#92400E">'+
+      '📋 近期有送件紀錄（'+recentCnt+' 次），建議確認原因</div>';
+  }
+
   if(sc>=70&&c.is_alert!=='yes') alertBar+='<div style="background:#ECFDF5;border:1.5px solid #A7F3D0;border-radius:8px;padding:10px 14px;margin-bottom:8px;display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:#065F46"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>初步條件良好，建議優先處理</div>';
 
   // 初審評分工具已移除，評分完全由客戶表單自動帶入
@@ -2080,8 +2222,16 @@ function openPanel(id){
           return '';
         })()+
         (c.company?'<a href="https://www.google.com/search?q='+encodeURIComponent(c.company)+'" target="_blank" style="background:#EFF6FF;border:1px solid #BFDBFE;color:#1E40AF;padding:2px 8px;border-radius:6px;font-size:11px;font-weight:700;text-decoration:none">Google</a>':'')+'</div></div>'+
-      '<div class="info"><div class="info-k">公司電話</div><div class="info-v" style="display:flex;align-items:center;gap:8px;color:'+(c.company_tel?'#2563EB':'#9CA3AF')+'">'+(c.company_tel||'未填')+
-        (c.company_tel?'<a href="tel:'+c.company_tel+'" style="background:#ECFDF5;border:1px solid #A7F3D0;color:#065F46;padding:2px 8px;border-radius:6px;font-size:11px;font-weight:700;text-decoration:none">撥打</a>':'')+'</div></div>'+
+      '<div class="info"><div class="info-k">公司電話</div><div class="info-v" style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">'+
+        (c.company_tel?
+          '<span style="color:#2563EB">'+c.company_tel+'</span>'+
+          '<a href="tel:'+c.company_tel+'" style="background:#ECFDF5;border:1px solid #A7F3D0;color:#065F46;padding:2px 8px;border-radius:6px;font-size:11px;font-weight:700;text-decoration:none">撥打</a>':
+          '<input id="edit-company-tel" type="tel" placeholder="輸入公司電話（可補填）" value=""'+
+            ' style="border:1.5px solid #BFDBFE;border-radius:6px;padding:3px 8px;font-size:12px;font-family:inherit;width:150px;color:#111"/>'+
+          '<button id="save-tel-btn" data-caseid="'+c.id+'" style="background:#EFF6FF;border:1px solid #BFDBFE;border-radius:6px;padding:3px 8px;font-size:11px;font-weight:700;cursor:pointer;color:#1E40AF">儲存</button>'+
+          '<a href="https://www.google.com/search?q='+encodeURIComponent(c.company||'')+'" target="_blank"'+
+            ' style="background:#F3F4F6;border:1px solid #E5E7EB;color:#374151;padding:3px 8px;border-radius:6px;font-size:11px;font-weight:700;text-decoration:none">Google查詢</a>'
+        )+'</div></div>'+
       '<div class="info"><div class="info-k">月收入</div><div class="info-v">'+(c.income?'NT$ '+parseInt(c.income).toLocaleString():'—')+'</div></div>'+
       '<div class="info"><div class="info-k">年資</div><div class="info-v">'+(c.tenure||'—')+'</div></div>'+
     '</div>'+
@@ -2152,7 +2302,7 @@ function openPanel(id){
         bonusItems.forEach(function(item){
           var checked=savedBonus.indexOf(item)>=0;
           html+='<label style="display:flex;align-items:center;gap:5px;background:'+(checked?'#ECFDF5':'#F9FAFB')+';border:1px solid '+(checked?'#A7F3D0':'#E5E7EB')+';border-radius:8px;padding:6px 10px;cursor:pointer;font-size:12px">'+
-            '<input type="checkbox" id="bonus-'+item+'" '+(checked?'checked':'')+' style="cursor:pointer">'+item+'</label>';
+            '<input type="checkbox" id="bonus-'+item+'" '+(checked?'checked':'')+' style="cursor:pointer;width:12px;height:12px;accent-color:#059669">'+item+'</label>';
         });
         html+='</div>';
         html+='<div style="display:flex;gap:6px;align-items:center">'+
@@ -2203,6 +2353,8 @@ function openPanel(id){
 
   // 狀態切換時顯示/隱藏撥款欄位
   setTimeout(function(){
+    var saveTelBtn = document.getElementById('save-tel-btn');
+    if(saveTelBtn) saveTelBtn.onclick = function(){ saveCompanyTel(saveTelBtn.getAttribute('data-caseid')); };
     var sel = document.getElementById('ssel');
     if(sel) sel.addEventListener('change', function(){
       var af = document.getElementById('approved-fields');
@@ -2268,6 +2420,25 @@ function calcFeeAuto(){
   } else if(sumEl){
     sumEl.style.display = 'none';
   }
+}
+
+async function saveCompanyTel(id){
+  var el = document.getElementById('edit-company-tel');
+  if(!el) return;
+  var tel = el.value.trim();
+  if(!tel){ alert('請輸入電話號碼'); return; }
+  try {
+    var r = await fetch(URL_+'/rest/v1/applications?id=eq.'+id,{
+      method:'PATCH',
+      headers:Object.assign({},HDR,{'Content-Type':'application/json','Prefer':'return=minimal'}),
+      body:JSON.stringify({company_tel:tel})
+    });
+    if(r.ok){
+      var c=cases.find(function(x){return x.id===id;});
+      if(c){ c.company_tel=tel; }
+      openPanel(id);
+    }
+  } catch(e){ alert('儲存失敗'); }
 }
 
 async function saveCase(id){
