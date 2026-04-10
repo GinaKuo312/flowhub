@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1"/>
-<title>FlowHub — 免費貸款方案評估</title>
+<title>FlowHub 經銷版 — 免費貸款方案評估</title>
 <meta name="description" content="FlowHub 提供免費貸款方案評估服務，信貸、房貸、車貸一次比較，30秒了解最適合您的方案。"/>
 <meta property="og:title" content="FlowHub — 免費貸款評估"/>
 <meta property="og:description" content="免費評估，不查聯徵，立即了解最適合的資金方案"/>
@@ -219,9 +219,9 @@ select{background-image:url("data:image/svg+xml,%3Csvg width='12' height='8' vie
 
     <div class="field">
       <div class="lbl">手機號碼<span class="req">*</span></div>
-      <input type="tel" id="f_phone" placeholder="0912-345-678" aria-label="手機號碼" maxlength="12" inputmode="numeric"
+      <input type="tel" id="f_phone" placeholder="" aria-label="手機號碼" maxlength="12" inputmode="numeric"
              oninput="fmtPhone(this)"/>
-      <div class="hint">格式：0912-345-678（09 開頭，共 10 碼）</div>
+      
       <div class="err" id="e_phone">請填寫正確手機號碼（10碼，09開頭）</div>
     </div>
 
@@ -229,7 +229,7 @@ select{background-image:url("data:image/svg+xml,%3Csvg width='12' height='8' vie
       <div class="lbl">出生日期<span class="req">*</span></div>
       <div class="frow3">
         <div>
-          <input type="text" id="by" placeholder="西元年，如 1990" maxlength="4" inputmode="numeric"
+          <input type="text" id="by" placeholder="西元年" maxlength="4" inputmode="numeric"
                  oninput="numOnly(this);if(this.value.length===4)id('bm').focus()"/>
           <div class="blbl">西元年</div>
         </div>
@@ -249,7 +249,7 @@ select{background-image:url("data:image/svg+xml,%3Csvg width='12' height='8' vie
 
     <div class="field">
       <div class="lbl">戶籍地址<span class="req">*</span></div>
-      <input type="text" id="f_addr" placeholder="例：台北市中山區某路某號"/>
+      <input type="text" id="f_addr" placeholder=""/>
       <div class="err" id="e_addr2">請填寫戶籍地址</div>
     </div>
   </div>
@@ -258,14 +258,14 @@ select{background-image:url("data:image/svg+xml,%3Csvg width='12' height='8' vie
     <div class="ctitle">💼 公司資訊</div>
     <div class="field">
       <div class="lbl">公司名稱<span class="req">*</span></div>
-      <input type="text" id="f_co" placeholder="例：台積電股份有限公司、自行開業"/>
-      <div class="hint">填寫後後台可直接 Google 查詢驗證</div>
+      <input type="text" id="f_co" placeholder=""/>
+      
       <div class="err" id="e_co">請填寫公司名稱</div>
     </div>
     <div class="field">
       <div class="lbl">公司電話</div>
-      <input type="tel" id="f_cotel" placeholder="例：02-1234-5678"/>
-      <div class="hint">填寫後後台可直接撥打查核（選填）</div>
+      <input type="tel" id="f_cotel" placeholder=""/>
+      
     </div>
   </div>
 
@@ -313,7 +313,7 @@ select{background-image:url("data:image/svg+xml,%3Csvg width='12' height='8' vie
         <button class="opt" onclick="fd.phone_own='是';pg('g_ph',this)">✅ 是，本人門號</button>
         <button class="opt" onclick="fd.phone_own='否';pg('g_ph',this)">❌ 非本人辦理</button>
       </div>
-      <div class="hint">聯絡真實性驗證，影響評分</div>
+      
       <div class="err" id="e_ph">請選擇</div>
     </div>
   </div>
@@ -352,14 +352,7 @@ select{background-image:url("data:image/svg+xml,%3Csvg width='12' height='8' vie
       </select>
       <div class="err" id="e_ten">請選擇年資</div>
     </div>
-    <div class="field">
-      <div class="lbl">公司是否可電話查核？<span class="req">*</span></div>
-      <div class="opts">
-        <button class="opt" onclick="fd.co_chk='是';pg('g_coc',this)">✅ 可以</button>
-        <button class="opt" onclick="fd.co_chk='否';pg('g_coc',this)">❌ 無法</button>
-      </div>
-      <div class="err" id="e_coc">請選擇</div>
-    </div>
+    
   </div>
 
   <div class="card">
@@ -388,7 +381,7 @@ select{background-image:url("data:image/svg+xml,%3Csvg width='12' height='8' vie
       <div class="err" id="e_st">請選擇</div>
     </div>
     <div class="field">
-      <div class="lbl">是否有薪轉帳戶？<span class="req">*</span></div>
+      
       <div class="opts">
         <button class="opt" onclick="fd.sal_tr='有';pg('g_str',this)">✅ 有薪轉帳戶</button>
         <button class="opt" onclick="fd.sal_tr='無';pg('g_str',this)">❌ 沒有</button>
@@ -453,7 +446,7 @@ select{background-image:url("data:image/svg+xml,%3Csvg width='12' height='8' vie
     <div class="coll" id="blk_cc">
       <div class="field">
         <div class="lbl">發卡銀行（選填）</div>
-        <input type="text" id="f_ccbank" placeholder="例：玉山銀行、國泰世華…" oninput="fd.cc_bank=this.value"/>
+        <input type="text" id="f_ccbank" placeholder="" oninput="fd.cc_bank=this.value"/>
       </div>
       <div class="field">
         <div class="lbl">信用卡繳款狀況<span class="req">*</span></div>
@@ -525,7 +518,7 @@ select{background-image:url("data:image/svg+xml,%3Csvg width='12' height='8' vie
     </div>
   </div>
 
-  <div class="card">
+  <div class="card" style="background:#fff">
     <div class="ctitle">🔍 近期查詢紀錄</div>
 
     <div class="field">
@@ -560,7 +553,7 @@ select{background-image:url("data:image/svg+xml,%3Csvg width='12' height='8' vie
   </div>
 
   <!-- 融資分期紀錄（重要評分因子）-->
-  <div class="field" id="blk_fin_hist">
+  <div class="field" id="blk_fin_hist" style="background:#fff;border-radius:12px;padding:16px;margin-bottom:12px">
     <div class="lbl">是否辦過<strong>融資分期</strong>？<span class="req">*</span></div>
     <div class="opts">
       <button class="opt" onclick="fd.has_fin='no';pg('g_fin',this);showFin(false)">否</button>
@@ -582,7 +575,7 @@ select{background-image:url("data:image/svg+xml,%3Csvg width='12' height='8' vie
         <button class="opt chk" id="fc_bobopei"  onclick="toggleFc('BOBO配')">BOBO配</button>
         <button class="opt chk" id="fc_other"    onclick="toggleFc('other')">其他</button>
       </div>
-      <input id="fc_other_text" style="display:none;margin-top:10px;width:100%;height:42px;border:1.5px solid var(--gold);border-radius:var(--rs);padding:0 14px;font-size:13px;font-family:inherit;outline:none;background:#fff;box-shadow:0 0 0 3px rgba(201,164,96,.1)" placeholder="請填寫分期公司名稱（例：花旗分期）" oninput="fd.fin_co_other=this.value"/>
+      <input id="fc_other_text" style="display:none;margin-top:10px;width:100%;height:42px;border:1.5px solid var(--gold);border-radius:var(--rs);padding:0 14px;font-size:13px;font-family:inherit;outline:none;background:#fff;box-shadow:0 0 0 3px rgba(201,164,96,.1)" placeholder="" oninput="fd.fin_co_other=this.value"/>
     </div>
 
     <!-- 繳款狀態 -->
@@ -637,13 +630,13 @@ select{background-image:url("data:image/svg+xml,%3Csvg width='12' height='8' vie
     <div class="field">
       <div class="lbl">希望還款期數</div>
       <select id="f_per" onchange="fd.period=this.value">
+        <option value="">請選擇</option>
+        <option value="6">6 期（半年）</option>
         <option value="12">12 期（1 年）</option>
-        <option value="24" selected>24 期（2 年）</option>
+        <option value="24">24 期（2 年）</option>
         <option value="36">36 期（3 年）</option>
         <option value="48">48 期（4 年）</option>
-        <option value="60">60 期（5 年）</option>
-        <option value="120">120 期（10 年）</option>
-        <option value="240">240 期（20 年）</option>
+        <option value="60">48 期以上</option>
       </select>
     </div>
     <div class="field">
@@ -718,46 +711,6 @@ select{background-image:url("data:image/svg+xml,%3Csvg width='12' height='8' vie
   <div class="ph-tag">步驟 5 / 5</div>
   <div class="ph-title">確認資料並送出</div>
 
-  <!-- 身分證上傳 -->
-  <div class="card">
-    <div class="ctitle">🪪 身分證上傳（選填）</div>
-    <div class="hint" style="margin-bottom:10px">上傳身分證正反面照片，有助於加速後台審核（照片僅限內部使用）</div>
-
-    <div class="field">
-      <div class="lbl">正面（含照片那面）</div>
-      <div class="upload-area" id="ua_front" onclick="id('fi_front').click()">
-        <input type="file" id="fi_front" accept="image/*" onchange="onImg(this,'front')" style="opacity:0;position:absolute;inset:0;cursor:pointer"/>
-        <div class="upload-icon">📷</div>
-        <div class="upload-text">點擊或拖曳上傳</div>
-        <div class="upload-sub">JPG / PNG，建議 5MB 以內</div>
-      </div>
-      <div id="prev_front" style="display:none;margin-top:8px">
-        <div class="img-preview">
-          <img id="img_front" src="" alt="正面"/>
-          <div class="img-label">身分證正面</div>
-          <button class="img-del" onclick="delImg('front')">✕</button>
-        </div>
-      </div>
-    </div>
-
-    <div class="field">
-      <div class="lbl">反面（背面）</div>
-      <div class="upload-area" id="ua_back" onclick="id('fi_back').click()">
-        <input type="file" id="fi_back" accept="image/*" onchange="onImg(this,'back')" style="opacity:0;position:absolute;inset:0;cursor:pointer"/>
-        <div class="upload-icon">📷</div>
-        <div class="upload-text">點擊或拖曳上傳</div>
-        <div class="upload-sub">JPG / PNG，建議 5MB 以內</div>
-      </div>
-      <div id="prev_back" style="display:none;margin-top:8px">
-        <div class="img-preview">
-          <img id="img_back" src="" alt="反面"/>
-          <div class="img-label">身分證反面</div>
-          <button class="img-del" onclick="delImg('back')">✕</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
   <!-- 同意書 -->
   <div class="consent-card">
     <div class="consent-title">🔒 個人資料蒐集同意書</div>
@@ -786,7 +739,9 @@ select{background-image:url("data:image/svg+xml,%3Csvg width='12' height='8' vie
 
   <div class="btm"><div class="btm-inner">
     <button class="btn-bk" onclick="go(4)">←</button>
-    <button class="btn-sb" id="btn_sb" onclick="doSubmit()" disabled>📤 送出免費評估申請</button>
+    <button class="btn-sb" id="btn_sb" onclick="doSubmit()">📤 送出免費評估申請</button>
+  </div>
+  <div id="submit_err" style="color:#DC2626;font-size:13px;text-align:center;margin-top:8px;min-height:18px"></div>
   </div></div>
 </div>
 
@@ -822,6 +777,7 @@ select{background-image:url("data:image/svg+xml,%3Csvg width='12' height='8' vie
 <div class="toast-wrap" id="tw"></div>
 
 <script>
+// =====
 // ===== 全域狀態 =====
 var fd = { alert: 'no', period: '24', q_bank: null, q_fin: null };
 var cur = 1;
@@ -1075,14 +1031,16 @@ function buildSummary(){
 
 // ===== 同意 =====
 function chkC(){
+  // 視覺提示用，送出時才真正驗證
   var ok=id('c1').checked&&id('c2').checked;
-  id('btn_sb').disabled=!ok;
+  var btn=id('btn_sb');
+  if(btn) btn.style.opacity=ok?'1':'0.7';
 }
 
 // ===== 評分 =====
 
 // ================================================================
-//  FlowHub 順策引擎 v2.0 — 精準評分核心
+//  FlowHub 經銷版 v2.0 — 精準評分核心
 //  基於台灣金融市場實際核准邏輯設計
 //  覆蓋：信貸、汽機車貸、房貸、土地貸、商品貸、債務整合
 // ================================================================
@@ -1413,6 +1371,13 @@ function gi(s){
 
 // ===== 送出 =====
 async function doSubmit(){
+  // 個資同意驗證
+  var c1=document.getElementById('c1'), c2=document.getElementById('c2');
+  if(!c1||!c1.checked||!c2||!c2.checked){
+    var errEl=document.getElementById('submit_err');
+    if(errEl) errEl.textContent='❌ 請先勾選個人資料蒐集同意書';
+    return;
+  }
   var btn=document.getElementById('btn_sb');
   btn.disabled=true;
   if(!document.getElementById('spin-style')){
@@ -1529,22 +1494,28 @@ async function doSubmit(){
   })
   .then(function(resp){
     clearTimeout(timeout);
-    return resp.json();
-  })
-  .then(function(data){
     btn.disabled = false;
-    if(data && data[0]) {
+    if(resp.ok){
+      // HTTP 201/200 = 送出成功
       showResult(scores, best, bGi);
     } else {
+      // 伺服器回傳錯誤
       btn.innerHTML = '重新送出 →';
-      console.error('送出回應:', JSON.stringify(data));
+      resp.json().then(function(d){
+        console.error('送出失敗 HTTP '+resp.status+':', JSON.stringify(d));
+        // 顯示錯誤提示
+        var errEl = document.getElementById('submit_err');
+        if(errEl) errEl.textContent = '❌ 送出失敗，請稍後再試（'+resp.status+'）';
+      }).catch(function(){});
     }
   })
   .catch(function(e){
     clearTimeout(timeout);
     btn.disabled  = false;
     btn.innerHTML = '重新送出 →';
-    console.error('送出失敗:', e.message);
+    console.error('網路錯誤:', e.message);
+    var errEl = document.getElementById('submit_err');
+    if(errEl) errEl.textContent = '❌ 網路連線問題，請檢查網路後重試';
   });
 }
 
@@ -1585,6 +1556,8 @@ window.go=go;
 window.next=next;
 window.chkC=chkC;
 window.doSubmit=doSubmit;
+
+
 </script>
 </body>
 </html>

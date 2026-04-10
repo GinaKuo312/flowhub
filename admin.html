@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <meta name="robots" content="noindex,nofollow"/>
 <meta name="theme-color" content="#C9A460"/>
-<title>FlowHub — 後台管理系統</title>
+<title>FlowHub 經銷版 — 後台管理系統</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;800;900&display=swap" rel="stylesheet"/>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
@@ -222,7 +222,7 @@ tr:hover td{background:#FDFBF7;cursor:pointer}
 </head>
 <body>
 
-<!-- LOGIN -->
+<!-- ===== 登入頁 ===== -->
 <div id="lp">
   <div class="lcard">
     <div class="llogo">
@@ -231,64 +231,271 @@ tr:hover td{background:#FDFBF7;cursor:pointer}
       <div class="llogo-fb" id="lfb" style="display:none">F</div>
     </div>
     <div class="ltitle">FlowHub</div>
-    <div class="lsub">後台管理系統 · 內部使用</div>
+    <div class="lsub">經銷版後台管理系統 · 內部使用</div>
     <div class="fl">帳號</div>
-    <input class="fi" type="text" id="u" placeholder="帳號" autocomplete="username" onkeydown="if(event.key==='Enter')document.querySelector('.lbtn').click()"
-           onkeydown="if(event.key==='Enter')document.getElementById('lbtn_submit').click()"/>
+    <input class="fi" type="text" id="u" placeholder="帳號" autocomplete="username"/>
     <div class="fl">密碼</div>
-    <input class="fi" type="password" id="p" placeholder="密碼" autocomplete="current-password" onkeydown="if(event.key==='Enter')document.querySelector('.lbtn').click()"
-           onkeydown="if(event.key==='Enter')document.getElementById('lbtn_submit').click()"/>
+    <input class="fi" type="password" id="p" placeholder="密碼" autocomplete="current-password"/>
+    <div class="lerr" id="lerr"></div>
     <button class="lbtn" id="lbtn_submit" onclick="(function(){
   var u=document.getElementById('u').value.trim();
   var p=document.getElementById('p').value.trim();
   var err=document.getElementById('lerr');
   if(!u||!p){err.textContent='請填寫帳號密碼';return;}
-  err.textContent='';
-  if(u==='admin'&&p==='FlowHub2024!'){
-    document.getElementById('lp').style.display='none';
-    document.getElementById('app').style.display='block';
-    document.getElementById('top_user').textContent='FlowHub 管理員';
-    document.getElementById('sb_name').textContent='FlowHub 管理員';
-    document.getElementById('sb_role').textContent='系統管理員';
-    window._ME='admin';window._ROLE='admin';window._CH=null;
-    if(typeof loadAll==='function')loadAll();
-    else if(typeof window.loadAll==='function')window.loadAll();
-    return;
+  err.textContent='驗證中...';
+  // 呼叫 script 裡的登入邏輯
+  if(typeof window.doLogin==='function'){
+    window.doLogin(u,p);
+  } else {
+    // 備用：直接 admin 登入
+    if(u==='admin'&&p==='FlowHub2024!'){
+      err.textContent='';
+      document.getElementById('lp').style.display='none';
+      document.getElementById('app').style.display='block';
+      document.getElementById('top_user').textContent='FlowHub 管理員';
+      if(document.getElementById('sb_name')) document.getElementById('sb_name').textContent='FlowHub 管理員';
+      if(document.getElementById('sb_role')) document.getElementById('sb_role').textContent='系統管理員';
+      window._ME='admin'; window._ROLE='admin'; window._CH=null;
+      if(typeof window.loadAll==='function') window.loadAll();
+    } else {
+      err.textContent='帳號或密碼錯誤';
+    }
   }
-  err.textContent='帳號或密碼錯誤';
-})()" >登入後台</button>
-    <div class="lerr" id="lerr"></div>
+})()">登入後台</button>
   </div>
 </div>
 
-<!-- APP -->
-<div id="app">
+<!-- ===== 主後台 ===== -->
+<div id="app" style="display:none">
+
+  <!-- 頂部導覽列 -->
   <div class="topbar">
     <div class="tlogo">
       <img src="logo.png" alt="FlowHub"
            onerror="this.style.display='none';document.getElementById('tfb').style.display='flex'">
       <div class="tlogo-fb" id="tfb" style="display:none">F</div>
-      <span class="tname">FlowHub 後台</span>
+      <span class="tname">FlowHub 經銷版 後台</span>
     </div>
     <div class="tright">
+      <span id="sb_name" style="font-size:12px;color:#6B5B4E;margin-right:6px"></span>
+      <span id="sb_role" style="font-size:11px;color:#C9A460;margin-right:12px;font-weight:600"></span>
       <span class="tuser" id="top_user"></span>
-      <button class="tlout" onclick="logout()">登出</button>
+      <button class="tlout" onclick="window.logout&&window.logout()">登出</button>
     </div>
   </div>
 
+  <!-- 主版面 -->
   <div class="layout">
+
+    <!-- 側欄 -->
     <div class="sidebar" id="sidebar">
       <div class="nb-label">案件管理</div>
-      <button class="nb on" id="nav_cases" onclick="page('cases')">
+      <button class="nb on" id="nav_cases" onclick="window.page&&window.page('cases')">
         📋 所有案件 <span class="nbadge" id="bdg_wait"></span>
       </button>
-      <button class="nb" id="nav_approved" onclick="page('approved')">
+      <button class="nb" id="nav_approved" onclick="window.page&&window.page('approved')">
         ✅ 核准撥款 <span class="nbadge" id="bdg_approve"></span>
       </button>
       <div class="nb-sep"></div>
       <div class="nb-label">分析報表</div>
-      <button class="nb" id="nav_stats" onclick="page('stats')">📊 統計總覽</button>
-      <button class="nb" id="nav_commission" onclick="page('commission')"<script>function $(id){
+      <button class="nb" id="nav_stats" onclick="window.page&&window.page('stats')">📊 統計總覽</button>
+      <button class="nb" id="nav_perf" onclick="window.page&&window.page('perf')">🏆 通路績效</button>
+      <button class="nb" id="nav_commission" onclick="window.page&&window.page('commission')">💰 分潤管理</button>
+      <div class="nb-sep"></div>
+      <div class="nb-label">通路管理</div>
+      <button class="nb" id="nav_channels" onclick="window.page&&window.page('channels')">🏢 通路總覽</button>
+      <button class="nb" id="nav_ch_setup" onclick="window.page&&window.page('ch_setup')">⚙️ 通路設定</button>
+      <div class="nb-sep"></div>
+      <div class="nb-label">系統</div>
+      <button class="nb" id="nav_settings" onclick="window.page&&window.page('settings')">🔧 系統設定</button>
+    </div>
+
+    <!-- 主內容區 -->
+    <div class="main" id="main_area">
+
+      <!-- 搜尋列 -->
+      <div class="bar">
+        <input id="qs" class="qinput" type="text" placeholder="搜尋姓名、手機..."
+               oninput="window.filterCases&&window.filterCases()">
+        <select id="qst" class="qsel" onchange="window.filterCases&&window.filterCases()">
+          <option value="">全部狀態</option>
+          <option value="待處理">待處理</option>
+          <option value="處理中">處理中</option>
+          <option value="核准">核准</option>
+          <option value="婉拒">婉拒</option>
+        </select>
+        <select id="qgr" class="qsel" onchange="window.filterCases&&window.filterCases()">
+          <option value="">全部評等</option>
+          <option value="A">A 級</option>
+          <option value="B">B 級</option>
+          <option value="C">C 級</option>
+          <option value="D">D 級</option>
+          <option value="E">E 級</option>
+        </select>
+        <select id="qch" class="qsel" onchange="window.filterCases&&window.filterCases()">
+          <option value="">全部通路</option>
+        </select>
+        <button class="qbtn" onclick="window.exportAll&&window.exportAll()">⬇ 匯出</button>
+      </div>
+
+      <!-- 所有案件頁 -->
+      <div id="pg_cases" class="pg active">
+        <div id="ov" class="sg" style="margin-bottom:12px"></div>
+        <table class="tbl">
+          <thead><tr>
+            <th>姓名</th><th>手機</th><th>申請</th><th>評等</th>
+            <th>最佳商品</th><th>通路</th><th>狀態</th><th>時間</th><th>操作</th>
+          </tr></thead>
+          <tbody id="cases_tbody"></tbody>
+        </table>
+      </div>
+
+      <!-- 核准撥款頁 -->
+      <div id="pg_approved" class="pg" style="display:none">
+        <table class="tbl">
+          <thead><tr>
+            <th>姓名</th><th>手機</th><th>商品</th><th>核准銀行</th>
+            <th>核准利率</th><th>金額</th><th>通路</th><th>核准時間</th><th>操作</th>
+          </tr></thead>
+          <tbody id="approved_tbody"></tbody>
+        </table>
+        <div style="margin-top:12px;text-align:right">
+          <button class="btn-sm" onclick="window.exportApproved&&window.exportApproved()">⬇ 匯出核准清單</button>
+        </div>
+      </div>
+
+      <!-- 統計總覽頁 -->
+      <div id="pg_stats" class="pg" style="display:none">
+        <div id="tw2" class="sg" style="margin-bottom:12px"></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
+          <div class="card">
+            <div id="donut" style="text-align:center;padding:16px;color:#C9A460;font-size:24px">◎</div>
+            <div id="donut_lbl" style="font-size:11px;color:#6B5B4E;margin-top:4px;text-align:center"></div>
+          </div>
+          <div class="card" id="grade_dist"></div>
+        </div>
+        <div class="card">
+          <div style="font-size:13px;font-weight:700;margin-bottom:10px">📅 月目標追蹤</div>
+          <div id="month_target"></div>
+        </div>
+      </div>
+
+      <!-- 通路績效頁 -->
+      <div id="pg_perf" class="pg" style="display:none">
+        <div id="pg_perf_content"></div>
+        <div id="perf_content"></div>
+      </div>
+
+      <!-- 分潤管理頁 -->
+      <div id="pg_commission" class="pg" style="display:none">
+        <div class="ag" id="cm_stats" style="margin-bottom:12px"></div>
+        <div class="card" style="margin-bottom:12px">
+          <div style="font-size:13px;font-weight:700;margin-bottom:8px">💰 分潤預覽</div>
+          <div id="cm_preview"></div>
+        </div>
+        <table class="tbl">
+          <thead><tr>
+            <th>通路</th><th>本月案件</th><th>核准</th><th>應付分潤</th><th>狀態</th><th>操作</th>
+          </tr></thead>
+          <tbody id="cm_tbody"></tbody>
+        </table>
+        <div style="margin-top:12px;text-align:right">
+          <button class="btn-sm" onclick="window.exportCommission&&window.exportCommission()">⬇ 匯出分潤清單</button>
+        </div>
+      </div>
+
+      <!-- 通路總覽頁 -->
+      <div id="pg_channels" class="pg" style="display:none">
+        <div style="margin-bottom:12px;text-align:right">
+          <button class="btn-sm btn-gold" onclick="window.page&&window.page('ch_setup')">➕ 新增通路</button>
+        </div>
+        <div id="ch_rank" style="margin-bottom:12px"></div>
+        <div id="ch_list"></div>
+      </div>
+
+      <!-- 通路設定頁 -->
+      <div id="pg_ch_setup" class="pg" style="display:none">
+        <div class="card" style="margin-bottom:12px">
+          <div class="ctitle">🏢 新增 / 編輯通路</div>
+          <div class="ig">
+            <div><div class="fl">通路統編</div>
+              <input class="fi" type="text" id="cs_biz" placeholder="統一編號 8 碼"></div>
+            <div><div class="fl">通路名稱</div>
+              <input class="fi" type="text" id="cs_name" placeholder="公司名稱"></div>
+            <div><div class="fl">負責人</div>
+              <input class="fi" type="text" id="cs_cat" placeholder="聯絡人姓名"></div>
+            <div><div class="fl">聯絡電話</div>
+              <input class="fi" type="text" id="cs_num" placeholder="聯絡電話"></div>
+            <div><div class="fl">訂閱方案</div>
+              <select class="fi" id="cs_plan">
+                <option value="basic">基本版</option>
+                <option value="advanced">進階版</option>
+              </select></div>
+            <div><div class="fl">分潤比例 %</div>
+              <input class="fi" type="number" id="cs_cm" placeholder="例: 30" min="0" max="100"></div>
+            <div><div class="fl">LINE Notify Token</div>
+              <input class="fi" type="text" id="cs_token" placeholder="LINE Notify Token"></div>
+            <div><div class="fl">Telegram Chat ID</div>
+              <input class="fi" type="text" id="cs_tg" placeholder="選填"></div>
+          </div>
+          <div style="margin-top:10px">
+            <div class="fl">歡迎訊息</div>
+            <textarea class="fi" id="cs_msg" rows="2" placeholder="選填，顯示於業務後台頂部"
+                      style="height:56px;resize:vertical"></textarea>
+          </div>
+          <div style="margin-top:10px;display:flex;align-items:center;gap:10px">
+            <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer">
+              <input type="checkbox" id="cs_agree"> 通路已同意合作合約
+            </label>
+            <span id="cs_tgt" style="font-size:11px;color:#6B5B4E"></span>
+          </div>
+          <div style="margin-top:12px;display:flex;gap:8px">
+            <button class="btn-sm btn-gold" onclick="window.createCh&&window.createCh()">💾 建立通路</button>
+            <button class="btn-sm" onclick="window.updCsCode&&window.updCsCode()">🔗 產生連結</button>
+          </div>
+          <div id="cs_line" style="margin-top:8px;font-size:12px;color:#6B5B4E"></div>
+          <div id="cs_preview" style="margin-top:8px"></div>
+        </div>
+        <div class="card">
+          <div class="ctitle">📋 現有通路清單</div>
+          <div id="cs_list"></div>
+        </div>
+      </div>
+
+      <!-- 系統設定頁 -->
+      <div id="pg_settings" class="pg" style="display:none">
+        <div class="card">
+          <div class="ctitle">⚙️ 系統設定</div>
+          <div><div class="fl">Supabase URL</div>
+            <input class="fi" type="text" id="set_url" placeholder="https://xxx.supabase.co"></div>
+          <div style="margin-top:10px">
+            <div class="fl">系統狀態</div>
+            <div id="sys_status" style="font-size:13px;color:#6B5B4E;margin-top:4px">-</div>
+          </div>
+          <div style="margin-top:12px">
+            <button class="btn-sm btn-gold" onclick="window.saveSettings&&window.saveSettings()">💾 儲存</button>
+          // NULL-SAFE $ 函式
+window.$ = function(id){
+  var el = document.getElementById(id);
+  if(!el){
+    var fake = {
+      style:{display:'',visibility:'',color:'',background:''},
+      textContent:'', innerHTML:'', innerText:'', value:'', className:'',
+      classList:{add:function(){},remove:function(){},contains:function(){return false;},toggle:function(){}},
+      addEventListener:function(){}, removeEventListener:function(){},
+      click:function(){}, focus:function(){}, blur:function(){},
+      querySelectorAll:function(){return [];}, querySelector:function(){return null;},
+      disabled:false, checked:false, selectedIndex:0,
+      options:[], length:0, placeholder:'', type:'',
+      getBoundingClientRect:function(){return {top:0,left:0,width:0,height:0};}
+    };
+    return fake;
+  }
+  return el;
+};
+var $ = window.$;
+
+function $(id){
   var el = document.getElementById(id);
   if(!el) return {
     style:{display:'',visibility:''},
@@ -310,7 +517,7 @@ var H = {
 };
 
 // ================================================================
-//  FlowHub 順策引擎 — AI 評分回饋優化系統
+//  FlowHub 經銷版 — AI 評分回饋優化系統
 // ================================================================
 
 // 評分權重（初始值，會隨案件累積自動調整）
@@ -618,6 +825,32 @@ window.logout = function(){
 // ================================================================
 //  資料載入
 // ================================================================
+
+window.doLogin = async function(u, p){
+  var err = document.getElementById('lerr');
+  // 管理員帳號（本地驗證）
+  if(u === 'admin' && p === 'FlowHub2024!'){
+    err.textContent = '';
+    window.initApp(u, 'FlowHub 管理員', 'admin', null);
+    return;
+  }
+  // 嘗試從 Supabase 驗證
+  try {
+    var r = await fetch(SUPA_URL+'/rest/v1/channels?biz_id=eq.'+u+'&status=eq.active', {headers:H});
+    var data = await r.json();
+    if(!data||!data[0]){ err.textContent='❌ 帳號不存在'; return; }
+    var ch = data[0];
+    if(ch.password_hash !== p){ err.textContent='❌ 密碼錯誤'; return; }
+    if(ch.trial_expires_at && new Date(ch.trial_expires_at) < new Date()){
+      err.textContent='⚠️ 試用期已結束，請聯繫 FlowHub'; return;
+    }
+    err.textContent = '';
+    window.initApp(u, ch.name||u, 'channel', u);
+  } catch(e) {
+    err.textContent = '❌ 連線失敗：'+e.message;
+  }
+};
+
 window.loadAll = async function(){
   await Promise.all([loadChannels(), loadCases()]);
 }
@@ -1515,6 +1748,29 @@ window.showRecordResult = function(caseId){
   okBtn.style.cssText='height:44px;background:#DCFCE7;color:#166534;border:2px solid #22C55E;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit';
   okBtn.onclick=function(){window.doRecord(caseId,'approved');};
   var ngBtn=document.createElement('button');
+  ngBtn.textContent='❌ 拒絕';
+  ngBtn.style.cssText='height:44px;background:#FEE2E2;color:#991B1B;border:2px solid #DC2626;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit';
+  ngBtn.onclick=function(){window.doRecord(caseId,'rejected');};
+  btnsEl.appendChild(okBtn);
+  btnsEl.appendChild(ngBtn);
+  document.getElementById('rr_cancel').onclick=function(){m.remove();};
+};
+
+window.doRecord = async function(caseId, result){
+  var prod=($('rr_product')||{}).value||'';
+  var note=($('rr_note')||{}).value||'';
+  var modal=document.getElementById('rr_modal');if(modal)modal.remove();
+  if(!caseId)return;
+  var status=result==='approved'?'已核准':'已拒絕';
+  try{
+    await fetch(SUPA_URL+'/rest/v1/applications?id=eq.'+caseId,{method:'PATCH',headers:H,body:JSON.stringify({status:status})});
+    await recordResult(caseId,result,prod,note);
+    await loadAll();
+    closePanel();
+    toast(result==='approved'?'✅ 已記錄核准，AI 評分持續優化中':'✅ 已記錄拒絕，AI 評分持續優化中');
+  }catch(e){toast('❌ 記錄失敗');}
+};
+n');
   ngBtn.textContent='❌ 拒絕';
   ngBtn.style.cssText='height:44px;background:#FEE2E2;color:#991B1B;border:2px solid #DC2626;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit';
   ngBtn.onclick=function(){window.doRecord(caseId,'rejected');};
