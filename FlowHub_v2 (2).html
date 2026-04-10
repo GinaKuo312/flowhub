@@ -1,0 +1,1421 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FlowHub 月付金試算系統</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><text y='28' font-size='28'>💫</text></svg>">
+<style>
+  :root{
+    /* FlowHub Gold/Champagne Palette - from logo */
+    --brand:#8b7355;--brand-light:#a08968;--brand-dark:#6b5740;
+    --gold:#c9a96e;--gold-light:#dcc9a5;--gold-lighter:#efe3cc;--gold-pale:#f8f2e8;--gold-deep:#b8944a;
+    --champagne:#d4b896;--champagne-light:#e8d5b8;
+    --cream:#faf7f2;--cream-dark:#f2ece3;--cream-deep:#e8dfd3;
+    --text:#4a4240;--text-light:#7a706a;--text-muted:#a89e94;
+    --sage:#6a8a6a;--sage-bg:#eef5ee;--sage-lt:#d4e8d4;--sage-dark:#3e6e3e;
+    --white:#ffffff;
+    --red:#c0392b;--red-bg:#fce8e6;
+    --g50:#faf8f6;--g100:#f5f0ea;--g200:#e8e0d6;--g300:#d6ccc0;--g400:#a89e94;--g500:#7a706a;--g600:#5c544e;--g700:#3e3836;--g800:#2a2624;
+    --radius:12px;--radius-lg:16px;
+    --shadow:0 2px 8px rgba(107,87,64,.06);--shadow-md:0 8px 24px rgba(107,87,64,.1);--shadow-lg:0 12px 40px rgba(107,87,64,.12);
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'Segoe UI','Microsoft JhengHei',-apple-system,BlinkMacSystemFont,sans-serif;background:var(--cream);color:var(--text);min-height:100vh}
+
+  /* NAV */
+  .nav{background:linear-gradient(135deg,#3e3430 0%,#5c4a3e 40%,#6b5740 100%);padding:0 28px;display:flex;align-items:center;height:58px;position:sticky;top:0;z-index:100;box-shadow:0 4px 20px rgba(62,52,48,.25)}
+  .nav-brand{font-size:17px;font-weight:700;color:#fff;margin-right:32px;white-space:nowrap;display:flex;align-items:center;gap:6px;letter-spacing:.5px}
+  .nav-brand .brand-name{font-style:italic;letter-spacing:.8px;font-size:19px}
+  .nav-brand .brand-sep{opacity:.3;font-weight:300;margin:0 2px}
+  .nav-brand .brand-desc{font-size:13px;opacity:.55;font-weight:400;letter-spacing:.3px}
+  .nav-tabs{display:flex;gap:4px}
+  .nav-tab{padding:8px 18px;border:none;background:none;cursor:pointer;font-size:14px;color:rgba(255,255,255,.45);border-radius:8px;font-weight:500;transition:.2s;letter-spacing:.3px}
+  .nav-tab:hover{color:rgba(255,255,255,.8);background:rgba(255,255,255,.08)}
+  .nav-tab.active{color:#fff;background:rgba(255,255,255,.12);backdrop-filter:blur(4px)}
+
+  .container{max-width:960px;margin:0 auto;padding:24px 20px}
+  .card{background:var(--white);border-radius:var(--radius-lg);box-shadow:var(--shadow-md);border:1px solid rgba(201,169,110,.12);overflow:hidden}
+  .card-body{padding:24px}
+
+  /* ===== FRONT - Premium Design ===== */
+  .front-card{border:none;box-shadow:var(--shadow-lg);border-radius:20px;overflow:hidden}
+
+  .store-banner{
+    background:linear-gradient(135deg,#4a3f35 0%,#5c4a3e 30%,#6b5740 60%,#7a6550 100%);
+    padding:28px 32px;color:#fff;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px;
+    position:relative;overflow:hidden
+  }
+  .store-banner::before{
+    content:'';position:absolute;top:-50%;right:-20%;width:300px;height:300px;
+    background:radial-gradient(circle,rgba(201,169,110,.15) 0%,transparent 70%);border-radius:50%
+  }
+  .store-banner::after{
+    content:'';position:absolute;bottom:-30%;left:10%;width:200px;height:200px;
+    background:radial-gradient(circle,rgba(212,184,150,.1) 0%,transparent 70%);border-radius:50%
+  }
+  .store-name{font-size:26px;font-weight:800;letter-spacing:1px;position:relative;z-index:1;text-shadow:0 2px 8px rgba(0,0,0,.15)}
+  .store-sub{font-size:12px;opacity:.5;margin-top:4px;position:relative;z-index:1;font-weight:300;letter-spacing:.5px}
+  .store-sel{padding:8px 14px;border-radius:8px;border:1px solid rgba(201,169,110,.3);background:rgba(255,255,255,.08);color:#fff;font-size:13px;outline:none;cursor:pointer;backdrop-filter:blur(4px);position:relative;z-index:1;transition:.2s}
+  .store-sel:hover{background:rgba(255,255,255,.12);border-color:rgba(201,169,110,.5)}
+  .store-sel option{color:#333;background:#fff}
+
+  /* Amount Input - Premium */
+  .calc-input-area{
+    padding:30px 32px;display:flex;gap:20px;align-items:flex-end;flex-wrap:wrap;
+    background:linear-gradient(180deg,var(--gold-pale) 0%,var(--white) 100%);
+    border-bottom:1px solid var(--g200)
+  }
+  .calc-f{display:flex;flex-direction:column;gap:8px;flex:1;min-width:200px}
+  .calc-f label{font-size:12px;font-weight:700;color:var(--brand);text-transform:uppercase;letter-spacing:1.5px}
+  .input-wrap{position:relative;display:flex;align-items:center}
+  .input-wrap .currency{position:absolute;left:16px;font-size:20px;font-weight:700;color:var(--gold);z-index:1}
+  .calc-f input[type="text"]{
+    width:100%;padding:16px 18px 16px 42px;
+    border:2px solid var(--g300);border-radius:12px;
+    font-size:24px;font-weight:800;outline:none;
+    background:var(--white);color:var(--brand-dark);
+    transition:.25s;letter-spacing:1px;
+    box-shadow:inset 0 2px 4px rgba(107,87,64,.04)
+  }
+  .calc-f input[type="text"]:focus{
+    border-color:var(--gold);
+    box-shadow:0 0 0 4px rgba(201,169,110,.15),inset 0 2px 4px rgba(107,87,64,.04)
+  }
+  .calc-f input[type="text"]::placeholder{color:var(--g400);font-weight:400;font-size:16px;letter-spacing:0}
+  .fc-select{
+    width:100%;padding:14px 14px;border:2px solid var(--g300);border-radius:12px;
+    font-size:15px;font-weight:600;outline:none;background:var(--white);color:var(--brand-dark);
+    cursor:pointer;transition:.25s;appearance:auto
+  }
+  .fc-select:focus{border-color:var(--gold);box-shadow:0 0 0 4px rgba(201,169,110,.15)}
+  .amt-preview{font-size:14px;color:var(--text-light);align-self:center;white-space:nowrap;padding-bottom:8px}
+  .amt-preview b{color:var(--brand-dark);font-size:16px}
+
+  /* Plan Toggle - Elegant */
+  .toggle-section{padding:20px 32px}
+  .type-toggle{display:flex;border-radius:14px;overflow:hidden;border:2px solid var(--g200);background:var(--cream);position:relative}
+  .type-btn{
+    flex:1;padding:16px 12px;border:none;background:transparent;cursor:pointer;
+    font-size:15px;font-weight:700;transition:.3s;text-align:center;color:var(--g400);
+    position:relative;z-index:1
+  }
+  .type-btn:first-child{border-right:1px solid var(--g200)}
+  .type-btn.sel-zero{background:linear-gradient(135deg,var(--sage-bg),#e0f0e0);color:var(--sage-dark);border-color:var(--sage);box-shadow:inset 0 2px 8px rgba(106,138,106,.1)}
+  .type-btn.sel-gen{background:linear-gradient(135deg,var(--gold-pale),var(--gold-lighter));color:var(--brand-dark);border-color:var(--gold);box-shadow:inset 0 2px 8px rgba(201,169,110,.1)}
+  .type-btn:hover:not(.sel-zero):not(.sel-gen){background:rgba(201,169,110,.06)}
+  .type-sub{font-size:11px;font-weight:400;display:block;margin-top:4px;opacity:.55}
+
+  /* Results - Premium Cards */
+  .res-area{padding:20px 32px 32px}
+  .res-section{border-radius:14px;overflow:hidden;border:1px solid var(--g200);margin-bottom:16px;box-shadow:var(--shadow);transition:.2s}
+  .res-section:hover{box-shadow:var(--shadow-md);transform:translateY(-1px)}
+  .res-hdr{padding:14px 20px;font-size:15px;font-weight:700;display:flex;align-items:center;gap:10px}
+  .res-hdr.zh{background:linear-gradient(135deg,var(--sage-bg),#e0f0e0);color:var(--sage-dark);border-bottom:2px solid var(--sage-lt)}
+  .res-hdr.gh{background:linear-gradient(135deg,var(--gold-pale),var(--gold-lighter));color:var(--brand-dark);border-bottom:2px solid var(--gold-lighter)}
+  .res-hdr .pill{font-size:11px;padding:3px 10px;border-radius:12px;margin-left:auto;font-weight:700}
+  .res-hdr.zh .pill{background:var(--sage-lt);color:var(--sage-dark)}
+  .res-hdr.gh .pill{background:var(--gold-lighter);color:var(--brand)}
+
+  .rt{width:100%;border-collapse:collapse}
+  .rt th{padding:10px 18px;font-size:12px;font-weight:700;text-align:center;border-bottom:2px solid var(--g200);letter-spacing:.5px}
+  .rt.zt th{background:#f5faf5;color:var(--sage)}
+  .rt.gt th{background:var(--gold-pale);color:var(--gold-deep)}
+  .rt td{padding:14px 18px;text-align:center;font-size:14px;border-bottom:1px solid var(--g100)}
+  .rt tr:nth-child(even) td{background:var(--g50)}
+  .rt tr:hover td{background:var(--cream-dark)}
+  .rt .period{font-weight:700;color:var(--g600);font-size:15px}
+  .rt .monthly{font-size:20px;font-weight:800;color:var(--brand-dark);letter-spacing:.5px}
+  .rt .note{font-size:11px;color:var(--g400);font-style:italic;padding:10px 18px;background:var(--g50)}
+
+  .no-msg{padding:40px;text-align:center;color:var(--g400);font-size:15px}
+  .no-msg .no-icon{font-size:36px;margin-bottom:10px;opacity:.5}
+
+  /* Powered by footer */
+  .powered-by{text-align:center;padding:14px;font-size:11px;color:var(--text-muted);letter-spacing:.5px;border-top:1px solid var(--g100)}
+  .powered-by strong{color:var(--gold);font-weight:700}
+
+  /* ===== PASSWORD GATE ===== */
+  .pw-gate{max-width:400px;margin:80px auto;text-align:center}
+  .pw-gate .pw-icon{font-size:52px;margin-bottom:18px}
+  .pw-gate h2{font-size:22px;font-weight:700;color:var(--brand);margin-bottom:8px}
+  .pw-gate p{font-size:13px;color:var(--text-light);margin-bottom:24px}
+  .pw-input-wrap{display:flex;gap:10px}
+  .pw-input-wrap input{flex:1;padding:12px 16px;border:2px solid var(--g300);border-radius:10px;font-size:15px;outline:none;text-align:center;letter-spacing:3px;transition:.2s}
+  .pw-input-wrap input:focus{border-color:var(--gold);box-shadow:0 0 0 4px rgba(201,169,110,.12)}
+  .pw-input-wrap button{padding:12px 24px;background:linear-gradient(135deg,var(--brand-dark),var(--brand-light));color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;transition:.2s;letter-spacing:.5px}
+  .pw-input-wrap button:hover{opacity:.9;transform:translateY(-1px)}
+  .pw-error{color:var(--red);font-size:13px;margin-top:12px;display:none}
+
+  /* ===== ADMIN ===== */
+  .admin-tabs{display:flex;gap:4px;margin-bottom:18px;background:var(--cream-dark);padding:4px;border-radius:10px}
+  .admin-tab{flex:1;padding:10px;border:none;background:none;border-radius:8px;font-size:14px;font-weight:500;cursor:pointer;color:var(--g500);transition:.2s;text-align:center}
+  .admin-tab.active{background:var(--white);color:var(--text);box-shadow:var(--shadow);font-weight:700}
+
+  .stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}
+  .stat{background:var(--white);border:1px solid var(--g200);border-radius:var(--radius);padding:16px 18px;box-shadow:var(--shadow);transition:.2s}
+  .stat:hover{box-shadow:var(--shadow-md)}
+  .stat-l{font-size:12px;color:var(--text-light);margin-bottom:4px}.stat-v{font-size:24px;font-weight:800;color:var(--brand)}
+
+  .toolbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px}
+  .toolbar-t{font-size:17px;font-weight:700;color:var(--brand)}
+  .toolbar-a{display:flex;gap:8px;flex-wrap:wrap}
+
+  .search-bar{margin-bottom:14px}
+  .search-bar input{width:100%;padding:10px 16px;border:2px solid var(--g200);border-radius:10px;font-size:14px;outline:none;background:var(--white);transition:.2s}
+  .search-bar input:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,169,110,.1)}
+
+  .at{width:100%;border-collapse:collapse;font-size:13px}
+  .at th{text-align:left;padding:11px 14px;background:var(--cream);border-bottom:2px solid var(--g200);font-weight:700;color:var(--g600);white-space:nowrap}
+  .at td{padding:11px 14px;border-bottom:1px solid var(--g100);vertical-align:top}
+  .at tr:hover td{background:var(--cream)}
+
+  .tags{display:flex;flex-wrap:wrap;gap:4px}
+  .tag{font-size:11px;padding:3px 8px;border-radius:10px;font-weight:600;white-space:nowrap}
+  .tag-z{background:var(--sage-bg);color:var(--sage-dark)}
+  .tag-g{background:var(--gold-pale);color:var(--gold-deep)}
+  .tag-fc{background:var(--cream-dark);color:var(--brand)}
+
+  .badge{display:inline-block;padding:3px 10px;border-radius:12px;font-size:11px;font-weight:700}
+  .b-on{background:#e8f5e9;color:#2e7d32}.b-off{background:var(--red-bg);color:var(--red)}
+
+  .btn{padding:7px 14px;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;transition:.2s;display:inline-flex;align-items:center;gap:5px}
+  .btn-p{background:linear-gradient(135deg,var(--brand-dark),var(--brand-light));color:#fff}.btn-p:hover{opacity:.9;transform:translateY(-1px)}
+  .btn-o{background:var(--white);color:var(--g600);border:1px solid var(--g300)}.btn-o:hover{background:var(--cream);border-color:var(--gold-light)}
+  .btn-d{background:var(--red);color:#fff}.btn-d:hover{opacity:.9}
+  .btn-s{background:var(--sage);color:#fff}
+  .btn-lock{padding:8px 16px;background:rgba(201,169,110,.15);color:var(--gold);border:1px solid rgba(201,169,110,.25);border-radius:8px;font-size:13px;cursor:pointer;font-weight:600;transition:.2s}
+  .btn-lock:hover{background:rgba(201,169,110,.25);color:var(--gold-deep)}
+
+  /* MODALS */
+  .overlay{position:fixed;inset:0;background:rgba(74,66,64,.5);display:flex;align-items:center;justify-content:center;z-index:200;backdrop-filter:blur(4px)}
+  .modal{background:var(--white);border-radius:18px;width:92%;max-width:720px;max-height:88vh;overflow-y:auto;padding:28px;box-shadow:var(--shadow-lg)}
+  .m-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
+  .m-head h3{font-size:18px;font-weight:700;color:var(--brand)}
+  .m-close{background:none;border:none;font-size:24px;cursor:pointer;color:var(--g400);padding:4px;transition:.2s}.m-close:hover{color:var(--text)}
+
+  .fg{margin-bottom:14px}
+  .fg label{display:block;font-size:12px;font-weight:700;color:var(--g600);margin-bottom:5px}
+  .fg input,.fg select{width:100%;padding:9px 12px;border:1.5px solid var(--g300);border-radius:8px;font-size:14px;outline:none;background:var(--white);transition:.2s}
+  .fg input:focus,.fg select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,169,110,.1)}
+  .fg-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+
+  .plan-list{border:1px solid var(--g200);border-radius:10px;overflow:hidden;margin-top:8px}
+  .pl-hdr{display:grid;grid-template-columns:55px 90px 1fr 1fr 32px;background:var(--cream-dark);font-size:11px;font-weight:700;color:var(--g500)}
+  .pl-hdr>div{padding:8px 6px;text-align:center}
+  .pl-row{display:grid;grid-template-columns:55px 90px 1fr 1fr 32px;border-top:1px solid var(--g100);align-items:center}
+  .pl-row>div{padding:6px 4px;display:flex;align-items:center;justify-content:center}
+  .pl-row .pr-p{font-weight:700;font-size:13px;color:var(--g600);background:var(--cream)}
+  .pl-row select{width:100%;padding:5px;border:1px solid var(--g200);border-radius:6px;font-size:12px;text-align:center}
+  .pl-row input{width:100%;padding:5px;border:1px solid var(--g200);border-radius:6px;font-size:12px;text-align:center;outline:none}
+  .pl-row input:focus{border-color:var(--gold)}
+  .pl-row input.i-g{color:var(--gold-deep);font-weight:700}
+  .pl-row input.i-z{color:var(--sage-dark);font-weight:700}
+  .pl-row .x-btn{background:none;border:none;color:var(--g400);cursor:pointer;font-size:16px;padding:2px 4px;border-radius:4px}
+  .pl-row .x-btn:hover{background:var(--red-bg);color:var(--red)}
+
+  .add-bar{display:flex;gap:6px;align-items:center;padding:8px 10px;border-top:1px solid var(--g100);background:var(--cream);flex-wrap:wrap}
+  .add-bar select{padding:5px 8px;border:1px solid var(--g200);border-radius:6px;font-size:12px}
+  .add-bar button{padding:5px 12px;background:var(--brand);color:#fff;border:none;border-radius:6px;font-size:12px;cursor:pointer;white-space:nowrap;font-weight:600}
+
+  .m-foot{display:flex;gap:10px;justify-content:flex-end;margin-top:18px}
+
+  .fc-checks{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px;margin-top:8px}
+  .fc-chk{display:flex;align-items:center;gap:7px;padding:10px 12px;border:1.5px solid var(--g200);border-radius:10px;font-size:13px;cursor:pointer;transition:.2s}
+  .fc-chk:hover{background:var(--cream);border-color:var(--gold-light)}
+  .fc-chk.checked{background:var(--gold-pale);border-color:var(--gold)}
+  .fc-chk input{accent-color:var(--gold)}
+
+  /* Store FC Config Cards */
+  .st-fc-card{border:1.5px solid var(--gold-light);border-radius:12px;overflow:hidden;background:var(--white)}
+  .st-fc-hdr{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--gold-pale);border-bottom:1px solid var(--gold-light)}
+  .st-fc-hdr strong{font-size:14px;color:var(--brand-dark)}
+  .st-fc-hdr .st-fc-acts{display:flex;gap:6px;align-items:center}
+  .st-fc-plan-list{font-size:12px}
+  .st-fc-plan-hdr{display:grid;grid-template-columns:60px 1fr 1fr 28px;background:var(--cream-dark);font-weight:700;color:var(--g500)}
+  .st-fc-plan-hdr>div{padding:8px 6px;text-align:center;font-size:11px}
+  .st-fc-plan-row{display:grid;grid-template-columns:60px 1fr 1fr 28px;border-top:1px solid var(--g100);align-items:center}
+  .st-fc-plan-row>div{padding:6px 5px;display:flex;align-items:center;justify-content:center}
+  .st-fc-plan-row .pp{font-weight:700;font-size:13px;color:var(--g600);background:var(--cream)}
+  .st-fc-plan-row select{width:100%;padding:6px;border:1px solid var(--g200);border-radius:6px;font-size:12px;text-align:center}
+  .st-fc-plan-row input{width:100%;padding:8px 6px;border:1.5px solid var(--g200);border-radius:8px;font-size:14px;text-align:center;outline:none;transition:.2s}
+  .st-fc-plan-row input:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,169,110,.12)}
+  .st-fc-plan-row .xb{background:none;border:none;color:var(--g400);cursor:pointer;font-size:14px;padding:2px}
+  .st-fc-plan-row .xb:hover{color:var(--red)}
+  .st-fc-add{display:flex;gap:6px;align-items:center;padding:8px 10px;border-top:1px solid var(--g100);background:var(--cream);flex-wrap:wrap}
+  .st-fc-add span{font-size:11px;color:var(--g500);font-weight:600}
+  .st-fc-add select{padding:4px 6px;border:1px solid var(--g200);border-radius:5px;font-size:11px}
+  .st-fc-add button{padding:4px 10px;background:var(--brand);color:#fff;border:none;border-radius:5px;font-size:11px;cursor:pointer;font-weight:600}
+
+  /* Store Link */
+  .store-link{display:flex;align-items:center;gap:6px;margin-top:6px}
+  .store-link input{flex:1;padding:5px 8px;border:1px solid var(--g200);border-radius:6px;font-size:11px;color:var(--text-light);background:var(--cream);cursor:text}
+  .store-link button{padding:4px 10px;background:var(--gold-pale);color:var(--gold-deep);border:1px solid var(--gold-light);border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap;transition:.2s}
+  .store-link button:hover{background:var(--gold-lighter)}
+  .copied{background:var(--sage-bg)!important;color:var(--sage-dark)!important;border-color:var(--sage-lt)!important}
+
+  /* Disbursement reveal toggle */
+  .disb-cell{position:relative;cursor:pointer;user-select:none}
+  .disb-hidden{color:transparent;background:var(--cream-dark);border-radius:6px;padding:2px 12px;font-size:12px;letter-spacing:2px;display:inline-block;min-width:80px;text-align:center;position:relative}
+  .disb-hidden::after{content:'點擊查看';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:var(--text-muted);font-size:11px;font-weight:600;letter-spacing:0}
+  .disb-show{font-size:14px;color:var(--text);font-weight:500}
+  .disb-toggle-bar{display:flex;align-items:center;justify-content:flex-end;gap:8px;padding:6px 18px;background:var(--g50);border-top:1px solid var(--g100)}
+  .disb-toggle-btn{padding:4px 12px;border:1px solid var(--sage-lt);background:var(--sage-bg);color:var(--sage-dark);border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;transition:.2s}
+  .disb-toggle-btn:hover{background:var(--sage-lt)}
+  .disb-toggle-btn.revealed{background:var(--cream-dark);border-color:var(--g300);color:var(--text-light)}
+
+  /* ===== SHARE MODAL ===== */
+  .share-modal-wrap{max-width:540px}
+  .share-hero{display:flex;gap:24px;align-items:flex-start;flex-wrap:wrap;margin-bottom:20px}
+  .share-qr-box{
+    flex-shrink:0;width:160px;height:160px;border-radius:14px;
+    border:2px solid var(--gold-light);background:var(--white);
+    display:flex;align-items:center;justify-content:center;
+    box-shadow:var(--shadow-md);overflow:hidden;position:relative
+  }
+  .share-qr-box canvas{display:block}
+  .share-qr-box .qr-loading{font-size:11px;color:var(--g400);text-align:center;padding:8px}
+  .share-info{flex:1;min-width:180px;display:flex;flex-direction:column;gap:10px}
+  .share-store-label{font-size:13px;font-weight:700;color:var(--brand);text-transform:uppercase;letter-spacing:1px}
+  .share-store-name{font-size:20px;font-weight:800;color:var(--brand-dark);line-height:1.2}
+  .share-store-meta{font-size:12px;color:var(--text-muted)}
+  .share-url-box{background:var(--cream);border:1.5px solid var(--g200);border-radius:10px;padding:10px 12px;font-size:11px;color:var(--text-light);word-break:break-all;line-height:1.5;cursor:text;font-family:monospace;max-height:60px;overflow-y:auto}
+  .share-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:4px}
+  .share-btn-copy{
+    flex:1;padding:11px 16px;
+    background:linear-gradient(135deg,var(--brand-dark),var(--brand-light));
+    color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:700;
+    cursor:pointer;transition:.2s;letter-spacing:.3px;display:flex;align-items:center;justify-content:center;gap:6px
+  }
+  .share-btn-copy:hover{opacity:.9;transform:translateY(-1px)}
+  .share-btn-copy.copied-ok{background:linear-gradient(135deg,var(--sage-dark),var(--sage))}
+  .share-btn-dl{
+    padding:11px 14px;background:var(--white);color:var(--brand);
+    border:1.5px solid var(--gold-light);border-radius:10px;font-size:13px;
+    font-weight:600;cursor:pointer;transition:.2s;white-space:nowrap
+  }
+  .share-btn-dl:hover{background:var(--gold-pale);border-color:var(--gold)}
+  .share-divider{border:none;border-top:1px solid var(--g100);margin:16px 0}
+  .share-tips{font-size:11px;color:var(--text-muted);line-height:1.7;background:var(--cream);border-radius:8px;padding:10px 12px}
+
+  /* Copyright watermark */
+  .copyright-bar{text-align:center;padding:10px;font-size:10px;color:var(--text-muted);letter-spacing:.3px;background:var(--cream-dark);border-top:1px solid var(--g200)}
+
+  .hidden{display:none!important}
+  .toast{position:fixed;bottom:24px;right:24px;background:linear-gradient(135deg,var(--brand-dark),var(--brand));color:#fff;padding:12px 22px;border-radius:10px;font-size:14px;font-weight:500;box-shadow:var(--shadow-lg);z-index:300;animation:su .35s ease}
+  @keyframes su{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
+
+  @media(max-width:768px){
+    .stats-row{grid-template-columns:1fr 1fr}
+    .calc-input-area{flex-direction:column;padding:24px 20px}
+    .calc-f{max-width:100%!important;min-width:0!important}
+    .container{padding:16px 12px}
+    .pl-hdr,.pl-row{grid-template-columns:50px 75px 1fr 1fr 28px}
+    .type-toggle{flex-direction:column}
+    .type-btn:first-child{border-right:none;border-bottom:1px solid var(--g200)}
+    .store-banner{padding:20px}
+    .store-name{font-size:20px}
+    .toggle-section{padding:16px 20px}
+    .res-area{padding:16px 20px 24px}
+    .calc-f input[type="text"]{font-size:20px;padding:14px 16px 14px 38px}
+    .input-wrap .currency{font-size:18px;left:14px}
+    .nav{padding:0 16px}
+    .nav-brand{font-size:14px;margin-right:12px;gap:4px}
+    .nav-brand .brand-name{font-size:16px}
+    .nav-brand .brand-sep{display:none}
+    .nav-brand .brand-desc{font-size:11px}
+  }
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-brand">
+    <span class="brand-name">FlowHub</span>
+    <span class="brand-sep">|</span>
+    <span class="brand-desc">分期付款月付金試算</span>
+  </div>
+  <div class="nav-tabs">
+    <button class="nav-tab active" onclick="go('calc')">📊 試算中心</button>
+    <button class="nav-tab" id="admin-nav-btn" onclick="goAdmin()">🔐 後台管理</button>
+  </div>
+  <button class="btn-lock hidden" id="lock-btn" onclick="lockAdmin()" style="margin-left:auto">🔓 登出</button>
+</nav>
+
+<!-- ====== FRONT ====== -->
+<div id="pg-calc" class="container">
+  <div class="card front-card">
+    <div class="store-banner">
+      <div>
+        <div class="store-name" id="front-store-name">旗艦店 A</div>
+        <div class="store-sub">FlowHub 分期付款試算</div>
+      </div>
+      <select id="c-store" class="store-sel" onchange="onStoreChange()"></select>
+    </div>
+
+    <div class="calc-input-area">
+      <div class="calc-f" style="max-width:340px">
+        <label>商品總金額</label>
+        <div class="input-wrap">
+          <span class="currency">$</span>
+          <input type="text" id="c-amt" value="" inputmode="numeric" placeholder="請輸入金額" oninput="onAmtInput(this)" onblur="onAmtBlur(this)">
+        </div>
+      </div>
+      <div class="calc-f" style="max-width:240px">
+        <label>分期公司</label>
+        <select id="c-fc" class="fc-select" onchange="calc()">
+          <option value="all">全部顯示</option>
+        </select>
+      </div>
+      <div class="amt-preview" id="amt-preview"></div>
+    </div>
+
+    <div class="toggle-section">
+      <div class="type-toggle">
+        <button class="type-btn" data-t="general" onclick="setType('general')">
+          一般專案<span class="type-sub">利息分攤在客人月付金</span>
+        </button>
+        <button class="type-btn" data-t="zero" onclick="setType('zero')">
+          零利率<span class="type-sub">店家負擔手續費</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="res-area" id="calc-result"></div>
+    <div class="powered-by">Powered by <strong>FlowHub</strong></div>
+  </div>
+</div>
+
+<!-- ====== PASSWORD GATE ====== -->
+<div id="pg-pw" class="container hidden">
+  <div class="card"><div class="card-body">
+    <div class="pw-gate">
+      <div class="pw-icon">🔐</div>
+      <h2>後台管理登入</h2>
+      <p>請輸入管理員密碼以進入後台設定</p>
+      <div class="pw-input-wrap">
+        <input type="password" id="pw-input" placeholder="請輸入密碼" onkeydown="if(event.key==='Enter')checkPw()">
+        <button onclick="checkPw()">登入</button>
+      </div>
+      <div class="pw-error" id="pw-error">密碼錯誤，請重新輸入</div>
+    </div>
+  </div></div>
+</div>
+
+<!-- ====== ADMIN ====== -->
+<div id="pg-admin" class="container hidden">
+  <div class="stats-row" id="a-stats"></div>
+  <div class="admin-tabs">
+    <button class="admin-tab" onclick="aTab('fc')">🏦 分期公司管理</button>
+    <button class="admin-tab active" onclick="aTab('store')">🛒 店家管理</button>
+  </div>
+
+  <div id="tab-fc" class="card hidden"><div class="card-body">
+    <div class="toolbar">
+      <div class="toolbar-t">分期公司報價設定</div>
+      <div class="toolbar-a">
+        <button class="btn btn-o" onclick="exportD()">📥 匯出</button>
+        <label class="btn btn-o" style="cursor:pointer">📤 匯入<input type="file" accept=".json" style="display:none" onchange="importD(event)"></label>
+        <button class="btn btn-p" onclick="openFcM()">+ 新增分期公司</button>
+      </div>
+    </div>
+    <div class="search-bar"><input id="fc-search" placeholder="搜尋分期公司..." oninput="renderFc()"></div>
+    <div style="overflow-x:auto">
+      <table class="at"><thead><tr><th>分期公司</th><th>方案總覽</th><th>期數</th><th>狀態</th><th>操作</th></tr></thead>
+      <tbody id="fc-tbody"></tbody></table>
+    </div>
+  </div></div>
+
+  <div id="tab-store" class="card"><div class="card-body">
+    <div id="url-setup-box" style="border-radius:10px;padding:14px 16px;margin-bottom:16px">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+        <span style="font-size:14px">🌐</span>
+        <label style="font-size:13px;font-weight:700;color:var(--brand)">系統對外網址設定</label>
+        <span id="url-status-badge" style="font-size:10px;padding:2px 8px;border-radius:8px;font-weight:700"></span>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+        <input id="base-url" type="text" placeholder="例如：https://yoursite.com/FlowHub.html" style="flex:1;min-width:240px;padding:9px 12px;border:1.5px solid var(--gold-light);border-radius:8px;font-size:13px;outline:none" oninput="saveBaseUrl()" onfocus="this.select()">
+        <button class="btn btn-o" style="font-size:11px;padding:6px 12px;white-space:nowrap" onclick="testBaseUrl()">🔗 測試連結</button>
+      </div>
+      <div id="url-hint" style="font-size:11px;margin-top:8px;line-height:1.6;color:var(--text-light)"></div>
+    </div>
+    <div class="toolbar">
+      <div class="toolbar-t">店家設定</div>
+      <div class="toolbar-a"><button class="btn btn-p" onclick="openStM()">+ 新增店家</button></div>
+    </div>
+    <div style="overflow-x:auto">
+      <table class="at"><thead><tr><th>店家名稱</th><th>配合分期公司</th><th>預設方案</th><th>專屬連結</th><th>狀態</th><th>操作</th></tr></thead>
+      <tbody id="st-tbody"></tbody></table>
+    </div>
+  </div></div>
+</div>
+
+<!-- FC Modal -->
+<div id="fc-modal" class="overlay hidden" onclick="event.target===this&&closeFcM()">
+<div class="modal">
+  <div class="m-head"><h3 id="fc-mt">新增分期公司</h3><button class="m-close" onclick="closeFcM()">&times;</button></div>
+  <div class="fg-row">
+    <div class="fg"><label>公司名稱 *</label><input id="fc-name"></div>
+    <div class="fg"><label>備註</label><input id="fc-note" placeholder="選填"></div>
+  </div>
+  <div class="fg-row" style="margin-bottom:8px">
+    <div class="fg" style="flex:1">
+      <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;color:var(--text)">
+        <input type="checkbox" id="fc-usecoef" style="accent-color:var(--gold);width:16px;height:16px">
+        <span>使用月付係數計算一般專案（僅裕富適用）</span>
+      </label>
+    </div>
+    <div class="fg" style="flex:1">
+      <label style="font-size:13px;color:var(--text)">一般專案計算公式</label>
+      <select id="fc-formula" style="padding:6px 10px;border:1px solid var(--g300);border-radius:8px;font-size:13px;width:100%;margin-top:4px">
+        <option value="grossup">金額÷(1-費率)÷期數（預設）</option>
+        <option value="markup">金額×(1+費率)÷期數（和潤）</option>
+      </select>
+    </div>
+  </div>
+  <div class="fg">
+    <label>方案設定</label>
+    <p style="font-size:11px;color:var(--g400);margin-bottom:6px">零利率 → 填扣款費率(%) ｜ 一般專案 → 填月付係數或費率 ｜ 都有 → 兩欄都填</p>
+    <div class="plan-list">
+      <div class="pl-hdr"><div>期數</div><div>類型</div><div style="color:var(--gold-deep)">一般月付係數</div><div style="color:var(--sage-dark)">零利扣款費率(%)</div><div></div></div>
+      <div id="fc-plans"></div>
+      <div class="add-bar">
+        <select id="fc-ap"><option value="3">3期</option><option value="6">6期</option><option value="9">9期</option><option value="12" selected>12期</option><option value="18">18期</option><option value="24">24期</option><option value="30">30期</option><option value="36">36期</option><option value="48">48期</option><option value="60">60期</option></select>
+        <select id="fc-at"><option value="both">都有</option><option value="zero">僅零利率</option><option value="general">僅一般專案</option></select>
+        <button onclick="addFcP()">+ 新增期數</button>
+      </div>
+    </div>
+  </div>
+  <div class="m-foot"><button class="btn btn-o" onclick="closeFcM()">取消</button><button class="btn btn-p" onclick="saveFc()">💾 儲存</button></div>
+</div></div>
+
+<!-- Store Modal -->
+<div id="st-modal" class="overlay hidden" onclick="event.target===this&&closeStM()">
+<div class="modal" style="max-width:780px">
+  <div class="m-head"><h3 id="st-mt">新增店家</h3><button class="m-close" onclick="closeStM()">&times;</button></div>
+  <div class="fg-row">
+    <div class="fg"><label>店家名稱 *</label><input id="st-name"></div>
+    <div class="fg"><label>預設顯示方案</label>
+      <select id="st-def"><option value="general">一般專案</option><option value="zero">零利率</option></select>
+    </div>
+  </div>
+  <div class="fg"><label>備註</label><input id="st-note" placeholder="選填"></div>
+  <div class="fg">
+    <label>配合的分期公司</label>
+    <div style="display:flex;gap:8px;align-items:center;margin:8px 0">
+      <select id="st-add-fc" style="flex:1;padding:8px 12px;border:1.5px solid var(--g300);border-radius:8px;font-size:13px"><option value="">— 選擇分期公司 —</option></select>
+      <button class="btn btn-p" onclick="addStFc()" style="white-space:nowrap">+ 加入</button>
+    </div>
+    <div id="st-fc-list" style="display:flex;flex-direction:column;gap:10px"></div>
+  </div>
+  <div class="m-foot"><button class="btn btn-o" onclick="closeStM()">取消</button><button class="btn btn-p" onclick="saveSt()">💾 儲存</button></div>
+</div></div>
+
+<!-- ====== SHARE MODAL ====== -->
+<div id="share-modal" class="overlay hidden" onclick="event.target===this&&closeShareM()">
+<div class="modal share-modal-wrap">
+  <div class="m-head">
+    <h3>🔗 店家專屬連結</h3>
+    <button class="m-close" onclick="closeShareM()">&times;</button>
+  </div>
+  <div class="share-hero">
+    <div class="share-qr-box" id="share-qr-box">
+      <div class="qr-loading">產生中…</div>
+    </div>
+    <div class="share-info">
+      <div>
+        <div class="share-store-label">店家名稱</div>
+        <div class="share-store-name" id="share-store-name">—</div>
+        <div class="share-store-meta" id="share-store-meta"></div>
+      </div>
+      <div class="share-url-box" id="share-url-box" onclick="selectShareUrl(this)">—</div>
+      <div class="share-actions">
+        <button class="share-btn-copy" id="share-copy-btn" onclick="copyShareUrl()">
+          <span>📋</span><span id="share-copy-label">複製連結</span>
+        </button>
+        <button class="share-btn-dl" onclick="downloadQr()" title="下載 QR Code 圖片">⬇ QR</button>
+      </div>
+    </div>
+  </div>
+  <hr class="share-divider">
+  <div class="share-tips">
+    💡 將此連結或 QR Code 提供給店家，客人掃碼後直接進入該店試算頁面，<strong>不會顯示後台或其他店家資料</strong>。
+  </div>
+</div>
+</div>
+
+<div class="copyright-bar">&copy; 2026 FlowHub. All rights reserved. 未經授權禁止複製或使用本系統。</div>
+<div id="toast" class="toast hidden"></div>
+
+<script>
+const SK='flowhub_v2';
+const ADMIN_PW='Aa1234';
+let adminUnlocked=false;
+
+function defaults(){return{
+financeCompanies:[
+  {id:'fc1',name:'裕富數位 (BuyNpay)',note:'裕融企業子公司',active:true,useCoefficient:true,plans:[
+    {period:3,type:'both',coefficient:0.34188,feeRate:0.025},
+    {period:6,type:'both',coefficient:0.172176,feeRate:0.032},
+    {period:9,type:'both',coefficient:0.116346,feeRate:0.045},
+    {period:12,type:'both',coefficient:0.088419,feeRate:0.0575},
+    {period:18,type:'both',coefficient:0.060551,feeRate:0.0825},
+    {period:24,type:'both',coefficient:0.046685,feeRate:0.1075},
+    {period:30,type:'both',coefficient:0.038314,feeRate:0.13},
+    {period:36,type:'both',coefficient:0.03287,feeRate:0.155}
+  ]},
+  {id:'fc2',name:'中租零卡 (zingala銀角零卡)',note:'中租迪和旗下・原仲信資融',active:true,plans:[
+    {period:3,type:'both',coefficient:0.345,feeRate:0.02},
+    {period:6,type:'both',coefficient:0.175,feeRate:0.03},
+    {period:12,type:'both',coefficient:0.09,feeRate:0.055},
+    {period:24,type:'both',coefficient:0.048,feeRate:0.105},
+    {period:36,type:'both',coefficient:0.034,feeRate:0.15}
+  ]},
+  {id:'fc3',name:'和潤企業 (Pay4U)',note:'和泰汽車旗下',active:true,generalFormula:'markup',plans:[
+    {period:3,type:'both',coefficient:0,feeRate:0.022},
+    {period:6,type:'both',coefficient:0,feeRate:0.035},
+    {period:9,type:'both',coefficient:0,feeRate:0.05},
+    {period:12,type:'both',coefficient:0,feeRate:0.055},
+    {period:18,type:'both',coefficient:0,feeRate:0.09},
+    {period:24,type:'both',coefficient:0,feeRate:0.12},
+    {period:30,type:'both',coefficient:0,feeRate:0.165},
+    {period:36,type:'both',coefficient:0,feeRate:0.18}
+  ]},
+  {id:'fc4',name:'麻吉付 (MAJIPAY)',note:'廿一世紀數位科技',active:true,plans:[
+    {period:3,type:'both',coefficient:0.345,feeRate:0.022},
+    {period:6,type:'both',coefficient:0.175,feeRate:0.033},
+    {period:12,type:'both',coefficient:0.091,feeRate:0.058},
+    {period:24,type:'both',coefficient:0.049,feeRate:0.11}
+  ]},
+  {id:'fc5',name:'分期趣 (GOGOPAY)',note:'PChome合作・廿一世紀數位',active:true,plans:[
+    {period:3,type:'zero',coefficient:0,feeRate:0.02},
+    {period:6,type:'zero',coefficient:0,feeRate:0.03},
+    {period:12,type:'zero',coefficient:0,feeRate:0.055}
+  ]},
+  {id:'fc6',name:'AFTEE 後支付',note:'日商 Net Protections',active:true,plans:[
+    {period:3,type:'zero',coefficient:0,feeRate:0.025},
+    {period:6,type:'zero',coefficient:0,feeRate:0.04}
+  ]},
+  {id:'fc7',name:'月付大人 (monthlypay)',note:'新光合纖集團・原遠信分期通',active:true,plans:[
+    {period:3,type:'both',coefficient:0.344,feeRate:0.022},
+    {period:6,type:'both',coefficient:0.174,feeRate:0.035},
+    {period:12,type:'both',coefficient:0.09,feeRate:0.06}
+  ]},
+  {id:'fc8',name:'Go分期',note:'3C無卡分期',active:false,plans:[
+    {period:6,type:'general',coefficient:0.176,feeRate:0},
+    {period:12,type:'general',coefficient:0.092,feeRate:0}
+  ]},
+  {id:'fc9',name:'台新銀行',note:'信用卡分期',active:false,plans:[
+    {period:3,type:'zero',coefficient:0,feeRate:0.022},
+    {period:6,type:'zero',coefficient:0,feeRate:0.033},
+    {period:12,type:'zero',coefficient:0,feeRate:0.058}
+  ]}
+],
+stores:[
+  {id:'s1',name:'旗艦店 A',note:'',active:true,defaultType:'general',fcConfigs:[
+    {fcId:'fc1',plans:[{period:3,type:'both',coefficient:0.34188,feeRate:0.025},{period:6,type:'both',coefficient:0.172176,feeRate:0.032},{period:12,type:'both',coefficient:0.088419,feeRate:0.0575},{period:24,type:'both',coefficient:0.046685,feeRate:0.1075}]},
+    {fcId:'fc2',plans:[{period:6,type:'both',coefficient:0.175,feeRate:0.03},{period:12,type:'both',coefficient:0.09,feeRate:0.055},{period:24,type:'both',coefficient:0.048,feeRate:0.105}]},
+    {fcId:'fc3',plans:[{period:6,type:'both',coefficient:0.173,feeRate:0.028},{period:12,type:'both',coefficient:0.089,feeRate:0.055}]},
+    {fcId:'fc4',plans:[{period:3,type:'both',coefficient:0.345,feeRate:0.022},{period:6,type:'both',coefficient:0.175,feeRate:0.033},{period:12,type:'both',coefficient:0.091,feeRate:0.058}]}
+  ]},
+  {id:'s2',name:'加盟店 B',note:'',active:true,defaultType:'general',fcConfigs:[
+    {fcId:'fc1',plans:[{period:6,type:'general',coefficient:0.172176,feeRate:0},{period:12,type:'general',coefficient:0.088419,feeRate:0}]},
+    {fcId:'fc2',plans:[{period:6,type:'both',coefficient:0.175,feeRate:0.03},{period:12,type:'both',coefficient:0.09,feeRate:0.055}]}
+  ]},
+  {id:'s3',name:'網路商城 C',note:'',active:true,defaultType:'general',fcConfigs:[
+    {fcId:'fc1',plans:[{period:6,type:'both',coefficient:0.172176,feeRate:0.032},{period:12,type:'both',coefficient:0.088419,feeRate:0.0575},{period:24,type:'both',coefficient:0.046685,feeRate:0.1075},{period:36,type:'both',coefficient:0.03287,feeRate:0.155}]},
+    {fcId:'fc5',plans:[{period:3,type:'zero',coefficient:0,feeRate:0.02},{period:6,type:'zero',coefficient:0,feeRate:0.03},{period:12,type:'zero',coefficient:0,feeRate:0.055}]},
+    {fcId:'fc6',plans:[{period:3,type:'zero',coefficient:0,feeRate:0.025},{period:6,type:'zero',coefficient:0,feeRate:0.04}]},
+    {fcId:'fc7',plans:[{period:3,type:'both',coefficient:0.344,feeRate:0.022},{period:6,type:'both',coefficient:0.174,feeRate:0.035},{period:12,type:'both',coefficient:0.09,feeRate:0.06}]}
+  ]}
+]}}
+
+let D=load();
+function load(){try{const r=localStorage.getItem(SK);if(r){const d=JSON.parse(r);migrateData(d);return d}}catch(e){}return defaults()}
+function migrateData(d){
+  // Migrate: add useCoefficient flag to 裕富/BuyNpay
+  (d.financeCompanies||[]).forEach(f=>{
+    if(f.useCoefficient===undefined){
+      if(f.id==='fc1'||f.name.includes('BuyNpay')||f.name.includes('裕富'))f.useCoefficient=true;
+      else f.useCoefficient=false;
+    }
+    // Migrate: add generalFormula for 和潤/Pay4U
+    if(f.generalFormula===undefined){
+      if(f.id==='fc3'||f.name.includes('Pay4U')||f.name.includes('和潤'))f.generalFormula='markup';
+    }
+  });
+  // Migrate old fcIds format to new fcConfigs with plans
+  d.stores.forEach(s=>{
+    if(s.fcIds&&!s.fcConfigs){
+      s.fcConfigs=s.fcIds.map(id=>{
+        const fc=d.financeCompanies.find(f=>f.id===id);
+        return{fcId:id,plans:fc?JSON.parse(JSON.stringify(fc.plans)):[]};
+      });
+      delete s.fcIds;
+    }
+    // Migrate old planType format to plans format
+    if(s.fcConfigs&&s.fcConfigs[0]&&s.fcConfigs[0].planType&&!s.fcConfigs[0].plans){
+      s.fcConfigs=s.fcConfigs.map(cfg=>{
+        const fc=d.financeCompanies.find(f=>f.id===cfg.fcId);
+        const allPlans=fc?JSON.parse(JSON.stringify(fc.plans)):[];
+        const pt=cfg.planType||'both';
+        const plans=pt==='both'?allPlans:allPlans.filter(p=>p.type===pt||p.type==='both').map(p=>({...p,type:pt}));
+        return{fcId:cfg.fcId,plans};
+      });
+    }
+  });
+}
+function getFcIds(store){return(store.fcConfigs||[]).map(c=>c.fcId)}
+function getStorePlans(store,fcId){const c=(store.fcConfigs||[]).find(x=>x.fcId===fcId);return c?c.plans:[]}
+function save(){try{localStorage.setItem(SK,JSON.stringify(D))}catch(e){}}
+function gid(p){return p+Date.now()+Math.random().toString(36).substr(2,4)}
+function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.remove('hidden');setTimeout(()=>t.classList.add('hidden'),2400)}
+function fmt(n){return n.toLocaleString()}
+function esc(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML}
+
+/* ======== Amount Input - Direct Number Entry ======== */
+let rawAmt=0;
+
+/* IRR calculation - Newton's method */
+function calcIRR(amt,monthly,periods){
+  if(monthly*periods<=amt)return 0;
+  let r=0.01;
+  for(let i=0;i<100;i++){
+    let pv=0,dpv=0;
+    for(let t=1;t<=periods;t++){
+      const d=Math.pow(1+r,t);
+      pv+=monthly/d;
+      dpv-=t*monthly/Math.pow(1+r,t+1);
+    }
+    const diff=pv-amt;
+    if(Math.abs(diff)<0.01)break;
+    if(dpv===0)break;
+    r-=diff/dpv;
+    if(r<0)r=0.0001;
+  }
+  return r*12*100; // annual %
+}
+
+function onAmtInput(el){
+  // Strip non-numeric characters except for the raw value
+  let val=el.value.replace(/[^\d]/g,'');
+  rawAmt=parseInt(val)||0;
+  // Format with commas for display while typing
+  if(val.length>0){
+    el.value=parseInt(val).toLocaleString();
+  } else {
+    el.value='';
+    rawAmt=0;
+  }
+  updatePreview();
+  calc();
+}
+
+function onAmtBlur(el){
+  if(rawAmt>0){
+    el.value=rawAmt.toLocaleString();
+  } else {
+    el.value='';
+  }
+}
+
+function updatePreview(){
+  document.getElementById('amt-preview').innerHTML=rawAmt>0?'商品金額：<b>$'+fmt(rawAmt)+'</b>':'';
+}
+
+/* ======== NAV & AUTH ======== */
+function go(p){
+  document.querySelectorAll('.nav-tab').forEach((t,i)=>t.classList.toggle('active',(i===0&&p==='calc')||(i===1&&(p==='admin'||p==='pw'))));
+  document.getElementById('pg-calc').classList.toggle('hidden',p!=='calc');
+  document.getElementById('pg-pw').classList.toggle('hidden',p!=='pw');
+  document.getElementById('pg-admin').classList.toggle('hidden',p!=='admin');
+  document.getElementById('lock-btn').classList.toggle('hidden',p!=='admin');
+  if(p==='calc'){fillStoreSel();onStoreChange()}
+  if(p==='admin'){renderStats();renderFc();renderSt();loadBaseUrl()}
+  if(p==='pw'){document.getElementById('pw-input').value='';document.getElementById('pw-error').style.display='none';setTimeout(()=>document.getElementById('pw-input').focus(),100)}
+}
+
+function goAdmin(){
+  if(adminUnlocked){go('admin')}
+  else{go('pw')}
+}
+
+function checkPw(){
+  const val=document.getElementById('pw-input').value;
+  if(val===ADMIN_PW){
+    adminUnlocked=true;
+    go('admin');
+    toast('歡迎回來，管理員！');
+  } else {
+    document.getElementById('pw-error').style.display='block';
+    document.getElementById('pw-input').value='';
+    document.getElementById('pw-input').focus();
+  }
+}
+
+function lockAdmin(){
+  adminUnlocked=false;
+  go('calc');
+  toast('已登出');
+}
+
+/* ======== FRONT ======== */
+let selType='zero';
+
+function fillStoreSel(){
+  const s=document.getElementById('c-store'),cur=s.value;
+  s.innerHTML='';
+  D.stores.filter(v=>v.active).forEach(v=>{const o=document.createElement('option');o.value=v.id;o.textContent=v.name;s.appendChild(o)});
+  if(cur)s.value=cur;
+}
+
+function onStoreChange(){
+  const store=D.stores.find(s=>s.id===document.getElementById('c-store').value);
+  if(!store)return;
+  document.getElementById('front-store-name').textContent=store.name;
+  selType=store.defaultType||'general';
+  fillFcSel(store);
+  updToggle();calc();
+}
+
+function fillFcSel(store){
+  const sel=document.getElementById('c-fc');
+  const cur=sel.value;
+  sel.innerHTML='<option value="all">全部顯示</option>';
+  getFcIds(store).forEach(id=>{
+    const fc=D.financeCompanies.find(f=>f.id===id);
+    if(fc&&fc.active){
+      const o=document.createElement('option');o.value=fc.id;o.textContent=fc.name;sel.appendChild(o);
+    }
+  });
+  if(cur)sel.value=cur;
+  if(sel.value!==cur&&cur!=='all')sel.value='all';
+}
+
+function setType(t){selType=t;updToggle();calc()}
+
+function toggleDisb(secId,btn){
+  const cells=document.querySelectorAll('.disb-col-'+secId);
+  const showing=cells[0]&&cells[0].style.display!=='none';
+  cells.forEach(c=>c.style.display=showing?'none':'');
+  btn.textContent=showing?'👁 查看撥款金額':'✕ 隱藏撥款金額';
+  btn.classList.toggle('revealed',!showing);
+}
+
+function updToggle(){
+  document.querySelectorAll('.type-btn').forEach(b=>{
+    b.classList.remove('sel-zero','sel-gen');
+    if(b.dataset.t===selType)b.classList.add(selType==='zero'?'sel-zero':'sel-gen');
+  });
+}
+
+function calc(){
+  const storeId=document.getElementById('c-store').value;
+  const amt=rawAmt;
+  if(amt<=0||!storeId){document.getElementById('calc-result').innerHTML='<div class="no-msg"><div class="no-icon">💰</div>請輸入商品金額開始試算</div>';return}
+
+  const store=D.stores.find(s=>s.id===storeId);if(!store)return;
+  const selFc=document.getElementById('c-fc').value;
+  let fcCfgs=(store.fcConfigs||[]).filter(cfg=>{
+    const fc=D.financeCompanies.find(f=>f.id===cfg.fcId);
+    return fc&&fc.active;
+  });
+  if(selFc!=='all')fcCfgs=fcCfgs.filter(c=>c.fcId===selFc);
+  const isZ=selType==='zero';
+
+  const match=fcCfgs.map(cfg=>{
+    const fc=D.financeCompanies.find(f=>f.id===cfg.fcId);
+    // Read plans from store-FC config, filter by selected type
+    const plans=(cfg.plans||[]).filter(p=>{
+      if(isZ) return p.type==='zero'||p.type==='both';
+      return p.type==='general'||p.type==='both';
+    }).sort((a,b)=>a.period-b.period);
+    return{fc,plans};
+  }).filter(x=>x.plans.length>0);
+
+  if(!match.length){
+    document.getElementById('calc-result').innerHTML=`<div class="no-msg"><div class="no-icon">📋</div>目前沒有${isZ?'零利率':'一般專案'}方案可用<br><span style="font-size:12px;margin-top:6px;display:inline-block">請切換方案類型</span></div>`;
+    return;
+  }
+
+  let h='';
+  match.forEach(({fc,plans})=>{
+    h+=`<div class="res-section"><div class="res-hdr ${isZ?'zh':'gh'}">${esc(fc.name)}<span class="pill">${plans.length} 期數</span></div>`;
+    const showIRR=adminUnlocked&&!storeMode;
+    const coefMode=!!fc.useCoefficient;
+    if(isZ){
+      const secId='disb_'+fc.id;
+      h+=`<table class="rt zt"><thead><tr><th>期數</th><th>每月金額</th>${showIRR?'<th>IRR</th>':''}<th class="disb-col disb-col-${secId}" style="display:none">撥款金額</th></tr></thead><tbody>`;
+      plans.forEach(p=>{
+        const monthly=Math.round(amt/p.period);
+        const disbVal=fmt(Math.round(amt*(1-p.feeRate)));
+        h+=`<tr><td class="period">${p.period} 期</td><td class="monthly">$${fmt(monthly)}</td>${showIRR?'<td style="color:var(--sage);font-weight:600;font-size:13px">0%</td>':''}<td class="disb-col disb-col-${secId}" style="display:none">$${disbVal}</td></tr>`;
+      });
+      h+=`</tbody></table>`;
+      h+=`<div class="disb-toggle-bar"><button class="disb-toggle-btn" onclick="toggleDisb('${secId}',this)">👁 查看撥款金額</button></div>`;
+    } else {
+      h+=`<table class="rt gt"><thead><tr><th>期數</th><th>每月金額</th>${showIRR?'<th>IRR</th>':''}<th>總繳金額</th></tr></thead><tbody>`;
+      const markup=fc.generalFormula==='markup';
+      plans.forEach(p=>{
+        let m;
+        if(coefMode&&p.coefficient&&p.coefficient>0){
+          m=Math.round(amt*p.coefficient);
+        } else if(p.feeRate>0){
+          m=markup?Math.round(amt*(1+p.feeRate)/p.period):Math.round(amt/(1-p.feeRate)/p.period);
+        } else {
+          m=Math.round(amt/p.period);
+        }
+        const irr=calcIRR(amt,m,p.period);
+        const irrStr=irr>0?irr.toFixed(2)+'%':'0%';
+        h+=`<tr><td class="period">${p.period} 期</td><td class="monthly">$${fmt(m)}</td>${showIRR?'<td style="color:var(--gold-deep);font-weight:600;font-size:13px">'+irrStr+'</td>':''}<td>$${fmt(m*p.period)}</td></tr>`;
+      });
+      h+=`</tbody></table>`;
+    }
+    h+=`</div>`;
+  });
+  document.getElementById('calc-result').innerHTML=h;
+}
+
+/* ======== ADMIN ======== */
+function aTab(t){
+  document.querySelectorAll('.admin-tab').forEach((b,i)=>b.classList.toggle('active',(i===0&&t==='fc')||(i===1&&t==='store')));
+  document.getElementById('tab-fc').classList.toggle('hidden',t!=='fc');
+  document.getElementById('tab-store').classList.toggle('hidden',t!=='store');
+}
+
+function renderStats(){
+  const f=D.financeCompanies,s=D.stores;
+  document.getElementById('a-stats').innerHTML=`
+    <div class="stat"><div class="stat-l">分期公司</div><div class="stat-v">${f.length}</div></div>
+    <div class="stat"><div class="stat-l">啟用中</div><div class="stat-v" style="color:var(--sage)">${f.filter(x=>x.active).length}</div></div>
+    <div class="stat"><div class="stat-l">店家數</div><div class="stat-v">${s.length}</div></div>
+    <div class="stat"><div class="stat-l">總方案數</div><div class="stat-v">${s.reduce((a,st)=>a+(st.fcConfigs||[]).reduce((b,c)=>b+(c.plans||[]).length,0),0)}</div></div>`;
+}
+
+function renderFc(){
+  const q=(document.getElementById('fc-search').value||'').toLowerCase();
+  const fcs=D.financeCompanies.filter(f=>!q||f.name.toLowerCase().includes(q));
+  document.getElementById('fc-tbody').innerHTML=fcs.map(f=>{
+    const tags=f.plans.sort((a,b)=>a.period-b.period).map(p=>{
+      if(p.type==='both')return`<span class="tag tag-z">${p.period}期</span><span class="tag tag-g">${p.period}期</span>`;
+      return`<span class="tag ${p.type==='zero'?'tag-z':'tag-g'}">${p.period}期</span>`;
+    }).join('');
+    const ps=f.plans.map(p=>p.period).sort((a,b)=>a-b);
+    return`<tr>
+      <td><strong>${esc(f.name)}</strong>${f.note?'<br><span style="font-size:11px;color:var(--g400)">'+esc(f.note)+'</span>':''}</td>
+      <td><div class="tags">${tags}</div></td>
+      <td style="white-space:nowrap">${ps.length?ps[0]+'~'+ps[ps.length-1]+'期':'—'}</td>
+      <td><span class="badge ${f.active?'b-on':'b-off'}">${f.active?'啟用':'停用'}</span></td>
+      <td style="white-space:nowrap">
+        <button class="btn btn-o" onclick="openFcM('${f.id}')">編輯</button>
+        <button class="btn ${f.active?'btn-o':'btn-s'}" onclick="togFc('${f.id}')">${f.active?'停用':'啟用'}</button>
+        <button class="btn btn-d" onclick="delFc('${f.id}')">刪除</button>
+      </td></tr>`}).join('');
+}
+
+function togFc(id){const f=D.financeCompanies.find(x=>x.id===id);if(f){f.active=!f.active;save();renderStats();renderFc();toast(f.active?'已啟用':'已停用')}}
+function delFc(id){const f=D.financeCompanies.find(x=>x.id===id);if(!f||!confirm('確定刪除「'+f.name+'」？'))return;D.financeCompanies=D.financeCompanies.filter(x=>x.id!==id);D.stores.forEach(s=>{s.fcConfigs=(s.fcConfigs||[]).filter(x=>x.fcId!==id)});save();renderStats();renderFc();renderSt();toast('已刪除')}
+
+function getBaseUrl(){
+  if(D.baseUrl&&D.baseUrl.startsWith('http'))return D.baseUrl;
+  // Always use current page URL as base — works automatically on GitHub Pages / any host
+  const p=location.pathname.replace(/\/$/,'');
+  return location.origin+p;
+}
+function getStoreUrl(storeId){
+  const base=getBaseUrl();
+  const store=D.stores.find(s=>s.id===storeId);
+  if(!store)return base;
+  // Compact portable format: short keys, plans as arrays [period,type,coefficient,feeRate]
+  // type: b=both, g=general, z=zero
+  const typeMap={both:'b',general:'g',zero:'z'};
+  const compact={n:store.name,
+    f:(store.fcConfigs||[]).map(cfg=>{
+      const fc=D.financeCompanies.find(f=>f.id===cfg.fcId);
+      if(!fc||!fc.active)return null;
+      const o={n:fc.name};
+      if(fc.useCoefficient)o.c=1;
+      if(fc.generalFormula)o.g=fc.generalFormula;
+      o.p=(cfg.plans||[]).map(p=>{
+        const a=[p.period,typeMap[p.type]||'b'];
+        if(p.coefficient)a.push(p.coefficient);else a.push(0);
+        if(p.feeRate)a.push(p.feeRate);
+        return a;
+      });
+      return o;
+    }).filter(Boolean)};
+  if(store.defaultType&&store.defaultType!=='general')compact.t=store.defaultType;
+  const json=JSON.stringify(compact);
+  const b64=btoa(unescape(encodeURIComponent(json)));
+  return base+'#c='+b64;
+}
+function getAdminUrl(){
+  const base=getBaseUrl();
+  return base+(base.includes('?')?'&':'?')+'admin=1';
+}
+
+function saveBaseUrl(){
+  D.baseUrl=document.getElementById('base-url').value.trim();
+  save();renderSt();updateUrlStatus();
+}
+
+function loadBaseUrl(){
+  const el=document.getElementById('base-url');
+  if(el&&D.baseUrl)el.value=D.baseUrl;
+  updateUrlStatus();
+}
+
+function isUrlReady(){
+  const base=D.baseUrl||'';
+  return base.startsWith('http://') || base.startsWith('https://');
+}
+
+function updateUrlStatus(){
+  const box=document.getElementById('url-setup-box');
+  const badge=document.getElementById('url-status-badge');
+  const hint=document.getElementById('url-hint');
+  if(isUrlReady()){
+    box.style.background='var(--sage-bg)';box.style.border='1.5px solid var(--sage-lt)';
+    badge.textContent='已設定';badge.style.background='var(--sage-lt)';badge.style.color='var(--sage-dark)';
+    hint.innerHTML='店家連結已就緒，可直接複製提供給店家使用。';
+  } else {
+    box.style.background='#fff8e8';box.style.border='1.5px solid #f0d68a';
+    badge.textContent='未設定';badge.style.background='#f0d68a';badge.style.color='#8a6d00';
+    hint.innerHTML='<strong style="color:#8a6d00">⚠ 請先設定網址</strong>，才能產生店家可用的連結。<br>步驟：將 <code style="background:#fff;padding:1px 5px;border-radius:4px;font-size:11px">FlowHub_試算系統_protected.html</code> 上傳到網路空間（如 GitHub Pages），再將網址貼到上方欄位。';
+  }
+}
+
+function testBaseUrl(){
+  if(!isUrlReady()){toast('請先填入 http:// 或 https:// 開頭的網址');return}
+  window.open(D.baseUrl,'_blank');
+}
+
+function copyLink(btn,storeId){
+  const url=getStoreUrl(storeId);
+  navigator.clipboard.writeText(url).then(()=>{
+    btn.textContent='已複製';btn.classList.add('copied');
+    setTimeout(()=>{btn.textContent='複製連結';btn.classList.remove('copied')},1800);
+  }).catch(()=>{
+    // Fallback for non-HTTPS
+    const inp=btn.parentElement.querySelector('input');
+    inp.select();document.execCommand('copy');
+    btn.textContent='已複製';btn.classList.add('copied');
+    setTimeout(()=>{btn.textContent='複製連結';btn.classList.remove('copied')},1800);
+  });
+}
+
+function renderSt(){
+  const urlOk=isUrlReady();
+  document.getElementById('st-tbody').innerHTML=D.stores.map(s=>{
+    const fcn=(s.fcConfigs||[]).map(cfg=>{const f=D.financeCompanies.find(x=>x.id===cfg.fcId);if(!f)return'';const pCnt=(cfg.plans||[]).length;return`<span class="tag tag-fc">${esc(f.name)} <small style="opacity:.6">(${pCnt}期)</small></span>`}).join('');
+    let linkCell;
+    if(urlOk){
+      const stUrl=getStoreUrl(s.id);
+      linkCell=`<div class="store-link"><input type="text" value="${esc(stUrl)}" readonly onclick="this.select()"><button onclick="copyLink(this,'${s.id}')">複製連結</button><a href="${esc(stUrl)}" target="_blank" class="btn btn-o" style="font-size:11px;padding:4px 8px;text-decoration:none;margin-left:4px">開啟</a></div>`;
+    } else {
+      linkCell=`<span style="font-size:11px;color:#8a6d00">⚠ 請先設定網址</span>`;
+    }
+    return`<tr>
+      <td><strong>${esc(s.name)}</strong>${s.note?'<br><span style="font-size:11px;color:var(--g400)">'+esc(s.note)+'</span>':''}</td>
+      <td><div class="tags">${fcn||'<span style="color:var(--g400)">未設定</span>'}</div></td>
+      <td>${s.defaultType==='zero'?'<span class="tag tag-z">零利率</span>':'<span class="tag tag-g">一般專案</span>'}</td>
+      <td style="min-width:200px">${linkCell}</td>
+      <td><span class="badge ${s.active?'b-on':'b-off'}">${s.active?'啟用':'停用'}</span></td>
+      <td style="white-space:nowrap">
+        <button class="btn btn-o" onclick="openStM('${s.id}')">編輯</button>
+        <button class="btn btn-o" style="color:var(--gold-deep);border-color:var(--gold-light)" onclick="openShareM('${s.id}')">🔗 分享</button>
+        <button class="btn ${s.active?'btn-o':'btn-s'}" onclick="togSt('${s.id}')">${s.active?'停用':'啟用'}</button>
+        <button class="btn btn-d" onclick="delSt('${s.id}')">刪除</button>
+      </td></tr>`}).join('');
+}
+
+function togSt(id){const s=D.stores.find(x=>x.id===id);if(s){s.active=!s.active;save();renderStats();renderSt();fillStoreSel();toast(s.active?'已啟用':'已停用')}}
+function delSt(id){const s=D.stores.find(x=>x.id===id);if(!s||!confirm('確定刪除「'+s.name+'」？'))return;D.stores=D.stores.filter(x=>x.id!==id);save();renderStats();renderSt();fillStoreSel();toast('已刪除')}
+
+/* FC Modal */
+let fcEid=null,fcP=[];
+function openFcM(id){
+  fcEid=id||null;document.getElementById('fc-mt').textContent=id?'編輯分期公司':'新增分期公司';
+  if(id){const f=D.financeCompanies.find(x=>x.id===id);if(!f)return;document.getElementById('fc-name').value=f.name;document.getElementById('fc-note').value=f.note||'';document.getElementById('fc-usecoef').checked=!!f.useCoefficient;document.getElementById('fc-formula').value=f.generalFormula||'grossup';fcP=JSON.parse(JSON.stringify(f.plans))}
+  else{document.getElementById('fc-name').value='';document.getElementById('fc-note').value='';document.getElementById('fc-usecoef').checked=false;document.getElementById('fc-formula').value='grossup';fcP=[{period:3,type:'both',coefficient:0,feeRate:0},{period:6,type:'both',coefficient:0,feeRate:0},{period:12,type:'both',coefficient:0,feeRate:0},{period:24,type:'both',coefficient:0,feeRate:0}]}
+  rFcP();document.getElementById('fc-modal').classList.remove('hidden');
+}
+function closeFcM(){document.getElementById('fc-modal').classList.add('hidden');fcEid=null}
+
+function rFcP(){
+  fcP.sort((a,b)=>a.period-b.period);
+  document.getElementById('fc-plans').innerHTML=fcP.map((p,i)=>`
+    <div class="pl-row" data-i="${i}">
+      <div class="pr-p">${p.period}期</div>
+      <div><select onchange="fcP[${i}].type=this.value;rFcP()">
+        <option value="both" ${p.type==='both'?'selected':''}>都有</option>
+        <option value="zero" ${p.type==='zero'?'selected':''}>僅零利率</option>
+        <option value="general" ${p.type==='general'?'selected':''}>僅一般</option>
+      </select></div>
+      <div><input class="i-g" type="number" step="0.000001" value="${p.type!=='zero'?(p.coefficient||''):''}" ${p.type==='zero'?'disabled style="background:var(--g100)"':''} placeholder="${p.type==='zero'?'—':'0.000000'}" onchange="fcP[${i}].coefficient=parseFloat(this.value)||0"></div>
+      <div><input class="i-z" type="number" step="0.01" value="${p.type!=='general'?(Math.round((p.feeRate||0)*10000)/100||''):''}" ${p.type==='general'?'disabled style="background:var(--g100)"':''} placeholder="${p.type==='general'?'—':'0.00'}" onchange="fcP[${i}].feeRate=(parseFloat(this.value)||0)/100"></div>
+      <div><button class="x-btn" onclick="fcP.splice(${i},1);rFcP()">&times;</button></div>
+    </div>`).join('');
+}
+
+function addFcP(){
+  const pr=parseInt(document.getElementById('fc-ap').value),tp=document.getElementById('fc-at').value;
+  if(fcP.find(p=>p.period===pr)){toast('此期數已存在');return}
+  fcP.push({period:pr,type:tp,coefficient:0,feeRate:0});rFcP();
+}
+
+function saveFc(){
+  const name=document.getElementById('fc-name').value.trim();
+  if(!name){toast('請輸入公司名稱');return}
+  if(!fcP.length){toast('至少需要一個方案');return}
+  document.querySelectorAll('#fc-plans .pl-row').forEach((r,i)=>{
+    const inp=r.querySelectorAll('input');
+    if(fcP[i].type!=='zero')fcP[i].coefficient=parseFloat(inp[0].value)||0;
+    if(fcP[i].type!=='general')fcP[i].feeRate=(parseFloat(inp[1].value)||0)/100;
+  });
+  const useCoef=document.getElementById('fc-usecoef').checked;
+  const formula=document.getElementById('fc-formula').value;
+  if(fcEid){const f=D.financeCompanies.find(x=>x.id===fcEid);if(f){f.name=name;f.note=document.getElementById('fc-note').value.trim();f.useCoefficient=useCoef;f.generalFormula=formula==='markup'?'markup':undefined;f.plans=JSON.parse(JSON.stringify(fcP))}}
+  else{const nf={id:gid('fc'),name,note:document.getElementById('fc-note').value.trim(),active:true,useCoefficient:useCoef,plans:JSON.parse(JSON.stringify(fcP))};if(formula==='markup')nf.generalFormula='markup';D.financeCompanies.push(nf)}
+  save();closeFcM();renderStats();renderFc();toast(fcEid?'已更新':'已新增');
+}
+
+/* Store Modal */
+let stEid=null;
+let stFcData=[]; // temp store-FC configs while editing
+
+function openStM(id){
+  stEid=id||null;document.getElementById('st-mt').textContent=id?'編輯店家':'新增店家';
+  if(id){
+    const s=D.stores.find(x=>x.id===id);if(!s)return;
+    document.getElementById('st-name').value=s.name;document.getElementById('st-note').value=s.note||'';document.getElementById('st-def').value=s.defaultType||'general';
+    stFcData=JSON.parse(JSON.stringify(s.fcConfigs||[]));
+  } else {
+    document.getElementById('st-name').value='';document.getElementById('st-note').value='';document.getElementById('st-def').value='general';
+    stFcData=[];
+  }
+  refreshStAddFc();renderStFcCards();
+  document.getElementById('st-modal').classList.remove('hidden');
+}
+function closeStM(){document.getElementById('st-modal').classList.add('hidden');stEid=null;stFcData=[]}
+
+function refreshStAddFc(){
+  const usedIds=stFcData.map(c=>c.fcId);
+  const avail=D.financeCompanies.filter(f=>f.active&&!usedIds.includes(f.id));
+  const sel=document.getElementById('st-add-fc');
+  sel.innerHTML='<option value="">— 選擇分期公司 —</option>'+avail.map(f=>`<option value="${f.id}">${f.name}</option>`).join('');
+}
+
+function addStFc(){
+  const sel=document.getElementById('st-add-fc');
+  const fcId=sel.value;if(!fcId)return;
+  // Copy master plans from FC as default
+  const fc=D.financeCompanies.find(f=>f.id===fcId);
+  const defaultPlans=fc?JSON.parse(JSON.stringify(fc.plans)):[];
+  stFcData.push({fcId,plans:defaultPlans});
+  refreshStAddFc();renderStFcCards();
+}
+
+function removeStFc(fcId){
+  stFcData=stFcData.filter(c=>c.fcId!==fcId);
+  refreshStAddFc();renderStFcCards();
+}
+
+function isCoefFc(fcId){const fc=D.financeCompanies.find(f=>f.id===fcId);return fc?!!fc.useCoefficient:false}
+
+function renderStFcCards(){
+  const el=document.getElementById('st-fc-list');
+  if(!stFcData.length){el.innerHTML='<div style="text-align:center;padding:16px;color:var(--g400);font-size:13px">尚未加入分期公司，請從上方選擇加入</div>';return}
+  el.innerHTML=stFcData.map((cfg,ci)=>{
+    const fc=D.financeCompanies.find(f=>f.id===cfg.fcId);
+    const name=fc?fc.name:cfg.fcId;
+    const useCoef=isCoefFc(cfg.fcId);
+    const plans=cfg.plans||[];
+    plans.sort((a,b)=>a.period-b.period);
+    let rows;
+    if(useCoef){
+      rows=plans.map((p,pi)=>{
+        const irr=p.coefficient>0?calcIRR(10000,Math.round(10000*p.coefficient),p.period):0;
+        const irrStr=irr>0?irr.toFixed(2)+'%':'—';
+        return`<div class="st-fc-plan-row" style="grid-template-columns:55px 1fr 1fr 60px 28px">
+          <div class="pp">${p.period}期</div>
+          <div><input type="number" step="0.000001" value="${p.coefficient||''}" placeholder="0.000000" onchange="stFcData[${ci}].plans[${pi}].coefficient=parseFloat(this.value)||0;renderStFcCards()" style="color:var(--gold-deep);font-weight:700"></div>
+          <div><input type="number" step="0.01" value="${Math.round((p.feeRate||0)*10000)/100||''}" placeholder="0.00" onchange="stFcData[${ci}].plans[${pi}].feeRate=(parseFloat(this.value)||0)/100" style="color:var(--sage-dark);font-weight:700"></div>
+          <div style="font-size:11px;font-weight:700;color:var(--red)">${irrStr}</div>
+          <div><button class="xb" onclick="stFcData[${ci}].plans.splice(${pi},1);renderStFcCards()">&times;</button></div>
+        </div>`}).join('');
+    } else {
+      rows=plans.map((p,pi)=>{
+        const fr=p.feeRate||0;
+        const fcObj=D.financeCompanies.find(f=>f.id===cfg.fcId);
+        const mkup=fcObj&&fcObj.generalFormula==='markup';
+        const irr=fr>0?calcIRR(10000,mkup?Math.round(10000*(1+fr)/p.period):Math.round(10000/(1-fr)/p.period),p.period):0;
+        const irrStr=irr>0?irr.toFixed(2)+'%':'—';
+        return`<div class="st-fc-plan-row" style="grid-template-columns:55px 1fr 60px 28px">
+          <div class="pp">${p.period}期</div>
+          <div><input type="number" step="0.01" value="${Math.round(fr*10000)/100||''}" placeholder="請輸入費率" onchange="stFcData[${ci}].plans[${pi}].feeRate=(parseFloat(this.value)||0)/100;stFcData[${ci}].plans[${pi}].coefficient=0;renderStFcCards()" style="color:var(--brand);font-weight:700;font-size:15px;padding:10px 8px"></div>
+          <div style="font-size:12px;font-weight:700;color:var(--red)">${irrStr}</div>
+          <div><button class="xb" onclick="stFcData[${ci}].plans.splice(${pi},1);renderStFcCards()">&times;</button></div>
+        </div>`}).join('');
+    }
+    const hdrCols=useCoef?
+      '<div class="st-fc-plan-hdr" style="grid-template-columns:55px 1fr 1fr 60px 28px"><div>期數</div><div style="color:var(--gold-deep)">月付係數</div><div style="color:var(--sage-dark)">費率(%)</div><div style="color:var(--red)">IRR</div><div></div></div>':
+      '<div class="st-fc-plan-hdr" style="grid-template-columns:55px 1fr 60px 28px"><div>期數</div><div style="color:var(--brand)">報價費率 (%)</div><div style="color:var(--red)">IRR</div><div></div></div>';
+    const note=useCoef?
+      '<div style="padding:5px 10px;font-size:10px;color:var(--g400);background:var(--cream)">月付係數 → 一般專案 ｜ 費率 → 零利率 ｜ IRR 即時計算</div>':
+      '<div style="padding:5px 10px;font-size:10px;color:var(--g400);background:var(--cream)">填入費率 → 自動帶出一般＋零利率 ｜ IRR 即時顯示</div>';
+    return`<div class="st-fc-card">
+      <div class="st-fc-hdr">
+        <strong>${name}</strong>
+        <div class="st-fc-acts">
+          <button class="btn btn-o" style="padding:3px 8px;font-size:11px" onclick="copyFcMaster('${cfg.fcId}',${ci})">📋 載入預設</button>
+          <button class="btn btn-d" style="padding:3px 8px;font-size:11px" onclick="removeStFc('${cfg.fcId}')">✕ 移除</button>
+        </div>
+      </div>
+      <div class="st-fc-plan-list">
+        ${hdrCols}${note}
+        ${rows}
+        <div class="st-fc-add">
+          <span>新增：</span>
+          <select id="st-ap-${ci}"><option value="3">3期</option><option value="6">6期</option><option value="9">9期</option><option value="12" selected>12期</option><option value="18">18期</option><option value="24">24期</option><option value="30">30期</option><option value="36">36期</option><option value="48">48期</option><option value="60">60期</option></select>
+          <button onclick="addStFcPlan(${ci})">+ 加入此期數</button>
+        </div>
+      </div>
+    </div>`}).join('');
+}
+
+function addStFcPlan(ci){
+  const pr=parseInt(document.getElementById('st-ap-'+ci).value);
+  if(stFcData[ci].plans.find(p=>p.period===pr)){toast('此期數已存在');return}
+  stFcData[ci].plans.push({period:pr,type:'both',coefficient:0,feeRate:0});
+  renderStFcCards();
+}
+
+function copyFcMaster(fcId,ci){
+  const fc=D.financeCompanies.find(f=>f.id===fcId);
+  if(!fc){toast('找不到分期公司');return}
+  stFcData[ci].plans=JSON.parse(JSON.stringify(fc.plans));
+  renderStFcCards();toast('已載入預設方案');
+}
+
+function saveSt(){
+  const name=document.getElementById('st-name').value.trim();if(!name){toast('請輸入店家名稱');return}
+  if(!stFcData.length){toast('請至少加入一家分期公司');return}
+  // Collect latest input values
+  stFcData.forEach((cfg,ci)=>{
+    const card=document.querySelectorAll('.st-fc-card')[ci];
+    if(!card)return;
+    const useCoef=isCoefFc(cfg.fcId);
+    card.querySelectorAll('.st-fc-plan-row').forEach((r,pi)=>{
+      if(!cfg.plans[pi])return;
+      const inps=r.querySelectorAll('input[type=number]');
+      if(useCoef){
+        cfg.plans[pi].coefficient=parseFloat(inps[0].value)||0;
+        cfg.plans[pi].feeRate=(parseFloat(inps[1].value)||0)/100;
+        // Determine type: has coefficient = general capable, has feeRate = zero capable
+        const hasCoef=cfg.plans[pi].coefficient>0;
+        const hasFee=cfg.plans[pi].feeRate>0;
+        cfg.plans[pi].type=hasCoef&&hasFee?'both':hasCoef?'general':hasFee?'zero':'both';
+      } else {
+        cfg.plans[pi].coefficient=0;
+        cfg.plans[pi].feeRate=(parseFloat(inps[0].value)||0)/100;
+        cfg.plans[pi].type='both'; // fee rate drives both general and zero for non-coef FCs
+      }
+    });
+  });
+  const fcConfigs=JSON.parse(JSON.stringify(stFcData));
+  if(stEid){const s=D.stores.find(x=>x.id===stEid);if(s){s.name=name;s.note=document.getElementById('st-note').value.trim();s.defaultType=document.getElementById('st-def').value;s.fcConfigs=fcConfigs;delete s.fcIds}}
+  else{D.stores.push({id:gid('s'),name,note:document.getElementById('st-note').value.trim(),active:true,defaultType:document.getElementById('st-def').value,fcConfigs})}
+  save();closeStM();renderStats();renderSt();fillStoreSel();onStoreChange();
+  const savedId=stEid||(D.stores[D.stores.length-1].id);
+  toast(stEid?'已更新':'已新增');
+  if(!stEid){setTimeout(()=>openShareM(savedId),300)}
+}
+
+/* Import/Export */
+function exportD(){const b=new Blob([JSON.stringify(D,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='FlowHub_'+new Date().toISOString().split('T')[0]+'.json';a.click();toast('已匯出')}
+function importD(e){const f=e.target.files[0];if(!f)return;if(!confirm('匯入會覆蓋目前所有資料，確定繼續？'))return;const r=new FileReader();r.onload=function(ev){try{const d=JSON.parse(ev.target.result);if(!d.financeCompanies||!Array.isArray(d.financeCompanies)||!d.stores||!Array.isArray(d.stores)){toast('格式錯誤：缺少必要資料');return}migrateData(d);D=d;save();renderStats();renderFc();renderSt();fillStoreSel();onStoreChange();loadBaseUrl();toast('已匯入')}catch(er){toast('解析失敗：'+er.message)}};r.readAsText(f);e.target.value=''}
+
+/* ======== URL PARAM: Store-specific link ======== */
+let storeMode=false;
+
+function enterStoreView(store){
+  storeMode=true;
+
+  // Hide admin nav button and store selector
+  document.getElementById('admin-nav-btn').classList.add('hidden');
+  document.getElementById('c-store').classList.add('hidden');
+  document.querySelectorAll('.nav-tabs')[0].classList.add('hidden');
+
+  // Set store directly
+  document.getElementById('front-store-name').textContent=store.name;
+  selType=store.defaultType||'general';
+
+  // Fill store select with just this store (for calc to work)
+  const sel=document.getElementById('c-store');
+  sel.innerHTML='';
+  const o=document.createElement('option');o.value=store.id;o.textContent=store.name;sel.appendChild(o);
+  sel.value=store.id;
+
+  // Populate FC selector for this store
+  fillFcSel(store);
+  updToggle();calc();
+}
+
+function _decodePortableHash(hash){
+  // Compact format #c= : short keys, plans as arrays
+  const rtypeMap={b:'both',g:'general',z:'zero'};
+  if(hash.startsWith('#c=')){
+    try{
+      const b64=hash.substring(3);
+      const json=decodeURIComponent(escape(atob(b64)));
+      const cd=JSON.parse(json);
+      if(cd&&cd.n&&cd.f){
+        const vs={id:'_portable',name:cd.n,note:'',active:true,
+                  defaultType:cd.t||'general',fcConfigs:[]};
+        const vfcs=[];
+        cd.f.forEach((fc,i)=>{
+          const fid='_pfc'+i;
+          const plans=(fc.p||[]).map(a=>({
+            period:a[0],type:rtypeMap[a[1]]||'both',
+            coefficient:a[2]||0,feeRate:a[3]||0
+          }));
+          vfcs.push({id:fid,name:fc.n,note:'',active:true,
+                     useCoefficient:!!fc.c,generalFormula:fc.g||undefined,plans:plans});
+          vs.fcConfigs.push({fcId:fid,plans:plans});
+        });
+        return{stores:[vs],fcs:vfcs};
+      }
+    }catch(e){console.warn('Compact link decode error:',e)}
+  }
+  // Legacy format #d= : full JSON
+  if(hash.startsWith('#d=')){
+    try{
+      const b64=hash.substring(3);
+      const json=decodeURIComponent(escape(atob(b64)));
+      const pd=JSON.parse(json);
+      if(pd&&pd.s){
+        const vs={id:'_portable',name:pd.s.name,note:pd.s.note||'',active:true,
+                  defaultType:pd.s.defaultType||'general',fcConfigs:[]};
+        const vfcs=[];
+        (pd.s.fcs||[]).forEach((fc,i)=>{
+          const fid='_pfc'+i;
+          vfcs.push({id:fid,name:fc.name,note:fc.note||'',active:true,
+                     useCoefficient:!!fc.useCoefficient,generalFormula:fc.generalFormula||undefined,
+                     plans:fc.plans||[]});
+          vs.fcConfigs.push({fcId:fid,plans:fc.plans||[]});
+        });
+        return{stores:[vs],fcs:vfcs};
+      }
+    }catch(e){console.warn('Portable link decode error:',e)}
+  }
+  return null;
+}
+function initApp(){
+  // Check for portable store data in URL hash (#c= compact or #d= legacy)
+  const hash=location.hash;
+  const portable=_decodePortableHash(hash);
+  if(portable){
+    D.stores=portable.stores;
+    D.financeCompanies=portable.fcs;
+    enterStoreView(portable.stores[0]);return;
+  }
+  const params=new URLSearchParams(location.search);
+  // Check for store-specific URL (legacy)
+  const storeId=params.get('store');
+  if(storeId){
+    const store=D.stores.find(s=>s.id===storeId&&s.active);
+    if(store){enterStoreView(store);return}
+  }
+  // Check for admin direct access
+  if(params.get('admin')==='1'){goAdmin();return}
+  // Normal mode
+  fillStoreSel();onStoreChange();
+}
+
+/* ======== SHARE MODAL ======== */
+let _qrLib=null;
+let _shareUrl='';
+let _shareStoreId='';
+let _shareStoreName='';
+
+function _loadQrLib(cb){
+  if(_qrLib){cb();return}
+  const s=document.createElement('script');
+  s.src='https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js';
+  s.onload=()=>{_qrLib=true;cb()};
+  s.onerror=()=>{_qrLib='err';cb()};
+  document.head.appendChild(s);
+}
+
+function openShareM(storeId){
+  const store=D.stores.find(s=>s.id===storeId);
+  if(!store)return;
+  _shareStoreId=storeId;
+  _shareStoreName=store.name;
+  _shareUrl=getStoreUrl(storeId);
+
+  // Fill modal info
+  document.getElementById('share-store-name').textContent=store.name;
+  const fcNames=(store.fcConfigs||[]).map(c=>{
+    const f=D.financeCompanies.find(x=>x.id===c.fcId);
+    return f?f.name.replace(/\(.*?\)/,'').trim():'';
+  }).filter(Boolean).join('・');
+  document.getElementById('share-store-meta').textContent=
+    (store.defaultType==='zero'?'零利率模式':'一般專案模式')+(fcNames?' ｜ '+fcNames:'');
+  document.getElementById('share-url-box').textContent=_shareUrl;
+  document.getElementById('share-copy-label').textContent='複製連結';
+  document.getElementById('share-copy-btn').classList.remove('copied-ok');
+
+  // Reset & render QR
+  const box=document.getElementById('share-qr-box');
+  box.innerHTML='<div class="qr-loading">產生中…</div>';
+  document.getElementById('share-modal').classList.remove('hidden');
+
+  _loadQrLib(()=>{
+    if(_qrLib==='err'){box.innerHTML='<div class="qr-loading" style="color:var(--red)">QR 產生失敗<br>(需網路)</div>';return}
+    box.innerHTML='';
+    try{
+      new QRCode(box,{text:_shareUrl,width:148,height:148,
+        colorDark:'#3e3836',colorLight:'#ffffff',
+        correctLevel:QRCode.CorrectLevel.M});
+    }catch(e){box.innerHTML='<div class="qr-loading" style="color:var(--red);font-size:10px">連結過長<br>無法產生QR</div>'}
+  });
+}
+
+function closeShareM(){document.getElementById('share-modal').classList.add('hidden')}
+
+function selectShareUrl(el){
+  const range=document.createRange();range.selectNodeContents(el);
+  const sel=window.getSelection();sel.removeAllRanges();sel.addRange(range);
+}
+
+function copyShareUrl(){
+  const btn=document.getElementById('share-copy-btn');
+  const lbl=document.getElementById('share-copy-label');
+  const done=()=>{lbl.textContent='✓ 已複製！';btn.classList.add('copied-ok');
+    setTimeout(()=>{lbl.textContent='複製連結';btn.classList.remove('copied-ok')},2000)};
+  navigator.clipboard.writeText(_shareUrl).then(done).catch(()=>{
+    const ta=document.createElement('textarea');
+    ta.value=_shareUrl;ta.style.cssText='position:fixed;opacity:0';
+    document.body.appendChild(ta);ta.focus();ta.select();
+    try{document.execCommand('copy');done()}catch(e){toast('請手動複製連結')}
+    document.body.removeChild(ta);
+  });
+}
+
+function downloadQr(){
+  const canvas=document.getElementById('share-qr-box').querySelector('canvas');
+  if(!canvas){toast('QR Code 尚未產生');return}
+  const a=document.createElement('a');
+  a.download='FlowHub_QR_'+_shareStoreName.replace(/[\s\/]/g,'_')+'.png';
+  a.href=canvas.toDataURL('image/png');a.click();
+  toast('QR Code 已下載');
+}
+/* ======== END SHARE MODAL ======== */
+
+/* INIT */
+initApp();
+</script>
+</body>
+</html>
