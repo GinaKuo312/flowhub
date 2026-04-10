@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>FlowHub 經銷版 — 通路合作申請</title>
+<style>
+:root{
+  --gold:#C9A460;--gl:#FDF8F0;--gm:#E8D5A8;--gd:#92400E;
+  --w:#fff;--bg:#F5F4F0;--dk:#2A1F0E;--mu:#6B6560;--ht:#A09890;
+  --bl:#2563EB;--blbg:#DBEAFE;--r:12px;--rs:8px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--dk);min-height:100vh;padding:24px 16px 60px}
+.wrap{max-width:560px;margin:0 auto}
+.logo{text-align:center;padding:32px 0 24px}
+.logo-f{width:52px;height:52px;background:var(--gold);border-radius:14px;display:inline-flex;align-items:center;justify-content:center;color:#fff;font-size:26px;font-weight:900;margin-bottom:10px}
+.logo-name{font-size:22px;font-weight:800;color:var(--dk)}
+.logo-sub{font-size:13px;color:var(--mu);margin-top:3px}
+.card{background:#fff;border-radius:var(--r);padding:24px;margin-bottom:16px;border:1px solid var(--gm)}
+.step-bar{display:flex;align-items:center;justify-content:center;gap:0;margin-bottom:28px}
+.step{display:flex;flex-direction:column;align-items:center;gap:4px;flex:1;position:relative}
+.step:not(:last-child)::after{content:'';position:absolute;right:-50%;top:16px;width:100%;height:2px;background:var(--gm);z-index:0}
+.step.done:not(:last-child)::after{background:var(--gold)}
+.step-dot{width:32px;height:32px;border-radius:50%;border:2px solid var(--gm);background:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:var(--ht);position:relative;z-index:1;transition:.3s}
+.step.active .step-dot{border-color:var(--gold);background:var(--gold);color:#fff}
+.step.done .step-dot{border-color:var(--gold);background:var(--gold);color:#fff}
+.step-label{font-size:10px;color:var(--ht);text-align:center}
+.step.active .step-label{color:var(--gd);font-weight:600}
+.tt{font-size:16px;font-weight:700;color:var(--dk);margin-bottom:16px}
+.fi{margin-bottom:14px}
+.fi label{display:block;font-size:12px;font-weight:600;color:var(--mu);margin-bottom:5px}
+.fi input,.fi select{width:100%;height:42px;border:1.5px solid var(--gm);border-radius:var(--rs);padding:0 12px;font-size:14px;font-family:inherit;color:var(--dk);background:#fff;outline:none;transition:.2s}
+.fi input:focus,.fi select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,164,96,.15)}
+.fi .hint{font-size:11px;color:var(--ht);margin-top:4px}
+.otp-row{display:flex;gap:8px}
+.otp-row input{flex:1;text-align:center;font-size:20px;font-weight:700;letter-spacing:8px}
+.otp-row button{flex-shrink:0;height:42px;padding:0 14px;background:var(--gm);border:none;border-radius:var(--rs);font-size:13px;font-weight:600;color:var(--gd);cursor:pointer;white-space:nowrap;font-family:inherit;transition:.2s}
+.otp-row button:hover{background:var(--gold);color:#fff}
+.otp-row button:disabled{opacity:.5;cursor:not-allowed}
+.plan-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
+.plan-card{border:2px solid var(--gm);border-radius:var(--r);padding:16px;cursor:pointer;transition:.2s;position:relative}
+.plan-card:hover{border-color:var(--gold)}
+.plan-card.selected{border-color:var(--gold);background:var(--gl)}
+.plan-card .badge{position:absolute;top:-10px;left:50%;transform:translateX(-50%);background:var(--gold);color:#fff;font-size:10px;font-weight:700;padding:2px 10px;border-radius:99px;white-space:nowrap}
+.plan-name{font-size:14px;font-weight:700;color:var(--dk);margin-bottom:6px}
+.plan-price{font-size:20px;font-weight:900;color:var(--gd)}
+.plan-price span{font-size:12px;font-weight:400;color:var(--mu)}
+.plan-trial{font-size:11px;color:var(--bl);font-weight:600;margin:4px 0}
+.plan-features{font-size:11px;color:var(--mu);line-height:1.9;margin-top:8px}
+.contract-box{background:#FAFAF7;border:1px solid var(--gm);border-radius:var(--rs);padding:12px;margin-bottom:14px}
+.contract-scroll{font-size:11px;color:var(--mu);line-height:1.9;max-height:140px;overflow-y:auto;background:#fff;border:1px solid var(--gm);border-radius:6px;padding:10px;margin-bottom:10px}
+.contract-scroll strong{color:var(--dk)}
+.agree-row{display:flex;align-items:flex-start;gap:8px;cursor:pointer;font-size:12px;color:var(--dk)}
+.agree-row input{width:16px;height:16px;margin-top:2px;flex-shrink:0;accent-color:var(--gold)}
+.btn-main{width:100%;height:48px;background:linear-gradient(135deg,#C9A460,#A07C3A);color:#fff;border:none;border-radius:var(--rs);font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;transition:.2s;margin-top:4px}
+.btn-main:hover{opacity:.9}
+.btn-main:disabled{opacity:.5;cursor:not-allowed}
+.btn-back{background:none;border:1.5px solid var(--gm);border-radius:var(--rs);height:40px;padding:0 20px;font-size:14px;color:var(--mu);cursor:pointer;font-family:inherit;margin-right:10px}
+.msg{font-size:13px;margin-top:10px;min-height:18px;text-align:center}
+.msg.ok{color:var(--gn)}
+.msg.err{color:var(--rd)}
+.success-box{text-align:center;padding:32px 16px}
+.success-icon{font-size:64px;margin-bottom:16px}
+.success-title{font-size:22px;font-weight:800;color:var(--dk);margin-bottom:8px}
+.success-sub{font-size:14px;color:var(--mu);line-height:1.8;margin-bottom:20px}
+.info-box{background:var(--gl);border:1px solid var(--gm);border-radius:var(--rs);padding:14px;text-align:left;font-size:13px;line-height:2}
+.page{display:none}
+.page.on{display:block}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="logo">
+    <div class="logo-f">F</div>
+    <div class="logo-name">FlowHub 經銷版</div>
+    <div class="logo-sub">通路合作申請 · 免費試用3天進階版</div>
+  </div>
+
+  <!-- 步驟條 -->
+  <div class="step-bar" id="step_bar">
+    <div class="step active" id="st1"><div class="step-dot">1</div><div class="step-label">基本資料</div></div>
+    <div class="step" id="st2"><div class="step-dot">2</div><div class="step-label">手機驗證</div></div>
+    <div class="step" id="st3"><div class="step-dot">3</div><div class="step-label">合約同意</div></div>
+    <div class="step" id="st4"><div class="step-dot">✓</div><div class="step-label">完成</div></div>
+  </div>
+
+  <!-- 步驟1：基本資料 -->
+  <div class="card page on" id="p1">
+    <div class="tt">📋 基本資料</div>
+    <div class="fi"><label>公司名稱 *</label><input id="a_name" placeholder="例：得人疼企業社"/></div>
+    <div class="fi"><label>統一編號 * <span style="font-size:10px;color:var(--ht)">(8碼，作為登入帳號)</span></label><input id="a_biz" placeholder="72533080" maxlength="8" type="text" inputmode="numeric"/></div>
+    <div class="fi"><label>負責人姓名 *</label><input id="a_contact" placeholder="王小明"/></div>
+    <div class="fi"><label>手機號碼 * <span style="font-size:10px;color:var(--ht)">(用於驗證與接收帳號資訊)</span></label>
+      <input id="a_phone" placeholder="0912345678" type="tel" inputmode="numeric" maxlength="10"/>
+    </div>
+    <div class="fi"><label>業務類別</label>
+      <select id="a_cat">
+        <option value="E">代辦業者</option>
+        <option value="B">銀行理專</option>
+        <option value="I">保險業務</option>
+        <option value="O">其他</option>
+      </select>
+    </div>
+    <div class="msg err" id="msg1"></div>
+    <button class="btn-main" onclick="goStep2()">下一步：手機驗證 →</button>
+  </div>
+
+  <!-- 步驟2：OTP 驗證 -->
+  <div class="card page" id="p2">
+    <div class="tt">📱 手機驗證</div>
+    <p style="font-size:13px;color:var(--mu);margin-bottom:16px">驗證碼將發送到 <strong id="otp_phone_show"></strong></p>
+    <div class="fi">
+      <label>輸入6位數驗證碼</label>
+      <div class="otp-row">
+        <input id="a_otp" placeholder="_ _ _ _ _ _" maxlength="6" inputmode="numeric" type="text"/>
+        <button id="otp_send_btn" onclick="sendOTP()">發送驗證碼</button>
+      </div>
+      <div class="hint" id="otp_hint"></div>
+    </div>
+    <div class="msg err" id="msg2"></div>
+    <div style="display:flex;align-items:center;margin-top:8px">
+      <button class="btn-back" onclick="goPage(1)">← 返回</button>
+      <button class="btn-main" style="flex:1" onclick="verifyOTP()">驗證確認 →</button>
+    </div>
+  </div>
+
+  <!-- 步驟4：合約同意 -->
+  <div class="card page" id="p3">
+    <div class="tt">📋 通路合作合約</div>
+    <div class="contract-box">
+      <div class="contract-scroll" id="contract_text">
+        <strong>FlowHub 經銷版 通路合作服務合約</strong><br><br>
+        <strong>第一條 服務內容</strong><br>
+        甲方（FlowHub 經銷版）提供乙方使用案件評分評估系統，依訂閱方案提供對應功能。乙方透過本系統協助客戶進行貸款方案評估。<br><br>
+        <strong>第二條 試用期與訂閱方案</strong><br>
+        乙方享有90天免費試用期。試用期間提供進階版完整功能。試用期結束後，乙方可選擇付費方案繼續使用，或降為基本版。<br><br>
+        <strong>第三條 保密義務</strong><br>
+        乙方不得揭露本系統之評估邏輯、評分標準及任何其他通路之資訊。乙方帳號為專屬使用，不得轉讓、出借或以任何方式提供他人使用。本系統所有資料均屬甲方財產，乙方不得擅自複製或輸出。合約終止後保密義務持續三年。<br><br>
+        <strong>第四條 智慧財產權</strong><br>
+        FlowHub 經銷版之品牌、商標、評估模型及系統邏輯均屬甲方所有。乙方不得仿製、複製或協助他人開發功能相似之競爭系統。<br><br>
+        <strong>第五條 資料安全與隔離</strong><br>
+        乙方僅能存取自己通路的案件資料，無法存取其他通路資料。甲方以業界標準加密保護所有資料，對各通路之間資料完全隔離。<br><br>
+        <strong>第六條 佣金與費用</strong><br>
+        試用期間免費使用所有功能。付費方案費用依官方報價單為準。佣金計算依系統記錄為準，如有疑問須於7個工作天內提出。<br><br>
+        <strong>第七條 免責聲明</strong><br>
+        本系統評估結果僅為輔助建議，不構成任何財務建議或貸款承諾。實際核准結果以金融機構最終審查為準。因乙方違規使用導致之損失由乙方自行承擔。<br><br>
+        <strong>第八條 合約終止</strong><br>
+        任一方得提前30天書面通知終止合約。乙方嚴重違約（含洩漏保密資料、帳號共用）時，甲方得立即終止合約，帳號立即停用。<br><br>
+        <strong>第九條 準據法</strong><br>
+        本合約以中華民國法律為準據法，如有爭議以台灣台北地方法院為第一審管轄法院。
+      </div>
+      <label class="agree-row">
+        <input type="checkbox" id="a_agree">
+        <span>本人已詳閱並完全同意上述通路合作合約，確認帳號為本人及本公司使用，並願意遵守所有條款規定</span>
+      </label>
+      <div style="font-size:10px;color:var(--ht);margin-top:6px">同意時間將自動記錄存檔，具法律效力</div>
+    </div>
+    <div class="msg err" id="msg4"></div>
+    <div style="display:flex;align-items:center">
+      <button class="btn-back" onclick="goPage(2)">← 返回</button>
+      <button class="btn-main" style="flex:1" onclick="submitApply()">✅ 同意並送出申請</button>
+    </div>
+  </div>
+
+  <!-- 步驟5：完成 -->
+  <div class="card page" id="p4">
+    <div class="success-box">
+      <div class="success-icon">🎉</div>
+      <div class="success-title">申請成功！</div>
+      <div class="success-sub">
+        您的帳號已建立完成<br>
+        90天免費試用已開始
+      </div>
+      <div class="info-box" id="success_info">
+        📋 帳號：<strong id="s_biz"></strong><br>
+        🔑 初始密碼：<strong id="s_pw"></strong><br>
+        📦 方案：<strong id="s_plan"></strong><br>
+        ⏰ 試用到期：<strong id="s_exp"></strong>
+      </div>
+      <div style="margin-top:16px;font-size:12px;color:var(--mu)">
+        以上資訊也已記錄於系統<br>
+        請妥善保存您的帳號密碼
+      </div>
+      <a href="channel.html" style="display:block;margin-top:20px;background:linear-gradient(135deg,#C9A460,#A07C3A);color:#fff;text-decoration:none;border-radius:var(--rs);height:46px;line-height:46px;font-size:14px;font-weight:700;text-align:center">
+        立即登入業務後台 →
+      </a>
+    </div>
+  </div>
+</div>
+
+<script>
+var SUPA_URL = 'https://qysgidxselirkgeuupxq.supabase.co';
+var SUPA_KEY = 'sb_publishable_ecIslOdeM5JLKLlEHwgdIw_K54AcO6y';
+var HDR = {'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Content-Type':'application/json','Prefer':'return=representation'};
+
+var applyData = {};
+var selectedPlan = 'advanced';
+var otpCode = '';
+var otpTimer = null;
+
+function $(id){ return document.getElementById(id); }
+
+function goPage(n){
+  for(var i=1;i<=4;i++){
+    var p = $('p'+i);
+    var st = $('st'+i);
+    if(p) p.className = 'card page' + (i===n?' on':'');
+    if(st){
+      st.className = 'step' + (i<n?' done':i===n?' active':'');
+      if(i<n) st.querySelector('.step-dot').textContent = '✓';
+    }
+  }
+  window.scrollTo(0,0);
+}
+
+function goStep2(){
+  var name = $('a_name').value.trim();
+  var biz  = $('a_biz').value.trim();
+  var contact = $('a_contact').value.trim();
+  var phone = $('a_phone').value.trim();
+  var msg = $('msg1');
+  if(!name||!biz||!contact||!phone){ msg.textContent='❌ 請填寫所有必填欄位'; return; }
+  if(!/^[0-9]{8}$/.test(biz)){ msg.textContent='❌ 統一編號須為8位數字'; return; }
+  if(!/^09[0-9]{8}$/.test(phone)){ msg.textContent='❌ 手機號碼格式不正確'; return; }
+  msg.textContent = '';
+  applyData.name    = name;
+  applyData.biz     = biz;
+  applyData.contact = contact;
+  applyData.phone   = phone;
+  applyData.cat     = $('a_cat').value;
+  $('otp_phone_show').textContent = phone;
+  goPage(2);
+  sendOTP();
+}
+
+function sendOTP(){
+  var btn = $('otp_send_btn');
+  var hint = $('otp_hint');
+  // 產生6位OTP
+  otpCode = String(Math.floor(100000 + Math.random() * 900000));
+
+  // TODO: 串接簡訊 API 發送真實 OTP
+  // 目前模擬：直接在 hint 顯示（上線前移除）
+  console.log('[DEV] OTP:', otpCode);
+
+  // 發送倒數計時
+  var sec = 60;
+  btn.disabled = true;
+  if(otpTimer) clearInterval(otpTimer);
+  otpTimer = setInterval(function(){
+    sec--;
+    btn.textContent = sec+'秒後重發';
+    hint.textContent = '✅ 驗證碼已發送（測試模式：請查看 Console）';
+    hint.style.color = '#22C55E';
+    if(sec<=0){
+      clearInterval(otpTimer);
+      btn.disabled = false;
+      btn.textContent = '重新發送';
+    }
+  }, 1000);
+}
+
+function verifyOTP(){
+  var input = $('a_otp').value.trim();
+  var msg = $('msg2');
+  if(!input){ msg.textContent='❌ 請輸入驗證碼'; return; }
+  if(input !== otpCode){ msg.textContent='❌ 驗證碼錯誤，請重新確認'; return; }
+  msg.textContent = '';
+  if(otpTimer) clearInterval(otpTimer);
+  applyData.plan = 'advanced';
+  goPage(3);
+}
+
+function selectPlan(plan){
+  selectedPlan = plan;
+  $('plan_basic').className    = 'plan-card' + (plan==='basic'   ?' selected':'');
+  $('plan_advanced').className = 'plan-card' + (plan==='advanced'?' selected':'');
+}
+
+async function submitApply(){
+  var agreeBox = $('a_agree');
+  var msg = $('msg4');
+  if(!agreeBox.checked){ msg.textContent='❌ 請先閱讀並同意合約條款'; return; }
+
+  msg.textContent = '⏳ 建立帳號中...';
+  msg.style.color = '#6B6560';
+
+  var agreeTime = new Date().toISOString();
+  var trialDays = 3;
+  var trialExp  = new Date(Date.now() + trialDays*24*60*60*1000).toISOString().split('T')[0];
+  var initPw    = applyData.biz; // 初始密碼 = 統編
+  applyData.plan = 'advanced'; // 試用期間固定進階版
+
+  try {
+    var payload = {
+      code:              applyData.cat + String(Math.floor(Math.random()*99)+1).padStart(2,'0'),
+      name:              applyData.name,
+      biz_id:            applyData.biz,
+      contact_name:      applyData.contact,
+      contact_phone:     applyData.phone,
+      category:          applyData.cat,
+      plan:              applyData.plan,
+      trial_expires_at:  trialExp,
+      is_trial:          true,
+      commission_rate:   3,
+      contract_agreed_at: agreeTime,
+      password_hash:     initPw,
+      channel_code:      applyData.biz,
+      status:            'active'
+    };
+
+    var r = await fetch(SUPA_URL+'/rest/v1/channels', {
+      method:'POST', headers:HDR, body:JSON.stringify(payload)
+    });
+    var data = await r.json();
+
+    if(r.ok){
+      $('s_biz').textContent  = applyData.biz;
+      $('s_pw').textContent   = initPw + '（請登入後修改）';
+      $('s_plan').textContent = '🎯 進階版完整功能（免費試用3天）';
+      $('s_exp').textContent  = trialExp;
+      goPage(5);
+    } else {
+      var errMsg = data && data.message ? data.message : '建立失敗，請稍後再試';
+      if(errMsg.includes('duplicate') || errMsg.includes('unique')){
+        msg.textContent = '❌ 此統編已申請過，請直接登入或聯繫客服';
+      } else {
+        msg.textContent = '❌ ' + errMsg;
+      }
+      msg.style.color = '#DC2626';
+    }
+  } catch(e) {
+    msg.textContent = '❌ 網路錯誤，請稍後再試';
+    msg.style.color = '#DC2626';
+    console.error(e);
+  }
+}
+</script>
+</body>
+</html>
