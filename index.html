@@ -1493,6 +1493,47 @@ async function doSubmit(){
     clearTimeout(timeout);
     btn.disabled = false;
     if(resp.ok){
+      // 送出成功後，打 LINE Notify 通知業務
+      (function(){
+        try {
+          var params = new URLSearchParams(window.location.search);
+          var chCode = params.get('ch');
+          if(!chCode) return;
+          // 從 Supabase 查業務的 line_token
+          fetch('https://qysgidxselirkgeuupxq.supabase.co/rest/v1/channels?code=eq.'+encodeURIComponent(chCode)+'&select=line_token,contact_name,name', {
+            headers: {
+              'apikey': 'sb_publishable_ecIslOdeM5JLKLlEHwgdIw_K54AcO6y',
+              'Authorization': 'Bearer sb_publishable_ecIslOdeM5JLKLlEHwgdIw_K54AcO6y'
+            }
+          }).then(function(r){ return r.json(); }).then(function(d){
+            if(!d || !d[0] || !d[0].line_token) return;
+            var token = d[0].line_token;
+            var chName = d[0].contact_name || d[0].name || chCode;
+            var grade = scores[best] ? gi(scores[best].s).g : '-';
+            var prodName = scores[best] ? scores[best].n : '-';
+            var msg = [
+              '',
+              '🔔 FlowHub 新案件通知',
+              '─────────────────',
+              '姓名：' + (fd.name||'-'),
+              '電話：' + (fd.phone||'-'),
+              '申請金額：' + (fd.amt ? parseInt(fd.amt).toLocaleString() + ' 元' : '-'),
+              '最佳商品：' + prodName + ' (' + grade + '級)',
+              '業務通路：' + chName,
+              '─────────────────',
+              '請盡速聯繫客戶 💪'
+            ].join('\n');
+            fetch('https://notify-api.line.me/api/notify', {
+              method: 'POST',
+              headers: {
+                'Authorization': 'Bearer ' + token,
+                'Content-Type': 'application/x-www-form-urlencoded'
+              },
+              body: 'message=' + encodeURIComponent(msg)
+            }).catch(function(){});
+          }).catch(function(){});
+        } catch(e){}
+      })();
       // HTTP 201/200 = 送出成功
       showResult(scores, best, bGi);
     } else {

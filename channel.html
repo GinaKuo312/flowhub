@@ -228,18 +228,23 @@ tr:hover td{background:#FAFAF7}
         <div class="page-title">LINE 推播通知</div>
         <div class="page-sub">新案件進來，自動推播到您的 LINE</div>
         <div class="line-setup">
-          <div class="line-title">⚙️ 設定 LINE Notify</div>
-          <div class="line-desc">完成設定後，每當有新客戶填單，FlowHub 會立即傳送通知到您的 LINE。</div>
-          <div class="line-step"><div class="step-num">1</div><div>前往 <a href="https://notify-bot.line.me/zh_TW/" target="_blank" style="color:var(--bl)">LINE Notify 官網</a>，點右上角登入</div></div>
-          <div class="line-step"><div class="step-num">2</div><div>點「個人頁面」→「發行權杖」→ 選「透過1對1聊天接收LINE Notify的通知」</div></div>
-          <div class="line-step"><div class="step-num">3</div><div>複製發行的 Token，貼到下方欄位</div></div>
+          <div class="line-title">⚙️ 設定 LINE 推播通知</div>
+          <div class="line-desc" style="margin-bottom:16px">完成設定後，每當有新客戶透過您的連結填單，FlowHub 會立即推播通知到您的 LINE 個人帳號。</div>
+          <div style="background:#F0FBF4;border:1px solid #A8DFB8;border-radius:10px;padding:14px 16px;margin-bottom:16px">
+            <div style="font-size:13px;font-weight:600;color:#1A7A3A;margin-bottom:10px">三步驟完成設定</div>
+            <div class="line-step"><div class="step-num">1</div><div><div style="font-weight:600;font-size:13px;margin-bottom:2px">點下方按鈕前往 LINE Notify 申請</div><div style="font-size:12px;color:#6B6560">用您的 LINE 帳號登入，完全免費</div></div></div>
+            <div class="line-step"><div class="step-num">2</div><div><div style="font-weight:600;font-size:13px;margin-bottom:2px">點「發行權杖」→ 填名稱 → 選「1對1聊天」→ 按發行</div><div style="font-size:12px;color:#6B6560">名稱可填「FlowHub通知」，選1對1才能推到您個人 LINE</div></div></div>
+            <div class="line-step"><div class="step-num">3</div><div><div style="font-weight:600;font-size:13px;margin-bottom:2px">複製 Token，貼到下方欄位並按儲存</div><div style="font-size:12px;color:#6B6560">Token 約40個英文數字，只顯示一次，請立刻複製</div></div></div>
+          </div>
+          <a href="https://notify-bot.line.me/zh_TW/" target="_blank" style="display:block;text-align:center;background:#06C755;color:#fff;text-decoration:none;padding:12px;border-radius:8px;font-weight:700;font-size:14px;margin-bottom:14px">前往 LINE Notify 申請 Token →</a>
           <div class="line-input">
-            <input id="line_token" placeholder="貼上 LINE Notify Token..." maxlength="50"/>
+            <input id="line_token" placeholder="貼上 LINE Notify Token（約40字元）..." maxlength="60"/>
             <button onclick="saveLINEToken()">儲存並測試</button>
           </div>
-          <div id="line_status" style="font-size:12px;color:var(--gn);min-height:18px"></div>
+          <div id="line_status" style="font-size:12px;color:var(--gn);min-height:18px;margin-top:6px"></div>
+          <div style="font-size:11px;color:#A09890;margin-top:8px">Token 僅儲存在您的裝置，不會上傳到伺服器</div>
         </div>
-        <div class="line-setup" id="line_current" style="display:none">
+                <div class="line-setup" id="line_current" style="display:none">
           <div class="line-title">✅ LINE 通知已啟用</div>
           <div class="line-desc" id="line_current_desc"></div>
           <button class="btn-sm" onclick="removeLINEToken()" style="margin-top:8px">移除通知設定</button>
