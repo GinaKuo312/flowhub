@@ -178,7 +178,15 @@
   <div id="panel_content"></div>
 </div>
 
-<script>
+<script>var statuses=[
+  {s:'待處理',c:'#D97706',bg:'#FEF3C7'},
+  {s:'聯繫中',c:'#2563EB',bg:'#DBEAFE'},
+  {s:'補件中',c:'#7C3AED',bg:'#EDE9FE'},
+  {s:'已送件',c:'#0891B2',bg:'#CFFAFE'},
+  {s:'已核准',c:'#16A34A',bg:'#DCFCE7'},
+  {s:'未通過',c:'#DC2626',bg:'#FEE2E2'}
+];
+
 var SUPA_URL='https://qysgidxselirkgeuupxq.supabase.co';
 var SUPA_KEY='sb_publishable_ecIslOdeM5JLKLlEHwgdIw_K54AcO6y';
 var H={'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Content-Type':'application/json'};
@@ -557,7 +565,11 @@ function openCase(id){
     var isA=curSt===st.s;
     return '<button data-cid="'+c.id+'" data-st="'+st.s+'" class="ch-st-btn" style="flex:1;min-width:60px;padding:8px 2px;border:1.5px solid '+(isA?st.c:'#E8D5A8')+';border-radius:7px;background:'+(isA?st.bg:'#fff')+';color:'+(isA?st.c:'#6B6560')+';font-size:11px;font-weight:'+(isA?'700':'500')+';cursor:pointer;font-family:inherit;transition:.15s">'+st.s+'</button>';
   }).join('');
-  html+='<div class="crm-box"><div class="crm-title">案件狀態</div><div style="display:flex;gap:5px;flex-wrap:wrap">'+stBtns+'</div></div>';
+  html+='<div class="crm-box"><div class="crm-title">案件狀態</div>'
+    +'<div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:10px">'+stBtns+'</div>'
+    +'<button data-cid="'+c.id+'" class="ch-save-status" style="width:100%;height:36px;background:#2A1F0E;color:#fff;border:none;border-radius:7px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;letter-spacing:.3px">💾 儲存狀態</button>'
+    +'<div id="status_saved_msg" style="font-size:11px;color:#16A34A;margin-top:5px;min-height:16px"></div>'
+    +'</div>';
 
   // ── CRM 備註 ──
   html+='<div class="crm-box"><div class="crm-title">業務備註</div>'
@@ -565,24 +577,43 @@ function openCase(id){
     +'<button data-cid="'+c.id+'" class="ch-save-crm" style="margin-top:6px;height:32px;padding:0 14px;border:1.5px solid var(--gm);border-radius:6px;font-size:12px;font-family:inherit;cursor:pointer;background:var(--gl);color:var(--gd);font-weight:600">儲存備註</button>'
     +'</div>';
 
-  // ── 核准記錄（黃金框，高端感）──
-  var hasApprove=c.approved_company||c.approved_amount;
-  html+='<div style="background:linear-gradient(135deg,#FDF8F0,#FFFDF8);border:1.5px solid #C9A460;border-radius:12px;padding:16px;margin-bottom:12px">'
-    +'<div style="font-size:13px;font-weight:700;color:#92400E;margin-bottom:3px;display:flex;align-items:center;gap:6px">'
-    +'<span>核准記錄</span>'
-    +(hasApprove?'<span style="font-size:10px;background:#DCFCE7;color:#16A34A;padding:1px 7px;border-radius:8px;font-weight:600">已填寫</span>':'')
+  // ── 核准記錄 ──
+  var hasApprove = c.approved_company||c.approved_amount;
+  var approveDate = c.approved_at ? c.approved_at.substr(0,10) : '';
+  html += '<div style="background:linear-gradient(135deg,#FDF8F0,#FFFDF8);border:1.5px solid #C9A460;border-radius:12px;padding:16px;margin-bottom:12px">'
+    +'<div style="font-size:13px;font-weight:700;color:#92400E;margin-bottom:10px;display:flex;align-items:center;gap:6px">'
+    +'核准記錄'
+    +(hasApprove?'<span style="font-size:10px;background:#DCFCE7;color:#16A34A;padding:1px 7px;border-radius:8px;font-weight:600;margin-left:4px">已填寫</span>':'')
     +'</div>'
-    ''
+    // 已有記錄：顯示摘要
+    +(hasApprove?'<div style="background:#DCFCE7;border-radius:8px;padding:9px 12px;margin-bottom:10px;font-size:12px;color:#16A34A;font-weight:600;line-height:1.8">'
+      +'✅ 核准公司：'+(c.approved_company||'—')+'<br>'
+      +'💰 核准金額：'+(c.approved_amount?'$'+Number(c.approved_amount).toLocaleString():'—')+'<br>'
+      +'📅 撥款日期：'+(approveDate||'—')
+      +'</div>':'')
+    // 欄位：第一行 核准公司 + 核准金額
     +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">'
-    +'<div><div style="font-size:11px;color:#6B6560;margin-bottom:3px;font-weight:600">核准公司</div>'
-    +'<input id="approve_company" value="'+(c.approved_company||'')+'" placeholder="中租、裕富、玉山..." style="width:100%;height:38px;padding:0 10px;border:1.5px solid #E8D5A8;border-radius:7px;font-size:13px;font-family:inherit;outline:none;transition:.2s" onfocus="this.style.borderColor=\'#C9A460\'" onblur="this.style.borderColor=\'#E8D5A8\'"/></div>'
-    +'<div><div style="font-size:11px;color:#6B6560;margin-bottom:3px;font-weight:600">核准金額（元）</div>'
-    +'<input id="approve_amount" type="number" value="'+(c.approved_amount||'')+'" placeholder="如：200000" style="width:100%;height:38px;padding:0 10px;border:1.5px solid #E8D5A8;border-radius:7px;font-size:13px;font-family:inherit;outline:none;transition:.2s" onfocus="this.style.borderColor=\'#C9A460\'" onblur="this.style.borderColor=\'#E8D5A8\'"/></div>'
+    +'<div>'
+      +'<div style="font-size:11px;color:#6B6560;font-weight:600;margin-bottom:3px">核准公司</div>'
+      +'<input id="approve_company" value="'+(c.approved_company||'')+'" placeholder="中租、裕富、銀角..." style="width:100%;height:38px;padding:0 10px;border:1.5px solid #E8D5A8;border-radius:7px;font-size:13px;font-family:inherit;outline:none" onfocus="this.style.borderColor=\'#C9A460\'" onblur="this.style.borderColor=\'#E8D5A8\'"/>'
     +'</div>'
-    +'<div style="margin-bottom:10px"><div style="font-size:11px;color:#6B6560;margin-bottom:3px;font-weight:600">方案備注（利率/期數/條件）</div>'
-    +'<input id="approve_note" value="'+(c.approved_note||'')+'" placeholder="例：年利率 9%，36期，需薪轉帳戶" style="width:100%;height:38px;padding:0 10px;border:1.5px solid #E8D5A8;border-radius:7px;font-size:13px;font-family:inherit;outline:none;transition:.2s" onfocus="this.style.borderColor=\'#C9A460\'" onblur="this.style.borderColor=\'#E8D5A8\'"/></div>'
-    +'<button data-cid="'+c.id+'" class="ch-save-approve" style="width:100%;height:40px;background:linear-gradient(135deg,#C9A460,#A07C3A);color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;letter-spacing:.3px">✓ 儲存核准記錄</button>'
-    +(hasApprove?'<div style="margin-top:10px;font-size:12px;color:#16A34A;font-weight:600">✅ 已核准：'+(c.approved_company||'')+(c.approved_amount?' ・ $'+Number(c.approved_amount).toLocaleString():'')+' </div>':'')
+    +'<div>'
+      +'<div style="font-size:11px;color:#6B6560;font-weight:600;margin-bottom:3px">核准金額（元）</div>'
+      +'<input id="approve_amount" type="number" value="'+(c.approved_amount||'')+'" placeholder="例：200000" style="width:100%;height:38px;padding:0 10px;border:1.5px solid #E8D5A8;border-radius:7px;font-size:13px;font-family:inherit;outline:none" onfocus="this.style.borderColor=\'#C9A460\'" onblur="this.style.borderColor=\'#E8D5A8\'"/>'
+    +'</div>'
+    +'</div>'
+    // 欄位：第二行 撥款日期 + 備注
+    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">'
+    +'<div>'
+      +'<div style="font-size:11px;color:#6B6560;font-weight:600;margin-bottom:3px">撥款日期</div>'
+      +'<input id="approve_date" type="date" value="'+approveDate+'" style="width:100%;height:38px;padding:0 10px;border:1.5px solid #E8D5A8;border-radius:7px;font-size:13px;font-family:inherit;outline:none" onfocus="this.style.borderColor=\'#C9A460\'" onblur="this.style.borderColor=\'#E8D5A8\'"/>'
+    +'</div>'
+    +'<div>'
+      +'<div style="font-size:11px;color:#6B6560;font-weight:600;margin-bottom:3px">備注（利率/期數）</div>'
+      +'<input id="approve_note" value="'+(c.approved_note||'')+'" placeholder="年利率9%，36期" style="width:100%;height:38px;padding:0 10px;border:1.5px solid #E8D5A8;border-radius:7px;font-size:13px;font-family:inherit;outline:none" onfocus="this.style.borderColor=\'#C9A460\'" onblur="this.style.borderColor=\'#E8D5A8\'"/>'
+    +'</div>'
+    +'</div>'
+    +'<button data-cid="'+c.id+'" class="ch-save-approve" style="width:100%;height:40px;background:linear-gradient(135deg,#C9A460,#A07C3A);color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit">✓ 儲存核准記錄</button>'
     +'</div>';
 
   $('panel_content').innerHTML=html;
@@ -593,7 +624,26 @@ function openCase(id){
 document.getElementById('panel').addEventListener('click',function(e){
   var btn=e.target.closest('button');if(!btn)return;
   var cid=btn.getAttribute('data-cid');
-  if(btn.classList.contains('ch-st-btn')&&cid){updateStatus(cid,btn.getAttribute('data-st'));}
+  if(btn.classList.contains('ch-st-btn')&&cid){
+    // 只更新 UI 選中狀態，不立即存
+    document.querySelectorAll('.ch-st-btn').forEach(function(b){
+      var st=statuses.find(function(s){return s.s===b.getAttribute('data-st');});
+      if(!st)return;
+      b.style.background='#fff'; b.style.color='#6B6560'; b.style.border='1.5px solid #E8D5A8'; b.style.fontWeight='500';
+    });
+    var mySt=statuses.find(function(s){return s.s===btn.getAttribute('data-st');});
+    if(mySt){btn.style.background=mySt.bg;btn.style.color=mySt.c;btn.style.border='1.5px solid '+mySt.c;btn.style.fontWeight='700';}
+    window._selectedStatus=btn.getAttribute('data-st');
+    var msg=document.getElementById('status_saved_msg');
+    if(msg)msg.textContent='';
+  }
+  else if(btn.classList.contains('ch-save-status')&&cid){
+    var st=window._selectedStatus||null;
+    if(!st){alert('請先選擇狀態');return;}
+    updateStatus(cid,st);
+    var msg=document.getElementById('status_saved_msg');
+    if(msg)msg.textContent='✅ 已儲存：'+st;
+  }
   else if(btn.classList.contains('ch-save-crm')&&cid){saveCRMNote(cid);}
   else if(btn.classList.contains('ch-save-approve')&&cid){saveApproval(cid);}
 });
@@ -620,7 +670,13 @@ async function saveApproval(id){
   var note=document.getElementById('approve_note').value.trim();
   if(!company&&!amount){alert('請填寫核准公司或金額');return;}
   try{
-    await fetch(SUPA_URL+'/rest/v1/applications?id=eq.'+id,{method:'PATCH',headers:{...H,'Prefer':'return=minimal'},body:JSON.stringify({approved_company:company||null,approved_amount:amount?parseInt(amount):null,approved_note:note||null,status:'已核准'})});
+    await fetch(SUPA_URL+'/rest/v1/applications?id=eq.'+id,{method:'PATCH',headers:{...H,'Prefer':'return=minimal'},body:JSON.stringify({
+          approved_company: company||null,
+          approved_amount:  amount?parseInt(amount):null,
+          approved_note:    note||null,
+          approved_at:      document.getElementById('approve_date')?document.getElementById('approve_date').value||null:null,
+          status:'已核准'
+        })});
     var c=allCases.find(function(x){return x.id==id;});if(c){c.approved_company=company;c.approved_amount=parseInt(amount)||0;c.approved_note=note;c.status='已核准';}
     renderCasesTable();alert('✅ 核准記錄已儲存！');
   }catch(e){alert('儲存失敗：'+e.message);}
