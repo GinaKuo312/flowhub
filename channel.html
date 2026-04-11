@@ -397,9 +397,16 @@ function openCase(id){
     var gs=Math.max(c.score_goods||0, 40); // 基礎分
 
     // 每家公司特色與條件（基於市場大數據）
+    // 找曾逾期的公司
+    var cHadLate = (c.fin_quality==='late_occ'||c.fin_quality==='late_oft'||c.fin_quality==='stopped');
+    var cFinCos  = (c.fin_cos||'').split(',').filter(Boolean);
+    var cNameMap = {'中租':'zhongzu','裕富':'yufu','和潤':'herun','麻吉配':'c21','銀角':'yingjiao','21世紀':'c21'};
+    var cLateIds = {};
+    if(cHadLate){ cFinCos.forEach(function(n){var id=cNameMap[n.trim()];if(id)cLateIds[id]=true;}); }
+
     var FIN_COS = [
       {
-        id:'yingjiao', name:'銀角零卡', sub:'中租旗下・無卡分期',
+        id:'yingjiao', blocked:!!cLateIds['yingjiao'], name:'銀角零卡', sub:'',
         color:'#185FA5', badge:'消費分期首選',
         score:(function(){
           var s=gs;
@@ -421,7 +428,7 @@ function openCase(id){
         })()
       },
       {
-        id:'yufu', name:'裕富數位資融', sub:'裕融旗下・個人融資',
+        id:'yufu', blocked:!!cLateIds['yufu'], name:'裕富數位資融', sub:'',
         color:'#0F6E56', badge:'個貸穩定',
         score:(function(){
           var s=gs;
@@ -442,7 +449,7 @@ function openCase(id){
         })()
       },
       {
-        id:'herun', name:'和潤企業', sub:'和泰集團・車貸強項',
+        id:'herun', blocked:!!cLateIds['herun'], name:'和潤企業', sub:'',
         color:'#854F0B', badge:'有車優先',
         score:(function(){
           var s=gs;
@@ -462,7 +469,7 @@ function openCase(id){
         })()
       },
       {
-        id:'c21', name:'21世紀(麻吉Pay)', sub:'PChome旗下・手機貸',
+        id:'c21', blocked:!!cLateIds['c21'], name:'21世紀(麻吉Pay)', sub:'',
         color:'#534AB7', badge:'小額快速',
         score:(function(){
           var s=gs;
@@ -481,14 +488,14 @@ function openCase(id){
           var amt=parseInt(c.need_amount||0);
           if(amt>150000)return'申請金額超出範圍（最高15萬）';
           if(amt<=80000)return'小額快速，最快當天撥款';
-          return '信用小白/急需資金首選';
+          return '';
         })()
       },
       {
-        id:'other', name:'其他融資公司', sub:'業務自填評估',
+        id:'other', blocked:!!cLateIds['other'], name:'其他融資公司', sub:'',
         color:'#6B6560', badge:'依案件評估',
         score: Math.round((gs + 50) / 2),
-        note:'請業務依客戶狀況自行評估適合的融資公司'
+        note:'依客戶條件自行評估'
       }
     ];
 
@@ -496,16 +503,21 @@ function openCase(id){
 
     html += '<div style="background:#FDF8F0;border:1px solid #E8D5A8;border-radius:10px;padding:14px;margin-bottom:14px">';
     html += '<div style="font-size:12px;font-weight:700;color:#92400E;margin-bottom:10px;display:flex;align-items:center;gap:6px">'
-      + '商品分期推薦公司 '
-      + '<span style="font-size:10px;font-weight:400;color:#A09890">（大數據初版，累積案例後AI優化）</span>'
+      + '商品分期推薦'
       + '</div>';
 
     FIN_COS.forEach(function(co,i){
-      var isTop=i===0;
+      var isTop = i===0 && !co.blocked;
+      if(co.blocked){
+        html += '<div style="margin-bottom:6px;display:flex;align-items:center;gap:8px">'
+          + '<span style="font-size:12px;font-weight:600;color:#DC2626;text-decoration:line-through;min-width:100px">'+co.name+'</span>'
+          + '<span style="font-size:11px;color:#DC2626;font-weight:600">⛔ 曾逾期，不送</span>'
+          + '</div>';
+        return;
+      }
       html += '<div style="margin-bottom:8px;padding-bottom:8px;border-bottom:'+(i<FIN_COS.length-1?'1px solid #F0EDE8':'none')+'">'
         + '<div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">'
         + '<span style="font-size:13px;font-weight:700;color:#2A1F0E;min-width:100px">'+co.name+'</span>'
-        + '<span style="font-size:10px;color:#6B6560">'+co.sub+'</span>'
         + (isTop?'<span style="margin-left:auto;font-size:10px;background:#C9A460;color:#fff;padding:1px 8px;border-radius:8px;font-weight:700">首推</span>':'')
         + '</div>'
         + '<div style="display:flex;align-items:center;gap:8px">'
@@ -513,7 +525,6 @@ function openCase(id){
         + '<div style="width:'+co.score+'%;height:100%;background:'+co.color+';border-radius:3px"></div></div>'
         + '<span style="font-size:11px;color:#6B6560;min-width:32px;text-align:right;font-weight:600">'+Math.round(co.score)+'%</span>'
         + '</div>'
-        + '<div style="font-size:11px;color:#6B6560;margin-top:3px">'+co.note+'</div>'
         + '</div>';
     });
     html += '</div>';
@@ -561,7 +572,7 @@ function openCase(id){
     +'<span>核准記錄</span>'
     +(hasApprove?'<span style="font-size:10px;background:#DCFCE7;color:#16A34A;padding:1px 7px;border-radius:8px;font-weight:600">已填寫</span>':'')
     +'</div>'
-    +'<div style="font-size:11px;color:#A09890;margin-bottom:12px">填入核准結果，自動同步數據分析・業績統計</div>'
+    ''
     +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">'
     +'<div><div style="font-size:11px;color:#6B6560;margin-bottom:3px;font-weight:600">核准公司</div>'
     +'<input id="approve_company" value="'+(c.approved_company||'')+'" placeholder="中租、裕富、玉山..." style="width:100%;height:38px;padding:0 10px;border:1.5px solid #E8D5A8;border-radius:7px;font-size:13px;font-family:inherit;outline:none;transition:.2s" onfocus="this.style.borderColor=\'#C9A460\'" onblur="this.style.borderColor=\'#E8D5A8\'"/></div>'

@@ -341,6 +341,14 @@ select{background-image:url("data:image/svg+xml,%3Csvg width='12' height='8' vie
       <div class="err" id="e_job">請選擇工作性質</div>
     </div>
     <div class="field">
+      <div class="lbl">是否有勞保投保？<span class="req">*</span></div>
+      <div class="opts">
+        <button class="opt" onclick="fd.labor='yes';pg('g_lab',this)">✅ 有勞保</button>
+        <button class="opt" onclick="fd.labor='no';pg('g_lab',this)">❌ 無勞保</button>
+      </div>
+      <div class="err" id="e_lab">請選擇</div>
+    </div>
+    <div class="field">
       <div class="lbl">目前工作年資<span class="req">*</span></div>
       <select id="f_ten" onchange="fd.tenure=this.value">
         <option value="">請選擇</option>
@@ -348,7 +356,8 @@ select{background-image:url("data:image/svg+xml,%3Csvg width='12' height='8' vie
         <option value="4">3–6 個月</option>
         <option value="9">6–12 個月</option>
         <option value="15">1–2 年</option>
-        <option value="25">2 年以上</option>
+        <option value="25">2–3 年</option>
+        <option value="37">3 年以上</option>
       </select>
       <div class="err" id="e_ten">請選擇年資</div>
     </div>
@@ -767,8 +776,7 @@ select{background-image:url("data:image/svg+xml,%3Csvg width='12' height='8' vie
   </div>
 </div>
 </div><!-- /main -->
-<div class="toast-wrap" id="tw"></div>
-
+<div c
 <script>
 // =====
 // ===== 全域狀態 =====
@@ -958,6 +966,7 @@ function v2(){
   if(!fd.sal_t){ sh('e_st'); ok=false; } else hd('e_st');
   // 收入證明
   if(!fd.proof){ sh('e_pf'); ok=false; } else hd('e_pf');
+  if(!fd.labor){ sh('e_lab'); ok=false; } else hd('e_lab');
   // 自動設定（已移除的欄位）
   fd.sal_tr = fd.sal_t === '薪轉' ? 'yes' : 'no';
   fd.co_chk = 'yes';
@@ -1047,80 +1056,35 @@ function chkC(){
 
 // ── 融資分期公司推薦（初版大數據規則，後續AI優化）──────────
 function calcFinRecommend(){
-  var inc = parseInt(fd.income)||0;
-  var amt = parseInt(fd.amt)||0;
-  var ten = parseInt(fd.tenure)||0;
-  var bur = parseInt(fd.burden)||0;
-  var cc  = fd.cc||'';
-  var job = fd.job||'';
-  var car = fd.has_car||'no';
-  var hist = fd.has_fin==='yes' ? (fd.fin_quality||'none') : 'none';
-  var dti = inc>0 ? (bur + Math.round(amt/36)) / inc : 1;
-
-  var companies = [
-    {
-      id:'zhongzu', name:'中租迪和',
-      score: (function(){
-        var s=50;
-        if(inc>=40000)s+=20; else if(inc>=30000)s+=10; else if(inc<25000)s-=25;
-        if(ten>=24)s+=15; else if(ten>=12)s+=8; else if(ten<6)s-=20;
-        if(cc==='正常')s+=15; else if(cc==='最低')s+=0; else if(cc==='遲繳')s-=20; else if(cc==='停卡')s-=40; else s+=5;
-        if(job==='正職')s+=10; else if(job==='自營')s+=5; else if(job==='兼職')s-=15;
-        if(dti<0.3)s+=10; else if(dti<0.4)s+=5; else if(dti>0.5)s-=20;
-        if(hist==='normal')s+=10; else if(hist==='settled')s+=8; else if(hist==='late_occ')s-=15; else if(hist==='late_oft'||hist==='stopped')s-=30;
-        if(amt>300000)s-=15;
-        return Math.min(100,Math.max(0,s));
-      })(),
-      note: inc<25000?'收入未達門檻':cc==='停卡'?'停卡影響大':ten<6?'在職未滿6個月':'條件符合'
-    },
-    {
-      id:'yufu', name:'裕富/新鑫',
-      score: (function(){
-        var s=55;
-        if(inc>=30000)s+=15; else if(inc>=22000)s+=8; else if(inc<20000)s-=20;
-        if(ten>=12)s+=12; else if(ten>=6)s+=5; else s-=15;
-        if(cc==='正常')s+=12; else if(cc==='最低')s+=3; else if(cc==='遲繳')s-=15; else if(cc==='停卡')s-=30; else s+=5;
-        if(job==='正職')s+=8; else if(job==='自營')s+=8; else if(job==='兼職')s-=10;
-        if(dti<0.35)s+=8; else if(dti>0.5)s-=15;
-        if(hist==='normal')s+=8; else if(hist==='settled')s+=6; else if(hist==='late_occ')s-=10; else if(hist==='late_oft'||hist==='stopped')s-=25;
-        if(car==='yes')s+=5;
-        if(amt>200000)s-=10;
-        return Math.min(100,Math.max(0,s));
-      })(),
-      note: inc<20000?'收入偏低':hist==='late_oft'||hist==='stopped'?'逾期紀錄影響':'主力推薦方案'
-    },
-    {
-      id:'herun', name:'和潤企業',
-      score: (function(){
-        var s=48;
-        if(car==='yes')s+=20; else if(car==='no')s-=15;
-        if(inc>=25000)s+=12; else if(inc>=20000)s+=5; else s-=10;
-        if(ten>=6)s+=10; else s-=10;
-        if(cc==='正常')s+=10; else if(cc==='遲繳')s-=12; else if(cc==='停卡')s-=25;
-        if(hist==='normal')s+=8; else if(hist==='late_occ')s-=10; else if(hist==='late_oft'||hist==='stopped')s-=20;
-        if(amt<=150000)s+=10; else if(amt>300000)s-=15;
-        return Math.min(100,Math.max(0,s));
-      })(),
-      note: car==='yes'?'有車，和潤最適合':car==='no'?'無車，非強項':'車貸主力'
-    },
-    {
-      id:'rijin', name:'日盛台駿',
-      score: (function(){
-        var s=52;
-        if(inc>=20000)s+=10; else if(inc>=15000)s+=5; else s-=15;
-        if(ten>=3)s+=8; else s-=10;
-        if(cc==='正常')s+=8; else if(cc==='最低')s+=5; else if(cc==='遲繳')s-=8; else if(cc==='停卡')s-=20; else s+=5;
-        if(job==='正職')s+=8; else if(job==='自營')s+=10; else if(job==='兼職')s+=3;
-        if(hist==='normal')s+=8; else if(hist==='settled')s+=5; else if(hist==='late_occ')s-=8; else if(hist==='late_oft'||hist==='stopped')s-=15;
-        if(dti<0.5)s+=5; else if(dti>0.6)s-=10;
-        if(amt<=100000)s+=8;
-        return Math.min(100,Math.max(0,s));
-      })(),
-      note: job==='自營'?'自營接受度高':cc==='停卡'?'停卡較難通過':'彈性方案可試'
-    }
+  var inc=parseInt(fd.income)||0,amt=parseInt(fd.amt)||0,ten=parseInt(fd.tenure)||0;
+  var bur=parseInt(fd.burden)||0,cc=fd.cc||'',car=fd.has_car||'no';
+  var quality=fd.has_fin==='yes'?(fd.fin_quality||'none'):'none';
+  var finCosArr=fd.fin_cos||[],hasLabor=fd.labor==='yes';
+  var dti=inc>0?(bur+Math.round(amt/36))/inc:1;
+  var hadLate=(quality==='late_occ'||quality==='late_oft'||quality==='stopped');
+  var nameMap={'中租':'zhongzu','裕富':'yufu','和潤':'herun','麻吉配':'c21','BOBO配':'c21','銀角':'yingjiao','21世紀':'c21'};
+  var lateIds={};
+  if(hadLate){ finCosArr.forEach(function(n){var id=nameMap[n];if(id)lateIds[id]=true;}); if(fd.fin_co_other)lateIds['other']=true; }
+  function bs(){
+    var s=50;
+    if(inc>=30000)s+=10;else if(inc>=20000)s+=5;else if(inc<15000)s-=15;
+    if(ten>=12)s+=8;else if(ten>=6)s+=3;else if(ten<3)s-=10;
+    if(cc==='正常')s+=8;else if(cc==='最低')s+=2;else if(cc==='遲繳')s-=12;else if(cc==='停卡')s-=30;
+    if(hasLabor)s+=8;else s-=8;
+    if(dti<0.35)s+=5;else if(dti>0.55)s-=12;
+    if(quality==='normal')s+=10;else if(quality==='settled')s+=8;
+    else if(quality==='late_occ')s-=15;else if(quality==='late_oft')s-=30;else if(quality==='stopped')s-=45;
+    return s;
+  }
+  var b=bs();
+  var companies=[
+    {id:'yingjiao',name:'銀角零卡',blocked:!!lateIds['yingjiao'],score:(function(){if(lateIds['yingjiao'])return -1;var s=b;if(amt<=200000)s+=15;else if(amt>300000)s-=20;if(cc==='正常')s+=10;else if(cc==='停卡')s-=20;if(ten>=3)s+=5;else s-=8;return Math.min(99,Math.max(0,s));})()},
+    {id:'yufu',name:'裕富/新鑫',blocked:!!lateIds['yufu'],score:(function(){if(lateIds['yufu'])return -1;var s=b;if(inc>=30000)s+=12;else if(inc<20000)s-=15;if(ten>=12)s+=12;else if(ten<6)s-=12;if(hasLabor)s+=10;if(amt<=300000)s+=8;else s-=10;return Math.min(99,Math.max(0,s));})()},
+    {id:'herun',name:'和潤企業',blocked:!!lateIds['herun'],score:(function(){if(lateIds['herun'])return -1;var s=b;if(car==='yes'||fd.has_moto==='yes')s+=25;else s-=20;if(inc>=25000)s+=8;else if(inc<18000)s-=10;if(ten>=6)s+=8;else s-=8;if(amt<=200000)s+=5;else if(amt>350000)s-=15;return Math.min(99,Math.max(0,s));})()},
+    {id:'c21',name:'21世紀(麻吉Pay)',blocked:!!lateIds['c21'],score:(function(){if(lateIds['c21'])return -1;var s=b,a=parseInt(amt)||0;if(a>150000)s-=50;else if(a<=80000)s+=20;else if(a<=120000)s+=10;if(inc>=15000)s+=5;else s-=10;if(ten>=3)s+=5;else s-=5;return Math.min(99,Math.max(0,s));})()},
+    {id:'other',name:'其他融資公司',blocked:!!lateIds['other'],score:lateIds['other']?-1:Math.min(60,Math.max(0,b))}
   ];
-
-  companies.sort(function(a,b){ return b.score - a.score; });
+  companies.sort(function(a,b){if(a.blocked&&!b.blocked)return 1;if(!a.blocked&&b.blocked)return -1;return b.score-a.score;});
   return companies;
 }
 
@@ -1195,7 +1159,7 @@ function calcScores(){
 
   // 工作類型
   function jobScore(isBank){
-    if(isBank) return job==='正職'?12 : job==='自營'?4 : job==='兼職'?-5 : job==='退休'?0 : -15;
+    if(isBank) return job==='正職'?12 : job==='自營'?4 : job==='兼職'?-12 : job==='臨時'?-18 : job==='退休'?0 : -15;
     return       job==='正職'?10 : job==='自營'?6 : job==='兼職'?0 : job==='退休'?3 : -10;
   }
 
@@ -1214,7 +1178,7 @@ function calcScores(){
 
   // 收入證明完整度
   function proofScore(fullBonus, partBonus){
-    return fd.proof==='完整'?fullBonus : fd.proof==='部分'?partBonus : -15;
+    return fd.proof==='完整'?fullBonus : fd.proof==='部分'?partBonus : -25;
   }
 
   // 薪資轉帳（重要加分）
@@ -1287,13 +1251,14 @@ function calcScores(){
   //  1. 信貸（無擔保，銀行最嚴格）
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   if(!isFatal){
-    var s1 = 42; // 基礎分
+    var s1 = 40; // 基礎分
     s1 += ccScore(20, -10, -28, -50, -3);  // 信用卡（最重要）
     s1 += tenureScore(true);                // 在職年資
+    s1 += (fd.labor==='yes') ? 15 : -20;   // 勞保
     s1 += jobScore(true);                   // 工作類型
     s1 += dtiScore(true);                   // 負債收入比（最嚴）
     s1 += dbrScore();                       // 總負債比
-    s1 += proofScore(12, 3);                // 收入證明
+    s1 += proofScore(20, 5);                // 收入證明（勞保/薪資單 重要加分）
     s1 += salTrScore(16);                   // 薪資轉帳
     s1 += salTypeScore();                   // 薪資方式
     s1 += queryScore(true);                 // 查詢次數（嚴格）
@@ -1391,6 +1356,7 @@ function calcScores(){
   // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   if(!isFatal){
     var s5 = 45;
+    s5 += (fd.labor==='yes') ? 8 : -10;
     // 商品貸看個人基本還款能力，不看信用評分
     s5 += inc >= 30000 ? 15 : inc >= 20000 ? 8 : inc >= 15000 ? 2 : -10;
     s5 += tenureScore(false);
@@ -1659,6 +1625,13 @@ function showResult(scores,best,bGi){
       +'<div style="font-size:13px;font-weight:700;color:#5C4A2A;margin-bottom:10px">融資分期推薦公司（初版 AI 規則）</div>';
     recs.forEach(function(r,i){
       var pct = r.score;
+      if(r.blocked){
+        finHtml += '<div style="margin-bottom:8px;display:flex;align-items:center;gap:8px">'
+          +'<span style="font-size:12px;font-weight:600;min-width:80px;color:#DC2626;text-decoration:line-through">'+r.name+'</span>'
+          +'<span style="font-size:11px;color:#DC2626;font-weight:600">⛔ 曾逾期，不建議送件</span>'
+          +'</div>';
+        return;
+      }
       var color = i===0?'#C9A460':i===1?'#92400E':'#A09890';
       var badge = i===0?'<span style="background:#C9A460;color:#fff;font-size:10px;padding:2px 6px;border-radius:8px;margin-left:6px">首推</span>':'';
       finHtml += '<div style="margin-bottom:8px">'
@@ -1707,6 +1680,10 @@ window.delImg=delImg;
 window.go=go;
 window.next=next;
 window.chkC=chkC;
+window.doSubmit=doSubmit;
+
+
+ow.chkC=chkC;
 window.doSubmit=doSubmit;
 
 
