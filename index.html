@@ -715,11 +715,11 @@ select{background-image:url("data:image/svg+xml,%3Csvg width='12' height='8' vie
       資料依法妥善保管，不會出售給第三方，您可隨時要求刪除。
     </div>
     <label class="ccheck">
-      <input type="checkbox" id="c1" onchange="chkC()"/>
+      <input type="checkbox" id="c1" onchange="chkC()" checked/>
       <span>我已閱讀並同意 FlowHub 依上述目的蒐集、處理及利用我的個人資料</span>
     </label>
     <label class="ccheck">
-      <input type="checkbox" id="c2" onchange="chkC()"/>
+      <input type="checkbox" id="c2" onchange="chkC()" checked/>
       <span>我同意 FlowHub 將資料提供給合作金融機構與業務人員進行評估與聯繫</span>
     </label>
   </div>
@@ -1421,21 +1421,21 @@ async function doSubmit(){
 
   // ── 組建 payload ──
   var payload = {
-    name:                fd.name,
-    phone:               fd.phone,
-    birth_date:          fd.birth,
-    reg_addr:            fd.reg_addr,
-    company:             fd.company,
+    name:                fd.name || '',
+    phone:               fd.phone || '',
+    birth_date:          fd.birth || null,
+    reg_addr:            fd.reg_addr || '',
+    company:             fd.company || '',
     company_tel:         fd.company_tel || '',
-    income:              fd.income,
-    sc_job_type:         fd.job,
-    sc_tenure:           fd.tenure,
+    income:              parseFloat(fd.income)||0,
+    sc_job_type:         String(fd.job||''),
+    sc_tenure:           String(fd.tenure||''),
     salary_type:         fd.sal_t === '薪轉' ? 'transfer' : fd.sal_t === '轉帳非薪轉' ? 'non-transfer' : 'cash',
-    sc_salary_transfer:  fd.sal_tr,
-    sc_income_proof:     fd.proof,
-    sc_residence:        fd.residence,
-    sc_phone_owner:      fd.phone_own,
-    sc_company_check:    fd.co_chk,
+    sc_salary_transfer:  String(fd.sal_tr||''),
+    sc_income_proof:     String(fd.proof||''),
+    sc_residence:        String(fd.residence||''),
+    sc_phone_owner:      String(fd.phone_own||''),
+    sc_company_check:    String(fd.co_chk||''),
     has_credit_card:     fd.has_cc === 'no' ? 'no' : 'yes',
     credit_card_status:  fd.cc   || '',
     credit_card_bank:    fd.cc_bank || '',
@@ -1445,40 +1445,38 @@ async function doSubmit(){
     car_time:            fd.car_t  || '',
     moto_quality:        fd.moto_q || '',
     moto_time:           fd.moto_t || '',
-    query_bank:          fd.q_bank || '0',
-    query_fin:           fd.q_fin  || '0',
-    recent_apply_count:  fd.query,
-    is_alert:            fd.alert,
-    loan_burden:         fd.burden,
-    loan_burden_total:   fd.debt,
-    need_amount:         fd.amt,
-    period:              fd.period,
+    query_bank:          String(fd.q_bank||'0'),
+    query_fin:           String(fd.q_fin||'0'),
+    recent_apply_count:  String(fd.query||'0'),
+    is_alert:            String(fd.alert||'no'),
+    loan_burden:         parseFloat(fd.burden)||0,
+    loan_burden_total:   parseFloat(fd.debt)||0,
+    need_amount:         String(fd.amt||''),
+    period:              parseInt(fd.period)||24,
     loan_purpose:        fd.purpose || '',
     collateral_house:    fd.house    || '無',
     collateral_land:     fd.land     || '無',
     collateral_car:      fd.car_col  || '無',
-    same_addr:           fd.same_addr,
+    same_addr:           String(fd.same_addr||''),
     status:              '待處理',
-    channel:             ch,
-    channel_plan:        plan,
+    channel:             ch || null,
+    channel_plan:        plan || null,
     created_at:          new Date().toISOString(),
-    // 6商品評分快照
-    score_credit:        scores.credit          ? scores.credit.s          : 0,
-    score_vehicle:       scores.vehicle         ? scores.vehicle.s         : 0,
-    score_house:         scores.house           ? scores.house.s           : 0,
-    score_land:          scores.land            ? scores.land.s            : 0,
-    score_goods:         scores.goods           ? scores.goods.s           : 0,
-    score_debt_c:        scores.debt_consolidation ? scores.debt_consolidation.s : 0,
-    score_best:          scores[best]           ? scores[best].s           : 0,
-    score_best_product:  scores[best]           ? scores[best].n           : '—',
-    score_best_grade:    gi(scores[best] ? scores[best].s : 0).g,
-    // 融資分期
+    score_credit:        scores.credit          ? parseFloat(scores.credit.s)||0          : 0,
+    score_vehicle:       scores.vehicle         ? parseFloat(scores.vehicle.s)||0         : 0,
+    score_house:         scores.house           ? parseFloat(scores.house.s)||0           : 0,
+    score_land:          scores.land            ? parseFloat(scores.land.s)||0            : 0,
+    score_goods:         scores.goods           ? parseFloat(scores.goods.s)||0           : 0,
+    score_debt_c:        scores.debt_consolidation ? parseFloat(scores.debt_consolidation.s)||0 : 0,
+    score_best:          scores[best]           ? parseFloat(scores[best].s)||0           : 0,
+    score_best_product:  scores[best]           ? String(scores[best].n||'')              : '',
+    score_best_grade:    gi(scores[best] ? scores[best].s : 0).g || '',
     has_fin:             fd.has_fin    || 'no',
     fin_cos:             (fd.fin_cos   || []).join(','),
     fin_co_other:        fd.fin_co_other || null,
     fin_status:          fd.fin_status || null,
     fin_quality:         fd.fin_quality || null,
-    fin_score:           (window.finScore||0)
+    fin_score:           parseFloat(window.finScore)||0
   };
 
   // ── 送出到 Supabase（10秒 timeout）──
