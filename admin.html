@@ -574,7 +574,7 @@ tr:hover td{background:#FDFBF7;cursor:pointer}
   </div><!-- /layout -->
 
   <!-- 案件詳情側邊面板 -->
-  <div class="panel" id="panel" style="right:-420px">
+  <div class="panel" id="panel">
     <div class="ph">
       <div class="panel-title" id="panel_title">案件詳情</div>
       <button class="pclose" onclick="window.closePanel&&window.closePanel()">✕</button>
@@ -1586,7 +1586,10 @@ window.openPanel = function(caseId){
     else if(btn.classList.contains('adm-btn-crm')){admSaveCRM(id2);}
   });
 
-  $('ov').classList.add('on'); $('panel').classList.add('on');
+  var _p=document.getElementById('panel');
+  if(_p){_p.style.right='0';_p.style.boxShadow='-10px 0 50px rgba(201,164,96,.15)';}
+  var _ap=document.getElementById('ap_fields');
+  if(_ap) _ap.style.display='block';
 }
 window.admSaveApproval=async function(id){
   var ac=document.getElementById('adm_ac'),aa=document.getElementById('adm_aa');
@@ -1695,8 +1698,10 @@ window.saveCase = async function(caseId){
 }
 
 window.closePanel = function(){
-  $('ov').classList.remove('on');
-  $('panel').classList.remove('on');
+  var panelEl=document.getElementById('panel');
+  if(panelEl) panelEl.style.right='-600px';
+  var apFields=document.getElementById('ap_fields');
+  if(apFields) apFields.style.display='none';
 }
 
 // ================================================================
