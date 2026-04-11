@@ -1044,6 +1044,86 @@ function chkC(){
 //  覆蓋：信貸、汽機車貸、房貸、土地貸、商品貸、債務整合
 // ================================================================
 
+
+// ── 融資分期公司推薦（初版大數據規則，後續AI優化）──────────
+function calcFinRecommend(){
+  var inc = parseInt(fd.income)||0;
+  var amt = parseInt(fd.amt)||0;
+  var ten = parseInt(fd.tenure)||0;
+  var bur = parseInt(fd.burden)||0;
+  var cc  = fd.cc||'';
+  var job = fd.job||'';
+  var car = fd.has_car||'no';
+  var hist = fd.has_fin==='yes' ? (fd.fin_quality||'none') : 'none';
+  var dti = inc>0 ? (bur + Math.round(amt/36)) / inc : 1;
+
+  var companies = [
+    {
+      id:'zhongzu', name:'中租迪和',
+      score: (function(){
+        var s=50;
+        if(inc>=40000)s+=20; else if(inc>=30000)s+=10; else if(inc<25000)s-=25;
+        if(ten>=24)s+=15; else if(ten>=12)s+=8; else if(ten<6)s-=20;
+        if(cc==='正常')s+=15; else if(cc==='最低')s+=0; else if(cc==='遲繳')s-=20; else if(cc==='停卡')s-=40; else s+=5;
+        if(job==='正職')s+=10; else if(job==='自營')s+=5; else if(job==='兼職')s-=15;
+        if(dti<0.3)s+=10; else if(dti<0.4)s+=5; else if(dti>0.5)s-=20;
+        if(hist==='normal')s+=10; else if(hist==='settled')s+=8; else if(hist==='late_occ')s-=15; else if(hist==='late_oft'||hist==='stopped')s-=30;
+        if(amt>300000)s-=15;
+        return Math.min(100,Math.max(0,s));
+      })(),
+      note: inc<25000?'收入未達門檻':cc==='停卡'?'停卡影響大':ten<6?'在職未滿6個月':'條件符合'
+    },
+    {
+      id:'yufu', name:'裕富/新鑫',
+      score: (function(){
+        var s=55;
+        if(inc>=30000)s+=15; else if(inc>=22000)s+=8; else if(inc<20000)s-=20;
+        if(ten>=12)s+=12; else if(ten>=6)s+=5; else s-=15;
+        if(cc==='正常')s+=12; else if(cc==='最低')s+=3; else if(cc==='遲繳')s-=15; else if(cc==='停卡')s-=30; else s+=5;
+        if(job==='正職')s+=8; else if(job==='自營')s+=8; else if(job==='兼職')s-=10;
+        if(dti<0.35)s+=8; else if(dti>0.5)s-=15;
+        if(hist==='normal')s+=8; else if(hist==='settled')s+=6; else if(hist==='late_occ')s-=10; else if(hist==='late_oft'||hist==='stopped')s-=25;
+        if(car==='yes')s+=5;
+        if(amt>200000)s-=10;
+        return Math.min(100,Math.max(0,s));
+      })(),
+      note: inc<20000?'收入偏低':hist==='late_oft'||hist==='stopped'?'逾期紀錄影響':'主力推薦方案'
+    },
+    {
+      id:'herun', name:'和潤企業',
+      score: (function(){
+        var s=48;
+        if(car==='yes')s+=20; else if(car==='no')s-=15;
+        if(inc>=25000)s+=12; else if(inc>=20000)s+=5; else s-=10;
+        if(ten>=6)s+=10; else s-=10;
+        if(cc==='正常')s+=10; else if(cc==='遲繳')s-=12; else if(cc==='停卡')s-=25;
+        if(hist==='normal')s+=8; else if(hist==='late_occ')s-=10; else if(hist==='late_oft'||hist==='stopped')s-=20;
+        if(amt<=150000)s+=10; else if(amt>300000)s-=15;
+        return Math.min(100,Math.max(0,s));
+      })(),
+      note: car==='yes'?'有車，和潤最適合':car==='no'?'無車，非強項':'車貸主力'
+    },
+    {
+      id:'rijin', name:'日盛台駿',
+      score: (function(){
+        var s=52;
+        if(inc>=20000)s+=10; else if(inc>=15000)s+=5; else s-=15;
+        if(ten>=3)s+=8; else s-=10;
+        if(cc==='正常')s+=8; else if(cc==='最低')s+=5; else if(cc==='遲繳')s-=8; else if(cc==='停卡')s-=20; else s+=5;
+        if(job==='正職')s+=8; else if(job==='自營')s+=10; else if(job==='兼職')s+=3;
+        if(hist==='normal')s+=8; else if(hist==='settled')s+=5; else if(hist==='late_occ')s-=8; else if(hist==='late_oft'||hist==='stopped')s-=15;
+        if(dti<0.5)s+=5; else if(dti>0.6)s-=10;
+        if(amt<=100000)s+=8;
+        return Math.min(100,Math.max(0,s));
+      })(),
+      note: job==='自營'?'自營接受度高':cc==='停卡'?'停卡較難通過':'彈性方案可試'
+    }
+  ];
+
+  companies.sort(function(a,b){ return b.score - a.score; });
+  return companies;
+}
+
 function calcScores(){
   window.finScore = 0; // 每次計算前重置
   // ── 基礎數值 ──────────────────────────────────────────────
@@ -1523,13 +1603,17 @@ async function doSubmit(){
               '─────────────────',
               '請盡速聯繫客戶 💪'
             ].join('\n');
-            fetch('https://notify-api.line.me/api/notify', {
+            var LINE_CH_TOKEN = 'YOUR_LINE_CHANNEL_ACCESS_TOKEN';
+            fetch('https://api.line.me/v2/bot/message/push', {
               method: 'POST',
               headers: {
-                'Authorization': 'Bearer ' + token,
-                'Content-Type': 'application/x-www-form-urlencoded'
+                'Authorization': 'Bearer ' + LINE_CH_TOKEN,
+                'Content-Type': 'application/json'
               },
-              body: 'message=' + encodeURIComponent(msg)
+              body: JSON.stringify({
+                to: token,
+                messages: [{ type: 'text', text: msg }]
+              })
             }).catch(function(){});
           }).catch(function(){});
         } catch(e){}
@@ -1567,6 +1651,36 @@ function showResult(scores,best,bGi){
     if(pd) pd.innerHTML='✓';
   });
   toast('✅ 申請已送出，業務將在24小時內聯繫您','ok');
+
+  // 融資分期推薦區塊（如果客戶有融資分期需求）
+  if(fd.has_fin==='yes' || (scores && scores.goods && scores.goods.s > 40)){
+    var recs = calcFinRecommend();
+    var finHtml = '<div style="margin-top:16px;background:#F8F5EF;border:1px solid #E8D5A8;border-radius:12px;padding:16px">'
+      +'<div style="font-size:13px;font-weight:700;color:#5C4A2A;margin-bottom:10px">融資分期推薦公司（初版 AI 規則）</div>';
+    recs.forEach(function(r,i){
+      var pct = r.score;
+      var color = i===0?'#C9A460':i===1?'#92400E':'#A09890';
+      var badge = i===0?'<span style="background:#C9A460;color:#fff;font-size:10px;padding:2px 6px;border-radius:8px;margin-left:6px">首推</span>':'';
+      finHtml += '<div style="margin-bottom:8px">'
+        +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:3px">'
+        +'<span style="font-size:12px;font-weight:600;color:#2A1F0E">'+r.name+badge+'</span>'
+        +'<span style="font-size:11px;color:#6B6560">'+r.note+'</span></div>'
+        +'<div style="height:6px;background:#E8D5A8;border-radius:3px;overflow:hidden">'
+        +'<div style="width:'+pct+'%;height:100%;background:'+color+';border-radius:3px"></div></div></div>';
+    });
+    finHtml += '<div style="font-size:10px;color:#A09890;margin-top:8px">規則基於市場大數據初版建立，累積案例後持續 AI 優化</div></div>';
+
+    var existingFinEl = document.getElementById('fin_recommend_block');
+    if(existingFinEl) existingFinEl.innerHTML = finHtml;
+    else {
+      var block = document.createElement('div');
+      block.id = 'fin_recommend_block';
+      block.innerHTML = finHtml;
+      var p6 = document.getElementById('p6');
+      if(p6) p6.appendChild(block);
+    }
+  }
+
 }
 
 // ===== Toast =====

@@ -714,6 +714,24 @@ async function openCase(id){
     html += '<button class="btn-pdf" onclick="genPDF(\''+c.id+'\')" style="width:100%;justify-content:center;height:40px">📄 匯出 PDF 評估報告</button>';
   }
 
+
+  // ── 核准記錄區塊 ──
+  var existingApproval = c.approved_company||c.approved_amount;
+  html += '<div class="crm-box" style="border:1.5px solid #C9A460">'
+    +'<div class="crm-title" style="color:#92400E">核准記錄</div>'
+    +'<div style="font-size:12px;color:#6B6560;margin-bottom:10px">填入後台核准結果，用於後續數據分析與業績統計</div>'
+    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">'
+    +'<div><div style="font-size:11px;color:#6B6560;margin-bottom:3px">核准公司</div>'
+    +'<input id="approve_company" value="'+(c.approved_company||'')+'" placeholder="如：中租、裕富、玉山銀行..." style="width:100%;height:36px;padding:0 10px;border:1px solid #E8D5A8;border-radius:6px;font-size:13px;font-family:inherit"/></div>'
+    +'<div><div style="font-size:11px;color:#6B6560;margin-bottom:3px">核准金額（元）</div>'
+    +'<input id="approve_amount" type="number" value="'+(c.approved_amount||'')+'" placeholder="如：200000" style="width:100%;height:36px;padding:0 10px;border:1px solid #E8D5A8;border-radius:6px;font-size:13px;font-family:inherit"/></div>'
+    +'</div>'
+    +'<div style="margin-bottom:8px"><div style="font-size:11px;color:#6B6560;margin-bottom:3px">備注（方案/條件等）</div>'
+    +'<input id="approve_note" value="'+(c.approved_note||'')+'" placeholder="如：年利率8%，24期，需薪轉帳戶" style="width:100%;height:36px;padding:0 10px;border:1px solid #E8D5A8;border-radius:6px;font-size:13px;font-family:inherit"/></div>'
+    +'<button class="btn-sm" onclick="saveApproval(\''+c.id+'\')" style="background:#C9A460;color:#fff;border:none;width:100%;height:36px;border-radius:6px;font-size:13px;font-weight:700;cursor:pointer">儲存核准記錄</button>'
+    +(existingApproval?'<div style="margin-top:8px;font-size:11px;color:#22C55E">✅ 已有核准記錄</div>':'')
+    +'</div>';
+
   $('panel_content').innerHTML = html;
   $('panel').classList.add('open');
 }
@@ -753,6 +771,30 @@ async function saveCRMNote(id){
     alert('✅ 備註已儲存');
   } catch(e){ alert('儲存失敗'); }
 }
+
+async function saveApproval(id){
+  var company = document.getElementById('approve_company').value.trim();
+  var amount  = document.getElementById('approve_amount').value.trim();
+  var note    = document.getElementById('approve_note').value.trim();
+  if(!company && !amount){ alert('請填寫核准公司或金額'); return; }
+  try {
+    await fetch(SUPA_URL+'/rest/v1/applications?id=eq.'+id,{
+      method:'PATCH',
+      headers:{...H,'Prefer':'return=minimal'},
+      body:JSON.stringify({
+        approved_company: company||null,
+        approved_amount:  amount ? parseInt(amount) : null,
+        approved_note:    note||null,
+        status: '已核准'
+      })
+    });
+    var c=allCases.find(function(x){return x.id==id;});
+    if(c){ c.approved_company=company; c.approved_amount=parseInt(amount)||0; c.approved_note=note; c.status='已核准'; }
+    renderCasesTable();
+    alert('✅ 核准記錄已儲存！');
+  } catch(e){ alert('儲存失敗：'+e.message); }
+}
+
 
 // ── LINE 推播 ──
 async function sendLINENotify(msg){
