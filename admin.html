@@ -1779,6 +1779,86 @@ window.doRecord = async function(caseId, result){
     toast(result==='approved'?'✅ 已記錄核准，AI 評分持續優化中':'✅ 已記錄拒絕，AI 評分持續優化中');
   }catch(e){toast('❌ 記錄失敗');}
 };
+
+
+function renderChannelAdmin(channels){
+  var el=document.getElementById('ch_admin_body');
+  if(!el) return;
+  var planNames={basic:'基本版 $1,490',advanced:'進階版 $3,490',flagship:'旗艦版 $8,900',enterprise:'企業版 $18,000'};
+  var personal = channels.filter(function(c){return (c.apply_type||'personal')==='personal';});
+  var company  = channels.filter(function(c){return (c.apply_type||'personal')==='company';});
+  var tStyle = 'width:100%;border-collapse:collapse;font-size:13px';
+  var thStyle = 'padding:8px 12px;text-align:left;font-size:11px;color:#A09890;border-bottom:1px solid #E8D5A8;background:#FAFAF7';
+  var tdStyle = 'padding:10px 12px';
+
+  function buildTable(list, cols){
+    var t = '<table style="'+tStyle+'"><thead><tr>';
+    cols.forEach(function(c){ t+='<th style="'+thStyle+'">'+c+'</th>'; });
+    t+='</tr></thead><tbody>';
+    if(!list.length) t+='<tr><td colspan="'+cols.length+'" style="padding:16px;text-align:center;color:#A09890">暫無資料</td></tr>';
+    return t;
+  }
+
+  var out = '<div style="margin-bottom:24px">';
+  out += '<div style="font-size:12px;font-weight:600;color:#6B6560;letter-spacing:.05em;text-transform:uppercase;margin-bottom:10px">👤 個人業務（'+personal.length+'）</div>';
+  out += buildTable(personal,['姓名','帳號（手機）','方案','試用到期','狀態','操作']);
+  personal.forEach(function(c){
+    var expired = c.trial_expires_at && new Date(c.trial_expires_at)<new Date();
+    var planBg='background:#E8D5A8;color:#92400E';
+    out += '<tr style="border-bottom:1px solid #F0EBE0" data-code="'+c.code+'">';
+    out += '<td style="'+tdStyle+'"><strong>'+(c.contact_name||c.name||'—')+'</strong></td>';
+    out += '<td style="'+tdStyle+';color:#6B6560">'+(c.biz_id||c.code||'—')+'</td>';
+    out += '<td style="'+tdStyle+'"><span style="'+planBg+';padding:2px 8px;border-radius:99px;font-size:11px;font-weight:600">'+(planNames[c.plan]||c.plan||'—')+'</span></td>';
+    out += '<td style="'+tdStyle+';color:'+(expired?'#DC2626':'#6B6560')+'">'+(c.trial_expires_at?c.trial_expires_at.slice(0,10):'正式')+(expired?' ⚠️':'')+'</td>';
+    out += '<td style="'+tdStyle+'"><span style="background:'+(c.status==='active'?'#DCFCE7':'#FEE2E2')+';color:'+(c.status==='active'?'#16A34A':'#DC2626')+';padding:2px 8px;border-radius:99px;font-size:11px">'+(c.status==='active'?'啟用':'停用')+'</span></td>';
+    out += '<td style="'+tdStyle+'"><button class="upgrade-btn" data-code="'+c.code+'" style="padding:4px 10px;border:1px solid #E8D5A8;border-radius:4px;font-size:11px;cursor:pointer;background:#fff">升級</button></td>';
+    out += '</tr>';
+  });
+  out += '</tbody></table></div>';
+
+  out += '<div>';
+  out += '<div style="font-size:12px;font-weight:600;color:#6B6560;letter-spacing:.05em;text-transform:uppercase;margin-bottom:10px">🏢 代辦公司（'+company.length+'）</div>';
+  out += buildTable(company,['公司名稱','統編/帳號','負責人','方案','業務人數','操作']);
+  company.forEach(function(c){
+    var planBg='background:#E1F5EE;color:#0F6E56';
+    out += '<tr style="border-bottom:1px solid #F0EBE0" data-code="'+c.code+'">';
+    out += '<td style="'+tdStyle+'"><strong>'+(c.name||'—')+'</strong></td>';
+    out += '<td style="'+tdStyle+';color:#6B6560">'+(c.biz_id||c.code||'—')+'</td>';
+    out += '<td style="'+tdStyle+'">'+(c.contact_name||'—')+'</td>';
+    out += '<td style="'+tdStyle+'"><span style="'+planBg+';padding:2px 8px;border-radius:99px;font-size:11px;font-weight:600">'+(planNames[c.plan]||c.plan||'—')+'</span></td>';
+    out += '<td style="'+tdStyle+'">'+(c.headcount||'—')+'</td>';
+    out += '<td style="'+tdStyle+'"><button class="upgrade-btn" data-code="'+c.code+'" style="padding:4px 10px;border:1px solid #E8D5A8;border-radius:4px;font-size:11px;cursor:pointer;background:#fff">升級</button></td>';
+    out += '</tr>';
+  });
+  out += '</tbody></table></div>';
+
+  el.innerHTML = out;
+
+  // 綁定升級按鈕
+  el.querySelectorAll('.upgrade-btn').forEach(function(btn){
+    btn.addEventListener('click',function(e){
+      e.stopPropagation();
+      upgradePlan(this.dataset.code);
+    });
+  });
+}
+
+async function upgradePlan(code){
+  var plans=['basic','advanced','flagship','enterprise'];
+  var planNames={basic:'基本版 $1,490',advanced:'進階版 $3,490',flagship:'旗艦版 $8,900',enterprise:'企業版 $18,000'};
+  var newPlan=prompt('選擇新方案（輸入1-4）：\n1. basic 基本版 $1,490\n2. advanced 進階版 $3,490\n3. flagship 旗艦版 $8,900\n4. enterprise 企業版 $18,000');
+  if(!newPlan) return;
+  var planKey=plans[parseInt(newPlan)-1];
+  if(!planKey){ alert('輸入錯誤'); return; }
+  try{
+    var r=await fetch(SUPA_URL+'/rest/v1/channels?code=eq.'+code,{
+      method:'PATCH',headers:Object.assign({},H,{'Prefer':'return=minimal'}),
+      body:JSON.stringify({plan:planKey,is_trial:false,trial_expires_at:null})
+    });
+    if(r.ok){ alert('✅ 已升級為 '+planNames[planKey]); window.loadChannels(); }
+    else { alert('❌ 升級失敗'); }
+  }catch(e){ alert('錯誤：'+e.message); }
+}
 </script>
 </body>
 </html>

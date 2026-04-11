@@ -3,450 +3,429 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>FlowHub 經銷版 — 專業金融代辦智慧評估平台</title>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+<title>FlowHub 經銷版 — 專為代辦業務打造的 AI 評估系統</title>
 <style>
-*{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --gold:#C9A460;--gold-l:#E8D5A8;--gold-d:#92400E;
-  --dark:#1A1208;--dark2:#2A1F0E;--dark3:#3D2B1A;
-  --cream:#FDF8F0;--cream2:#F5F0E8;
-  --white:#fff;
+  --gold:#C9A460;--gl:#FDF8F0;--gm:#E8D5A8;--gd:#92400E;
+  --dk:#2A1F0E;--mu:#6B6560;--ht:#A09890;--bg:#F5F4F0;
+  --w:#fff;--gn:#16A34A;--rd:#DC2626;--r:14px;--rs:8px;
 }
-html{scroll-behavior:smooth}
-body{font-family:'Noto Sans TC',sans-serif;background:var(--cream);color:var(--dark);overflow-x:hidden}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--dk)}
 
-/* ── HERO ── */
-.hero{
-  min-height:100vh;background:var(--dark);position:relative;
-  display:flex;align-items:center;justify-content:center;
-  overflow:hidden;
-}
-.hero-bg{
-  position:absolute;inset:0;
-  background:radial-gradient(ellipse 80% 60% at 50% 40%, rgba(201,164,96,.12) 0%, transparent 70%),
-             radial-gradient(ellipse 40% 40% at 80% 80%, rgba(201,164,96,.06) 0%, transparent 60%);
-}
-.hero-grid{
-  position:absolute;inset:0;
-  background-image:linear-gradient(rgba(201,164,96,.05) 1px, transparent 1px),
-                   linear-gradient(90deg, rgba(201,164,96,.05) 1px, transparent 1px);
-  background-size:60px 60px;
-}
-.hero-content{
-  position:relative;z-index:2;text-align:center;padding:40px 24px;
-  animation:fadeUp .8s ease both;
-}
-@keyframes fadeUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
-.hero-badge{
-  display:inline-flex;align-items:center;gap:8px;
-  background:rgba(201,164,96,.15);border:1px solid rgba(201,164,96,.3);
-  border-radius:99px;padding:6px 16px;font-size:12px;color:var(--gold);
-  letter-spacing:1px;margin-bottom:28px;
-}
-.hero-badge-dot{width:6px;height:6px;border-radius:50%;background:var(--gold);animation:pulse 2s infinite}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
-.hero-logo{
-  width:72px;height:72px;background:linear-gradient(135deg,#C9A460,#A07C3A);
-  border-radius:20px;margin:0 auto 20px;display:flex;align-items:center;justify-content:center;
-  font-size:36px;font-weight:900;color:#fff;letter-spacing:-2px;
-  box-shadow:0 20px 60px rgba(201,164,96,.3);
-}
-.hero-title{
-  font-size:clamp(36px,6vw,72px);font-weight:900;color:var(--white);
-  line-height:1.1;letter-spacing:-1px;margin-bottom:12px;
-}
-.hero-title span{
-  background:linear-gradient(135deg,#C9A460,#E8D5A8,#C9A460);
-  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
-}
-.hero-sub{
-  font-size:clamp(16px,2.5vw,22px);color:rgba(255,255,255,.6);
-  margin-bottom:16px;font-weight:300;letter-spacing:.5px;
-}
-.hero-desc{
-  font-size:15px;color:rgba(255,255,255,.4);max-width:560px;margin:0 auto 40px;
-  line-height:1.8;
-}
-.hero-btns{display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
-.btn-primary{
-  display:inline-flex;align-items:center;gap:8px;
-  background:linear-gradient(135deg,#C9A460,#A07C3A);
-  color:#fff;font-weight:700;font-size:15px;
-  padding:14px 32px;border-radius:12px;text-decoration:none;
-  box-shadow:0 8px 30px rgba(201,164,96,.35);
-  transition:all .25s;font-family:inherit;border:none;cursor:pointer;
-}
-.btn-primary:hover{transform:translateY(-2px);box-shadow:0 12px 40px rgba(201,164,96,.45)}
-.btn-secondary{
-  display:inline-flex;align-items:center;gap:8px;
-  background:rgba(255,255,255,.08);backdrop-filter:blur(10px);
-  color:rgba(255,255,255,.85);font-weight:600;font-size:15px;
-  padding:14px 32px;border-radius:12px;text-decoration:none;
-  border:1px solid rgba(255,255,255,.15);transition:all .25s;
-}
-.btn-secondary:hover{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.25)}
-.hero-scroll{
-  position:absolute;bottom:32px;left:50%;transform:translateX(-50%);
-  display:flex;flex-direction:column;align-items:center;gap:6px;
-  color:rgba(255,255,255,.3);font-size:11px;letter-spacing:2px;
-}
-.hero-scroll-arrow{
-  width:20px;height:20px;border-right:1.5px solid rgba(255,255,255,.3);
-  border-bottom:1.5px solid rgba(255,255,255,.3);
-  transform:rotate(45deg);animation:bounce 2s infinite;
-}
-@keyframes bounce{0%,100%{transform:rotate(45deg) translateY(0)}50%{transform:rotate(45deg) translateY(6px)}}
+/* Hero */
+.hero{background:var(--dk);color:#fff;padding:64px 24px;text-align:center}
+.hero-logo{width:64px;height:64px;background:var(--gold);border-radius:16px;display:inline-flex;align-items:center;justify-content:center;font-size:32px;font-weight:900;color:#fff;margin-bottom:20px}
+.hero-title{font-size:32px;font-weight:900;margin-bottom:12px;line-height:1.3}
+.hero-title span{color:var(--gold)}
+.hero-sub{font-size:16px;color:rgba(255,255,255,.7);margin-bottom:32px;line-height:1.7;max-width:520px;margin-left:auto;margin-right:auto}
+.hero-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.btn-gold{background:var(--gold);color:#fff;border:none;padding:14px 32px;border-radius:var(--rs);font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;text-decoration:none;display:inline-block;transition:.2s}
+.btn-gold:hover{opacity:.9}
+.btn-outline{background:none;color:#fff;border:1.5px solid rgba(255,255,255,.4);padding:14px 32px;border-radius:var(--rs);font-size:15px;font-weight:600;cursor:pointer;font-family:inherit;text-decoration:none;display:inline-block;transition:.2s}
+.btn-outline:hover{border-color:#fff}
+.hero-note{font-size:12px;color:rgba(255,255,255,.4);margin-top:16px}
 
-/* ── STATS ── */
-.stats{background:var(--dark2);padding:60px 24px}
-.stats-inner{max-width:900px;margin:0 auto;display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:rgba(201,164,96,.1)}
-.stat-item{background:var(--dark2);padding:40px 30px;text-align:center}
-.stat-num{font-size:42px;font-weight:900;color:var(--gold);letter-spacing:-1px}
-.stat-label{font-size:13px;color:rgba(255,255,255,.45);margin-top:6px;letter-spacing:.5px}
+/* 數字統計 */
+.stats{display:flex;justify-content:center;gap:0;background:var(--gold);flex-wrap:wrap}
+.stat{padding:20px 32px;text-align:center;border-right:1px solid rgba(255,255,255,.2)}
+.stat:last-child{border-right:none}
+.stat-num{font-size:28px;font-weight:900;color:#fff}
+.stat-lbl{font-size:11px;color:rgba(255,255,255,.8);margin-top:2px}
 
-/* ── SECTION ── */
-.section{padding:100px 24px}
-.section-inner{max-width:1000px;margin:0 auto}
-.section-tag{font-size:11px;font-weight:700;letter-spacing:3px;color:var(--gold);margin-bottom:12px;text-transform:uppercase}
-.section-title{font-size:clamp(28px,4vw,44px);font-weight:900;color:var(--dark);line-height:1.2;margin-bottom:16px}
-.section-desc{font-size:16px;color:#6B5B4E;line-height:1.9;max-width:600px}
+/* Section */
+.section{max-width:960px;margin:0 auto;padding:60px 24px}
+.section-title{font-size:24px;font-weight:800;color:var(--dk);text-align:center;margin-bottom:8px}
+.section-sub{font-size:14px;color:var(--mu);text-align:center;margin-bottom:40px}
 
-/* ── FEATURES ── */
-.features{background:var(--cream2)}
-.feat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px;margin-top:50px}
-.feat-card{
-  background:#fff;border-radius:16px;padding:28px;
-  border:1px solid var(--gold-l);
-  transition:all .25s;
-  position:relative;overflow:hidden;
-}
-.feat-card::before{
-  content:'';position:absolute;top:0;left:0;right:0;height:3px;
-  background:linear-gradient(90deg,var(--gold),var(--gold-l));
-  transform:scaleX(0);transform-origin:left;transition:.3s;
-}
-.feat-card:hover{transform:translateY(-4px);box-shadow:0 20px 50px rgba(92,74,42,.1)}
-.feat-card:hover::before{transform:scaleX(1)}
-.feat-icon{font-size:32px;margin-bottom:14px}
-.feat-title{font-size:16px;font-weight:700;color:var(--dark);margin-bottom:8px}
-.feat-desc{font-size:13px;color:#6B5B4E;line-height:1.8}
+/* 痛點 */
+.pain-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;margin-bottom:16px}
+.pain-card{background:var(--w);border-radius:var(--r);padding:20px;border:1px solid var(--gm)}
+.pain-icon{font-size:28px;margin-bottom:10px}
+.pain-title{font-size:14px;font-weight:700;color:var(--rd);margin-bottom:6px}
+.pain-desc{font-size:13px;color:var(--mu);line-height:1.7}
 
-/* ── HOW IT WORKS ── */
-.steps{counter-reset:step}
-.step-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:32px;margin-top:50px}
-.step-item{position:relative;text-align:center}
-.step-num{
-  width:52px;height:52px;border-radius:50%;margin:0 auto 16px;
-  background:linear-gradient(135deg,var(--gold),var(--gold-d));
-  display:flex;align-items:center;justify-content:center;
-  font-size:20px;font-weight:900;color:#fff;
-}
-.step-title{font-size:15px;font-weight:700;color:var(--dark);margin-bottom:6px}
-.step-desc{font-size:13px;color:#6B5B4E;line-height:1.8}
+/* 功能 */
+.feat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px}
+.feat-card{background:var(--w);border-radius:var(--r);padding:24px;border:1px solid var(--gm);position:relative;overflow:hidden}
+.feat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--gold)}
+.feat-badge{display:inline-block;background:var(--gl);color:var(--gd);font-size:10px;font-weight:700;padding:3px 10px;border-radius:99px;margin-bottom:12px}
+.feat-title{font-size:16px;font-weight:700;color:var(--dk);margin-bottom:8px}
+.feat-desc{font-size:13px;color:var(--mu);line-height:1.8}
+.feat-items{margin-top:12px;font-size:12px;color:var(--mu);line-height:2}
+.feat-items span{color:var(--gn);margin-right:4px}
 
-/* ── PLANS ── */
-.plans-bg{background:var(--dark);padding:100px 24px}
-.plans-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:24px;margin-top:50px;max-width:700px;margin-left:auto;margin-right:auto}
-.plan-card{
-  border-radius:20px;padding:32px;
-  background:rgba(255,255,255,.05);
-  border:1px solid rgba(201,164,96,.2);
-  position:relative;overflow:hidden;
-}
-.plan-card.featured{
-  background:linear-gradient(135deg,rgba(201,164,96,.15),rgba(201,164,96,.05));
-  border-color:var(--gold);
-}
-.plan-badge{
-  position:absolute;top:16px;right:16px;
-  background:var(--gold);color:#fff;font-size:10px;font-weight:700;
-  padding:3px 10px;border-radius:99px;letter-spacing:1px;
-}
-.plan-name{font-size:13px;font-weight:600;color:rgba(255,255,255,.5);letter-spacing:2px;text-transform:uppercase;margin-bottom:8px}
-.plan-price{font-size:42px;font-weight:900;color:var(--white);margin-bottom:4px}
-.plan-price span{font-size:14px;font-weight:400;color:rgba(255,255,255,.4)}
-.plan-trial{font-size:12px;color:var(--gold);margin-bottom:20px;font-weight:600}
-.plan-features{list-style:none}
-.plan-features li{
-  font-size:13px;color:rgba(255,255,255,.65);padding:7px 0;
-  border-bottom:1px solid rgba(255,255,255,.06);
-  display:flex;align-items:center;gap:8px;
-}
-.plan-features li::before{content:'✓';color:var(--gold);font-weight:700;flex-shrink:0}
-.plan-features li.no::before{content:'—';color:rgba(255,255,255,.25)}
-.plan-features li.no{color:rgba(255,255,255,.3)}
-.plan-btn{
-  width:100%;margin-top:24px;padding:13px;border-radius:10px;
-  font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;
-  text-align:center;display:block;text-decoration:none;transition:.2s;
-}
-.plan-btn-outline{
-  background:transparent;border:1.5px solid rgba(201,164,96,.4);color:var(--gold);
-}
-.plan-btn-outline:hover{background:rgba(201,164,96,.1)}
-.plan-btn-fill{
-  background:linear-gradient(135deg,#C9A460,#A07C3A);
-  border:none;color:#fff;
-  box-shadow:0 8px 24px rgba(201,164,96,.3);
-}
-.plan-btn-fill:hover{transform:translateY(-1px);box-shadow:0 12px 30px rgba(201,164,96,.4)}
+/* ROI 計算 */
+.roi-box{background:var(--dk);color:#fff;border-radius:var(--r);padding:40px;text-align:center;margin:40px 0}
+.roi-title{font-size:20px;font-weight:800;color:var(--gold);margin-bottom:24px}
+.roi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-bottom:24px}
+.roi-item{text-align:center}
+.roi-num{font-size:28px;font-weight:900;color:#fff}
+.roi-lbl{font-size:11px;color:rgba(255,255,255,.6);margin-top:4px}
+.roi-arrow{font-size:24px;color:var(--gold);display:flex;align-items:center;justify-content:center}
+.roi-conclusion{font-size:14px;color:rgba(255,255,255,.8);line-height:1.8}
+.roi-hl{color:var(--gold);font-weight:700}
 
-/* ── CTA ── */
-.cta{
-  background:linear-gradient(135deg,var(--dark2),var(--dark));
-  padding:100px 24px;text-align:center;
-}
-.cta-title{font-size:clamp(28px,4vw,48px);font-weight:900;color:#fff;margin-bottom:14px}
-.cta-sub{font-size:16px;color:rgba(255,255,255,.5);margin-bottom:40px;line-height:1.8}
-.cta-note{font-size:12px;color:rgba(255,255,255,.3);margin-top:20px}
+/* 定價 */
+.price-grid{display:grid;gap:16px}
+.price-section-title{font-size:14px;font-weight:700;color:var(--mu);margin:24px 0 12px;letter-spacing:.05em;text-transform:uppercase}
+.plan-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+.plan{background:var(--w);border:1.5px solid var(--gm);border-radius:var(--r);padding:20px;position:relative}
+.plan.hot{border-color:var(--gold);background:var(--gl)}
+.plan-hot-badge{position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:var(--gold);color:#fff;font-size:10px;font-weight:700;padding:3px 14px;border-radius:99px;white-space:nowrap}
+.plan-name{font-size:14px;font-weight:700;color:var(--dk);margin-bottom:6px}
+.plan-price{font-size:26px;font-weight:900;color:var(--gd)}
+.plan-price span{font-size:13px;font-weight:400;color:var(--mu)}
+.plan-trial{font-size:11px;color:var(--gn);font-weight:600;margin:4px 0 12px}
+.plan-feats{font-size:12px;color:var(--mu);line-height:2}
+.plan-feats b{color:var(--dk)}
 
-/* ── FOOTER ── */
-footer{background:#0D0A05;padding:40px 24px;text-align:center}
-.footer-logo{font-size:18px;font-weight:800;color:var(--gold);margin-bottom:10px}
-.footer-desc{font-size:12px;color:rgba(255,255,255,.3);line-height:1.8}
+/* 流程 */
+.flow-steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:0;position:relative}
+.flow-step{background:var(--w);border:1px solid var(--gm);padding:24px 20px;text-align:center;position:relative}
+.flow-step:not(:last-child)::after{content:'→';position:absolute;right:-12px;top:50%;transform:translateY(-50%);font-size:18px;color:var(--gold);z-index:1}
+.flow-num{width:32px;height:32px;background:var(--gold);color:#fff;font-size:14px;font-weight:700;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 10px}
+.flow-title{font-size:13px;font-weight:700;color:var(--dk);margin-bottom:4px}
+.flow-desc{font-size:11px;color:var(--mu);line-height:1.6}
 
-/* ── NAVBAR ── */
-nav{
-  position:fixed;top:0;left:0;right:0;z-index:100;
-  background:rgba(26,18,8,.85);backdrop-filter:blur(20px);
-  border-bottom:1px solid rgba(201,164,96,.1);
-  padding:0 24px;height:64px;display:flex;align-items:center;justify-content:space-between;
-}
-.nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none}
-.nav-logo-icon{
-  width:36px;height:36px;background:linear-gradient(135deg,#C9A460,#A07C3A);
-  border-radius:9px;display:flex;align-items:center;justify-content:center;
-  font-size:17px;font-weight:900;color:#fff;
-}
-.nav-logo-name{font-size:16px;font-weight:800;color:#fff}
-.nav-links{display:flex;align-items:center;gap:28px}
-.nav-links a{font-size:13px;color:rgba(255,255,255,.55);text-decoration:none;transition:.2s}
-.nav-links a:hover{color:var(--gold)}
-.nav-cta{
-  background:linear-gradient(135deg,#C9A460,#A07C3A);
-  color:#fff;font-size:13px;font-weight:700;padding:8px 18px;
-  border-radius:8px;text-decoration:none;transition:.2s;
-}
-.nav-cta:hover{opacity:.9}
-@media(max-width:640px){
-  .nav-links{display:none}
-  .stats-inner{grid-template-columns:1fr}
-}
+/* 適用對象 */
+.target-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.target-card{border-radius:var(--r);padding:24px;border:2px solid}
+.target-personal{border-color:#3B82F6;background:#EFF6FF}
+.target-company{border-color:var(--gold);background:var(--gl)}
+.target-title{font-size:16px;font-weight:700;margin-bottom:12px}
+.target-personal .target-title{color:#1E40AF}
+.target-company .target-title{color:var(--gd)}
+.target-items{font-size:13px;line-height:2.2;color:var(--mu)}
 
-/* ── ANIMATE ON SCROLL ── */
-.reveal{opacity:0;transform:translateY(24px);transition:opacity .6s ease,transform .6s ease}
-.reveal.visible{opacity:1;transform:none}
+/* CTA */
+.cta{background:linear-gradient(135deg,var(--gold),#A07C3A);color:#fff;padding:60px 24px;text-align:center}
+.cta-title{font-size:28px;font-weight:900;margin-bottom:12px}
+.cta-sub{font-size:15px;opacity:.85;margin-bottom:28px}
+.cta-note{font-size:12px;opacity:.7;margin-top:16px}
+
+/* Footer */
+footer{background:var(--dk);color:rgba(255,255,255,.5);text-align:center;padding:24px;font-size:12px}
 </style>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&display=swap" rel="stylesheet">
 </head>
 <body>
 
-<!-- NAV -->
-<nav>
-  <a class="nav-logo" href="#">
-    <div class="nav-logo-icon">F</div>
-    <span class="nav-logo-name">FlowHub</span>
-  </a>
-  <div class="nav-links">
-    <a href="#features">功能特色</a>
-    <a href="#how">使用流程</a>
-    <a href="#plans">訂閱方案</a>
-    <a href="apply.html" class="nav-cta">立即申請試用</a>
+<!-- Hero -->
+<div class="hero">
+  <div class="hero-logo">F</div>
+  <div class="hero-title">台灣首套<span>代辦業務專用</span><br>AI 貸款評估系統</div>
+  <div class="hero-sub">客戶填完表單，30秒自動評等 A-E、AI 建議最佳方案。業務不靠直覺靠數據，核准率最高提升 40%。</div>
+  <div class="hero-btns">
+    <a href="apply.html" class="btn-gold">免費試用 3 天 →</a>
+    <a href="index.html" class="btn-outline">看填單 Demo</a>
   </div>
-</nav>
-
-<!-- HERO -->
-<div class="hero" style="padding-top:64px">
-  <div class="hero-bg"></div>
-  <div class="hero-grid"></div>
-  <div class="hero-content">
-    <div class="hero-badge">
-      <div class="hero-badge-dot"></div>
-      台灣金融代辦智慧引擎
-    </div>
-    <div class="hero-logo">F</div>
-    <h1 class="hero-title">FlowHub<br><span>順策引擎</span></h1>
-    <p class="hero-sub">讓每一份案件都有最精準的建議方向</p>
-    <p class="hero-desc">
-      整合 6 大貸款商品評分模型，智慧比對最適合的金融方案，
-      幫助業務人員在最短時間內提供客戶最精準的建議。
-    </p>
-    <div class="hero-btns">
-      <a href="apply.html" class="btn-primary">🚀 免費試用 3 天</a>
-      <a href="#features" class="btn-secondary">了解更多 →</a>
-    </div>
-  </div>
-  <div class="hero-scroll">
-    <span>SCROLL</span>
-    <div class="hero-scroll-arrow"></div>
-  </div>
+  <div class="hero-note">不需信用卡 · 3 天後再決定是否訂閱 · 隨時取消</div>
 </div>
 
-<!-- STATS -->
+<!-- 數字 -->
 <div class="stats">
-  <div class="stats-inner">
-    <div class="stat-item">
-      <div class="stat-num">6</div>
-      <div class="stat-label">貸款商品精準評分</div>
+  <div class="stat"><div class="stat-num">225萬</div><div class="stat-lbl">台灣房貸族人數</div></div>
+  <div class="stat"><div class="stat-num">22萬+</div><div class="stat-lbl">年新增貸款件數</div></div>
+  <div class="stat"><div class="stat-num">30秒</div><div class="stat-lbl">AI 自動評等速度</div></div>
+  <div class="stat"><div class="stat-num">0</div><div class="stat-lbl">同類競品數量</div></div>
+</div>
+
+<!-- 痛點 -->
+<div class="section">
+  <div class="section-title">業務每天在煩惱的事</div>
+  <div class="section-sub">這些問題，FlowHub 幫你解決</div>
+  <div class="pain-grid">
+    <div class="pain-card">
+      <div class="pain-icon">😰</div>
+      <div class="pain-title">憑感覺送件，退件率高</div>
+      <div class="pain-desc">不確定客戶能不能過，就這樣送，被退件還拉高聯徵次數，影響下次機會</div>
     </div>
-    <div class="stat-item">
-      <div class="stat-num">3天</div>
-      <div class="stat-label">進階版完整試用</div>
+    <div class="pain-card">
+      <div class="pain-icon">📋</div>
+      <div class="pain-title">案件資料靠手寫、LINE 傳</div>
+      <div class="pain-desc">客戶資料散落在 LINE 訊息、Excel 表格，一旦業務離職，案件就跟著消失</div>
     </div>
-    <div class="stat-item">
-      <div class="stat-num">100%</div>
-      <div class="stat-label">通路資料完全隔離</div>
+    <div class="pain-card">
+      <div class="pain-icon">📞</div>
+      <div class="pain-title">新案件進來不知道</div>
+      <div class="pain-desc">客戶填完問卷，業務要一直手動查，錯過黃金聯繫時間，客戶就跑了</div>
+    </div>
+    <div class="pain-card">
+      <div class="pain-icon">📊</div>
+      <div class="pain-title">沒有數據，不知道哪裡出問題</div>
+      <div class="pain-desc">每個月核准幾件？哪類客戶通過率高？靠記憶管理，無法複製成功經驗</div>
     </div>
   </div>
 </div>
 
-<!-- FEATURES -->
-<div class="section features" id="features">
-  <div class="section-inner">
-    <div class="reveal">
-      <div class="section-tag">功能特色</div>
-      <h2 class="section-title">一套系統<br>幫您做到這些</h2>
-      <p class="section-desc">從客戶填單到建議方案，FlowHub 經銷版自動完成最複雜的評估工作。</p>
+<!-- 功能 -->
+<div style="background:var(--w);padding:1px 0">
+<div class="section">
+  <div class="section-title">FlowHub 能做什麼</div>
+  <div class="section-sub">讓業務的工作流程從混亂變成系統</div>
+  <div class="feat-grid">
+    <div class="feat-card">
+      <div class="feat-badge">核心功能</div>
+      <div class="feat-title">AI 即時評估 + 評等 A-E</div>
+      <div class="feat-desc">客戶填完 5 步驟問卷，系統立即計算信貸、房貸、車貸、融資分期等 6 種商品的核准機率，自動給出 A-E 評等。</div>
+      <div class="feat-items">
+        <span>✓</span>6 種商品同時評估<br>
+        <span>✓</span>警示戶自動攔截<br>
+        <span>✓</span>評分依據透明可查
+      </div>
     </div>
-    <div class="feat-grid">
-      <div class="feat-card reveal">
-        <div class="feat-icon">🎯</div>
-        <div class="feat-title">6商品精準評分</div>
-        <div class="feat-desc">信貸、汽機車貸、房貸、土地貸、商品分期、債務整合，每個商品獨立計算最適合的評分。</div>
+    <div class="feat-card">
+      <div class="feat-badge">進階版</div>
+      <div class="feat-title">AI 建議最佳方案</div>
+      <div class="feat-desc">系統不只給分，還告訴業務「這個客戶最適合送哪家銀行、補什麼件、注意什麼風險」，讓每次送件都是最佳決策。</div>
+      <div class="feat-items">
+        <span>✓</span>最佳商品自動推薦<br>
+        <span>✓</span>補件建議清單<br>
+        <span>✓</span>風險提示說明
       </div>
-      <div class="feat-card reveal">
-        <div class="feat-icon">🤖</div>
-        <div class="feat-title">AI 順策建議方案</div>
-        <div class="feat-desc">根據客戶狀況自動產生「建議送件順序 + 補件建議 + 風險提示」，讓業務一目了然。</div>
+    </div>
+    <div class="feat-card">
+      <div class="feat-badge">進階版</div>
+      <div class="feat-title">LINE 新案件推播通知</div>
+      <div class="feat-desc">客戶填完問卷，業務的 LINE 立刻收到通知，包含客戶姓名、評等結果，第一時間聯繫，成交率大幅提升。</div>
+      <div class="feat-items">
+        <span>✓</span>即時 LINE 推播<br>
+        <span>✓</span>通知含評估摘要<br>
+        <span>✓</span>一鍵設定，不需技術
       </div>
-      <div class="feat-card reveal">
-        <div class="feat-icon">🔒</div>
-        <div class="feat-title">通路完全隔離</div>
-        <div class="feat-desc">每個業務通路只能看到自己的客戶資料，資料完全加密保護，安心使用。</div>
+    </div>
+    <div class="feat-card">
+      <div class="feat-badge">進階版</div>
+      <div class="feat-title">PDF 專業評估報告</div>
+      <div class="feat-desc">一鍵匯出精美 PDF 報告，拿去跟客戶討論貸款方案時，讓客戶感受到專業度，提升信任感與成交率。</div>
+      <div class="feat-items">
+        <span>✓</span>專業版面設計<br>
+        <span>✓</span>含完整評估數據<br>
+        <span>✓</span>客戶可帶回參考
       </div>
-      <div class="feat-card reveal">
-        <div class="feat-icon">📊</div>
-        <div class="feat-title">通路績效分析</div>
-        <div class="feat-desc">即時查看案件核准率、平均評分、送件趨勢，數據驅動業務成長。</div>
+    </div>
+    <div class="feat-card">
+      <div class="feat-badge">企業版</div>
+      <div class="feat-title">多業務帳號管理</div>
+      <div class="feat-desc">代辦公司老闆可以看到旗下所有業務的案件與業績，統一管理分潤，再也不用用 Excel 追蹤。</div>
+      <div class="feat-items">
+        <span>✓</span>各業務績效看板<br>
+        <span>✓</span>分潤自動計算<br>
+        <span>✓</span>月報 PDF 匯出
       </div>
-      <div class="feat-card reveal">
-        <div class="feat-icon">💳</div>
-        <div class="feat-title">融資分期評分</div>
-        <div class="feat-desc">將融資分期繳款品質納入評分模型，中租、裕富、和潤等主流配合公司均支援。</div>
+    </div>
+    <div class="feat-card">
+      <div class="feat-badge">所有方案</div>
+      <div class="feat-title">專屬填單連結</div>
+      <div class="feat-desc">每位業務有專屬連結，分享給客戶填寫，案件自動歸屬到該業務名下，方便追蹤來源與業績計算。</div>
+      <div class="feat-items">
+        <span>✓</span>專屬 QR Code<br>
+        <span>✓</span>自動歸屬業務<br>
+        <span>✓</span>LINE/IG 均可分享
       </div>
-      <div class="feat-card reveal">
-        <div class="feat-icon">📱</div>
-        <div class="feat-title">LINE 即時通知</div>
-        <div class="feat-desc">新案件進來立即推播，業務第一時間掌握，不漏接任何商機。</div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ROI 試算 -->
+<div class="section">
+  <div class="roi-box">
+    <div class="roi-title">訂一個月，一件案子就回本</div>
+    <div class="roi-grid">
+      <div class="roi-item">
+        <div class="roi-num">$80萬</div>
+        <div class="roi-lbl">信貸平均核貸金額</div>
+      </div>
+      <div class="roi-arrow">×</div>
+      <div class="roi-item">
+        <div class="roi-num">5%</div>
+        <div class="roi-lbl">代辦費抽成（市場行情）</div>
+      </div>
+    </div>
+    <div class="roi-grid">
+      <div class="roi-item">
+        <div class="roi-num">= $4萬</div>
+        <div class="roi-lbl">一件核准的收入</div>
+      </div>
+      <div class="roi-arrow">÷</div>
+      <div class="roi-item">
+        <div class="roi-num">$3,490</div>
+        <div class="roi-lbl">FlowHub 進階版月費</div>
+      </div>
+    </div>
+    <div class="roi-conclusion">
+      FlowHub 月費只佔一件信貸收入的 <span class="roi-hl">8.7%</span><br>
+      只要每個月多核准半件，訂閱費用就全回來了<br>
+      房貸一件賺 $15萬，月費更只佔 <span class="roi-hl">2.3%</span>
+    </div>
+  </div>
+</div>
+
+<!-- 定價 -->
+<div style="background:var(--w);padding:1px 0">
+<div class="section">
+  <div class="section-title">方案與定價</div>
+  <div class="section-sub">個人業務、代辦公司各有專屬方案，全方案提供 3 天免費試用</div>
+
+  <div class="price-section-title">👤 個人業務方案</div>
+  <div class="plan-row">
+    <div class="plan">
+      <div class="plan-name">基本版</div>
+      <div class="plan-price">$1,490<span>/月</span></div>
+      <div class="plan-trial">✓ 免費試用 3 天</div>
+      <div class="plan-feats">
+        <b>案件管理</b> — 所有客戶案件<br>
+        <b>AI 評等 A-E</b> — 即時評估<br>
+        <b>填單連結</b> — 專屬客戶填單頁<br>
+        <b>狀態追蹤</b> — 待處理/核准/婉拒<br>
+        — AI 建議方案（進階版）<br>
+        — LINE 推播通知（進階版）<br>
+        — PDF 報告匯出（進階版）
+      </div>
+    </div>
+    <div class="plan hot">
+      <div class="plan-hot-badge">最多人選擇</div>
+      <div class="plan-name">進階版</div>
+      <div class="plan-price">$3,490<span>/月</span></div>
+      <div class="plan-trial">✓ 免費試用 3 天</div>
+      <div class="plan-feats">
+        <b>基本版全部功能</b><br>
+        <b>AI 建議最佳方案</b> — 送哪家最穩<br>
+        <b>補件建議清單</b> — 提高通過率<br>
+        <b>LINE 即時推播</b> — 新案件通知<br>
+        <b>PDF 評估報告</b> — 一鍵匯出<br>
+        <b>融資分期分析</b> — 中租/裕融比較<br>
+        <b>業績統計報表</b> — 核准率追蹤
+      </div>
+    </div>
+  </div>
+
+  <div class="price-section-title">🏢 代辦公司方案</div>
+  <div class="plan-row">
+    <div class="plan">
+      <div class="plan-name">旗艦版</div>
+      <div class="plan-price">$8,900<span>/月</span></div>
+      <div class="plan-trial">✓ 免費試用 3 天</div>
+      <div class="plan-feats">
+        <b>進階版全部功能</b><br>
+        <b>白標 Logo</b> — 貼上公司品牌<br>
+        <b>優先技術支援</b><br>
+        <b>月報分析報告</b><br>
+        適合：5人以下小型公司
+      </div>
+    </div>
+    <div class="plan hot">
+      <div class="plan-hot-badge">公司主力方案</div>
+      <div class="plan-name">企業版</div>
+      <div class="plan-price">$18,000<span>/月</span></div>
+      <div class="plan-trial">✓ 免費試用 3 天</div>
+      <div class="plan-feats">
+        <b>旗艦版全部功能</b><br>
+        <b>多帳號管理</b> — 最多 10 位業務<br>
+        <b>業務績效看板</b> — 各人成績一覽<br>
+        <b>LINE 群組推播</b> — 全員通知<br>
+        <b>分潤管理</b> — 自動計算月報<br>
+        <b>PDF 批量匯出</b> — 月報一鍵產出<br>
+        <b>專屬客服</b> — 優先處理問題<br>
+        適合：6-20人中型公司
+      </div>
+    </div>
+    <div class="plan">
+      <div class="plan-name">集團版</div>
+      <div class="plan-price">洽談<span> 起 $35,000</span></div>
+      <div class="plan-trial">✓ 專屬試用安排</div>
+      <div class="plan-feats">
+        <b>企業版全部功能</b><br>
+        <b>無限帳號</b> — 業務人數無上限<br>
+        <b>白標系統</b> — 完整品牌客製<br>
+        <b>API 串接</b> — 對接既有系統<br>
+        <b>專屬 PM 服務</b> — 專人協助<br>
+        適合：20人以上大型公司
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- 適用對象 -->
+<div class="section">
+  <div class="section-title">誰適合用 FlowHub？</div>
+  <div class="section-sub">只要在做貸款代辦相關業務，都可以用</div>
+  <div class="target-grid">
+    <div class="target-card target-personal">
+      <div class="target-title">👤 個人業務 / 兼職代辦</div>
+      <div class="target-items">
+        ✓ 獨立接信貸、房貸案件<br>
+        ✓ 兼職代辦，手邊有客戶名單<br>
+        ✓ 想提高核准率、減少退件<br>
+        ✓ 想用系統管理而非 Excel<br>
+        ✓ 想專業化，讓客戶更信任
+      </div>
+    </div>
+    <div class="target-card target-company">
+      <div class="target-title">🏢 代辦公司 / 業務團隊</div>
+      <div class="target-items">
+        ✓ 有多位業務需要統一管理<br>
+        ✓ 需要追蹤各業務業績與分潤<br>
+        ✓ 想建立公司標準作業流程<br>
+        ✓ 需要月報給老闆或業務看<br>
+        ✓ 想用品牌化系統提升形象
       </div>
     </div>
   </div>
 </div>
 
-<!-- HOW IT WORKS -->
-<div class="section" id="how">
-  <div class="section-inner">
-    <div class="reveal">
-      <div class="section-tag">使用流程</div>
-      <h2 class="section-title">三個步驟<br>立即開始</h2>
+<!-- 使用流程 -->
+<div style="background:var(--w);padding:1px 0">
+<div class="section">
+  <div class="section-title">3 分鐘上手，立即開始</div>
+  <div class="section-sub">申請到開始使用，最快 3 分鐘</div>
+  <div class="flow-steps">
+    <div class="flow-step">
+      <div class="flow-num">1</div>
+      <div class="flow-title">填申請表單</div>
+      <div class="flow-desc">選個人或公司方案，填基本資料</div>
     </div>
-    <div class="step-grid">
-      <div class="step-item reveal">
-        <div class="step-num">1</div>
-        <div class="step-title">申請試用帳號</div>
-        <div class="step-desc">填寫基本資料，手機驗證後立即取得 3 天進階版完整體驗。</div>
-      </div>
-      <div class="step-item reveal">
-        <div class="step-num">2</div>
-        <div class="step-title">分享填單連結</div>
-        <div class="step-desc">將您的專屬連結分享給客戶，客戶填完資料自動進入系統。</div>
-      </div>
-      <div class="step-item reveal">
-        <div class="step-num">3</div>
-        <div class="step-title">查看順策建議</div>
-        <div class="step-desc">登入業務後台，看到完整評分等級和 AI 建議方案，立即聯繫客戶。</div>
-      </div>
+    <div class="flow-step">
+      <div class="flow-num">2</div>
+      <div class="flow-title">手機 OTP 驗證</div>
+      <div class="flow-desc">收驗證碼，完成身份確認</div>
+    </div>
+    <div class="flow-step">
+      <div class="flow-num">3</div>
+      <div class="flow-title">帳號立即開通</div>
+      <div class="flow-desc">系統自動開通，帳密即時取得</div>
+    </div>
+    <div class="flow-step">
+      <div class="flow-num">4</div>
+      <div class="flow-title">分享填單連結</div>
+      <div class="flow-desc">把專屬連結傳給客戶填寫</div>
+    </div>
+    <div class="flow-step">
+      <div class="flow-num">5</div>
+      <div class="flow-title">收到 LINE 通知</div>
+      <div class="flow-desc">客戶填完即通知，立即聯繫</div>
     </div>
   </div>
 </div>
-
-<!-- PLANS -->
-<div class="plans-bg" id="plans">
-  <div class="section-inner" style="max-width:1000px;margin:0 auto;padding:0 24px">
-    <div class="reveal" style="text-align:center;margin-bottom:0">
-      <div class="section-tag" style="color:var(--gold)">訂閱方案</div>
-      <h2 class="section-title" style="color:#fff">選擇適合您的方案</h2>
-      <p style="color:rgba(255,255,255,.45);font-size:14px;margin-bottom:0">試用期間享有完整進階版功能，到期後再選擇</p>
-    </div>
-    <div class="plans-grid">
-      <div class="plan-card reveal">
-        <div class="plan-name">基本版</div>
-        <div class="plan-price">洽談<span> /月</span></div>
-        <div class="plan-trial">✦ 含 3 天進階版試用</div>
-        <ul class="plan-features">
-          <li>案件列表管理</li>
-          <li>評分等級（A-E）</li>
-          <li>案件狀態追蹤</li>
-          <li>客戶填單連結</li>
-          <li class="no">完整建議方案</li>
-          <li class="no">補件建議</li>
-          <li class="no">風險提示</li>
-        </ul>
-        <a href="apply.html" class="plan-btn plan-btn-outline">開始試用</a>
-      </div>
-      <div class="plan-card featured reveal">
-        <div class="plan-badge">推薦</div>
-        <div class="plan-name">進階版</div>
-        <div class="plan-price">洽談<span> /月</span></div>
-        <div class="plan-trial">✦ 含 3 天免費試用</div>
-        <ul class="plan-features">
-          <li>案件列表管理</li>
-          <li>評分等級（A-E）</li>
-          <li>案件狀態追蹤</li>
-          <li>客戶填單連結</li>
-          <li>🎯 完整建議方案</li>
-          <li>📎 補件建議</li>
-          <li>⚠️ 風險提示</li>
-        </ul>
-        <a href="apply.html" class="plan-btn plan-btn-fill">免費試用 3 天</a>
-      </div>
-    </div>
-  </div>
 </div>
 
 <!-- CTA -->
 <div class="cta">
-  <div class="reveal">
-    <h2 class="cta-title">現在就開始<br>讓 AI 幫您找最佳方案</h2>
-    <p class="cta-sub">3 天進階版完整體驗，不需信用卡，立即可用</p>
-    <a href="apply.html" class="btn-primary" style="font-size:16px;padding:16px 40px">
-      🚀 立即申請免費試用
-    </a>
-    <p class="cta-note">試用期間享有完整進階版功能 · 到期後再決定是否續訂</p>
-  </div>
+  <div class="cta-title">現在申請，3 天免費試用</div>
+  <div class="cta-sub">全台灣唯一代辦業務專用 AI 評估系統<br>不需信用卡，試用滿意再付款</div>
+  <a href="apply.html" class="btn-gold" style="font-size:16px;padding:16px 40px">立即免費申請 →</a>
+  <div class="cta-note">試用期間功能完整 · 隨時取消無違約金 · 資料安全加密保護</div>
 </div>
 
-<!-- FOOTER -->
 <footer>
-  <div class="footer-logo">FlowHub 經銷版</div>
-  <p class="footer-desc">
-    FlowHub 幫助業務人員快速找出最適合客戶的金融方案<br>
-    安全加密 · 資料僅供評估使用 · 絕不對外分享<br><br>
-    © 2026 FlowHub 經銷版 · 資料加密保護 · 通路完全隔離
-  </p>
+  © 2026 FlowHub 版權所有 ·
+  <a href="apply.html" style="color:rgba(255,255,255,.5);margin:0 8px">申請通路</a> ·
+  <a href="channel.html" style="color:rgba(255,255,255,.5);margin:0 8px">業務登入</a> ·
+  <a href="index.html" style="color:rgba(255,255,255,.5);margin:0 8px">客戶填單 Demo</a>
 </footer>
 
-<script>
-// 滾動動畫
-var reveals = document.querySelectorAll('.reveal');
-var observer = new IntersectionObserver(function(entries){
-  entries.forEach(function(e){
-    if(e.isIntersecting){
-      e.target.classList.add('visible');
-    }
-  });
-}, {threshold:0.1, rootMargin:'0px 0px -50px 0px'});
-reveals.forEach(function(el){ observer.observe(el); });
-</script>
 </body>
 </html>
