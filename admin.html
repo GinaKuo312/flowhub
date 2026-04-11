@@ -1384,182 +1384,254 @@ window.renderApproved = function(){
 //  案件側滑面板（完整版）
 // ================================================================
 window.openPanel = function(caseId){
-  var c=cases.find(function(x){ return x.id===caseId; });
-  if(!c) return;
+  var c=cases.find(function(x){return x.id===caseId;});
+  if(!c)return;
   var sc=calcScore(c); var g=gi(sc);
 
-  var glink=c.company?'<a class="gl-link" href="https://www.google.com/search?q='+encodeURIComponent(c.company)+'" target="_blank">🔍 Google</a>':'';
-  var tlink=c.company_tel?'<a class="tel-link" href="tel:'+c.company_tel+'">📞 撥打</a>':'';
+  // 評等工具函式
+  function gi2(s){return s>=82?'A':s>=68?'B':s>=55?'C':s>=40?'D':'E';}
+  function gc2(g2){var m={A:'#16A34A',B:'#2563EB',C:'#D97706',D:'#EA580C',E:'#DC2626'};return m[g2]||'#A09890';}
+  function gbg2(g2){var m={A:'#DCFCE7',B:'#DBEAFE',C:'#FEF3C7',D:'#FFEDD5',E:'#FEE2E2'};return m[g2]||'#F1F5F9';}
+  function gd2(s){if(s>=82)return'條件優秀';if(s>=68)return'條件良好';if(s>=55)return'條件尚可';if(s>=40)return'偏弱需補強';return s>0?'不建議送件':'資料不足';}
 
-  var adv={A:'✅ 資料完整，直接送件',B:'📋 確認薪轉帳戶後送件',C:'⚠️ 建議降額或補齊佐證文件',D:'🔶 高風險，建議先補強再評估',E:'❌ 條件不足，不建議此次送件'};
+  // 資料列
+  function row(lb,val,color){
+    var vc=color?'color:'+color+';font-weight:600':'font-weight:500';
+    return '<tr><td style="padding:5px 8px;color:#6B6560;font-size:12px;white-space:nowrap">'+lb+'</td>'
+      +'<td style="padding:5px 8px;font-size:13px;'+vc+'text-align:right">'+(val||'—')+'</td></tr>';
+  }
+  function section(title,rows){
+    return '<div style="margin-bottom:12px">'
+      +'<div style="font-size:11px;font-weight:700;color:#92400E;letter-spacing:.5px;margin-bottom:5px;padding-left:4px">'+title+'</div>'
+      +'<table style="width:100%;border-collapse:collapse;background:#FAFAF7;border-radius:8px;overflow:hidden">'
+      +rows+'</table></div>';
+  }
 
-  var html= '' +
-    '<div class="sh" style="background:'+g.bg+';border:1px solid '+g.bc+'">'+
-      '<div class="sc2" style="border-color:'+g.bc+';color:'+g.tc+'">'+
-        '<div class="snum">'+sc+'</div><div class="sgrp">'+g.g+' 級</div>'+
-      '</div>'+
-      '<div class="sdt">'+
-        '<div class="snm" style="color:'+g.tc+'">'+g.l+'</div>'+
-        '<div class="sbr"><span class="sbl">過件率</span>'+
-          '<div class="sbt"><div class="sbf" style="width:'+g.r+'%;background:'+g.bc+'"></div></div>'+
-          '<span class="sbv" style="color:'+g.tc+'">'+g.r+'%</span></div>'+
-        '<div class="sbr"><span class="sbl">評分</span>'+
-          '<div class="sbt"><div class="sbf" style="width:'+sc+'%;background:'+g.bc+'"></div></div>'+
-          '<span class="sbv" style="color:'+g.tc+'">'+sc+'</span></div>'+
-        '<div class="sadv" style="background:'+g.bg+';color:'+g.tc+';border:1px solid '+g.bc+'">'+adv[g.g]+'</div>'+
-      '</div>'+
-    '</div>'+
+  // 評分
+  var allScores=[
+    {n:'信貸',      s:parseInt(c.score_credit)||0},
+    {n:'汽機車貸',  s:parseInt(c.score_vehicle)||0},
+    {n:'房貸',      s:parseInt(c.score_house)||0},
+    {n:'土地貸',    s:parseInt(c.score_land)||0},
+    {n:'商品分期',  s:parseInt(c.score_goods)||0},
+    {n:'債務整合',  s:parseInt(c.score_debt_c)||0}
+  ].filter(function(x){return x.s>0;}).sort(function(a,b){return b.s-a.s;});
+  var bestG=allScores.length?gi2(allScores[0].s):g.g;
+  var bestScore=allScores.length?allScores[0].s:sc;
+  var bestProd=c.score_best_product||(allScores[0]&&allScores[0].n)||'—';
+  var chName=CHANNELS[c.channel]?CHANNELS[c.channel].name:(c.channel||'直接');
+  var appDate=c.approved_at?c.approved_at.substr(0,10):'';
+  var hasApprove=c.approved_company||c.approved_amount;
 
-    '<div class="sec">⚡ 初審重點</div>'+
-    '<div class="ig">'+
-      '<div class="ii"><div class="ik">警示戶</div><div class="iv" style="color:'+(c.is_alert==='yes'?'var(--rd)':'#22C55E')+'">'+(c.is_alert==='yes'?'⚠ 是':'✓ 否')+'</div></div>'+
-      '<div class="ii"><div class="ik">信用卡</div><div class="iv">'+(c.credit_card_status||'未填')+(c.credit_card_bank?' · '+c.credit_card_bank:'')+'</div></div>'+
-      '<div class="ii"><div class="ik">門號本人</div><div class="iv" style="color:'+(c.sc_phone_owner==='是'?'#22C55E':'var(--rd)')+'">'+(c.sc_phone_owner||'未填')+'</div></div>'+
-      '<div class="ii"><div class="ik">薪轉帳戶</div><div class="iv" style="color:'+(c.sc_salary_transfer==='有'?'#22C55E':'var(--mu)')+'">'+(c.sc_salary_transfer||'—')+'</div></div>'+
-      '<div class="ii"><div class="ik">銀行查詢（3月）</div><div class="iv">'+(c.query_bank||'0')+'次</div></div>'+
-      '<div class="ii"><div class="ik">融資查詢（3月）</div><div class="iv">'+(c.query_fin||'0')+'次</div></div>'+
-      (c.has_fin==='yes'?
-        '<div class=\"ii\"><div class=\"ik\">融資分期</div><div class=\"iv\">有辦過</div></div>'+
-        '<div class=\"ii\"><div class=\"ik\">配合公司</div><div class=\"iv\">'+(c.fin_cos||'—')+'</div></div>'+
-        '<div class=\"ii\"><div class=\"ik\">繳款品質</div><div class=\"iv\">'+(
-          c.fin_quality==='normal'?'✅ 正常':c.fin_quality==='late_occ'?'⚠️ 偶逾期':
-          c.fin_quality==='late_oft'?'❌ 常逾期':c.fin_quality==='settled'?'✅ 已結清':
-          c.fin_quality==='stopped'?'🔴 未繳':'—')+'</div></div>'+
-        (c.fin_score&&parseInt(c.fin_score)!==0?
-          '<div class=\"ii\"><div class=\"ik\">融資加減分</div><div class=\"iv\" style=\"color:'+(parseInt(c.fin_score)>0?'#166534':'#DC2626')+';font-weight:700\">'+(parseInt(c.fin_score)>0?'+':'')+parseInt(c.fin_score)+'分</div></div>':''
-        )
-      :'<div class=\"ii\"><div class=\"ik\">融資分期</div><div class=\"iv\">無</div></div>')+
-      (c.id_front||c.id_back?'<div class="ii"><div class="ik">身分證</div><div class="iv">'+
-        (c.id_front&&c.id_back?'✅ 已上傳正反面':c.id_front?'📄 已上傳正面':'📄 已上傳反面')+'</div></div>':'')+''+
-    '</div>'+
+  var h='';
 
-    '<div class="sec">👤 基本資料</div>'+
-    '<div class="ig">'+
-      '<div class="ii"><div class="ik">姓名</div><div class="iv">'+(c.name||'—')+'</div></div>'+
-      '<div class="ii"><div class="ik">手機</div><div class="iv">'+(c.phone||'—')+'</div></div>'+
-      '<div class="ii"><div class="ik">出生日期</div><div class="iv">'+(c.birth_date||'—')+'</div></div>'+
-      '<div class="ii"><div class="ik">居住狀況</div><div class="iv">'+(c.sc_residence||'—')+'</div></div>'+
-      '<div class="ii full"><div class="ik">戶籍地址</div><div class="iv">'+(c.reg_addr||'—')+'</div></div>'+
-    '</div>'+
+  // ── 評等大卡 ──
+  h+='<div style="background:'+gbg2(bestG)+';border:2px solid '+gc2(bestG)+';border-radius:12px;padding:14px 16px;margin-bottom:14px;display:flex;align-items:center;gap:14px">'
+    +'<div style="font-size:52px;font-weight:900;color:'+gc2(bestG)+';line-height:1">'+bestG+'</div>'
+    +'<div style="flex:1">'
+    +'<div style="font-size:15px;font-weight:700;color:#2A1F0E">最佳方案：'+bestProd+'</div>'
+    +'<div style="font-size:13px;color:#6B6560;margin-top:2px">'+(c.name||'—')+' ・ '+bestScore+' 分</div>'
+    +'<div style="font-size:12px;color:'+gc2(bestG)+';font-weight:600;margin-top:3px">'+gd2(bestScore)+'</div>'
+    +'</div>'
+    +(c.is_alert==='yes'?'<div style="background:#FEE2E2;color:#DC2626;font-size:11px;font-weight:700;padding:4px 10px;border-radius:8px;white-space:nowrap">⚠️ 警示戶</div>':'')
+    +'</div>';
 
-    '<div class="sec">💼 公司資訊</div>'+
-    '<div class="ig">'+
-      '<div class="ii full"><div class="ik">公司名稱</div><div class="iv" style="display:flex;align-items:center;flex-wrap:wrap;gap:4px">'+(c.company||'—')+glink+'</div></div>'+
-      '<div class="ii"><div class="ik">公司電話</div><div class="iv" style="display:flex;align-items:center;flex-wrap:wrap;gap:4px">'+(c.company_tel||'未填')+tlink+'</div></div>'+
-      '<div class="ii"><div class="ik">可電話查核</div><div class="iv">'+(c.sc_company_check||'—')+'</div></div>'+
-    '</div>'+
+  // ── 全部商品評分 ──
+  if(allScores.length){
+    h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:14px">';
+    allScores.forEach(function(item,ii){
+      var g2=gi2(item.s);
+      h+='<div style="background:'+(ii===0?gbg2(g2):'#F5F5F2')+';border:1.5px solid '+(ii===0?gc2(g2):'#E0DDD8')+';border-radius:9px;padding:10px 12px">'
+        +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px">'
+        +'<span style="font-size:13px;font-weight:700;color:#2A1F0E">'+item.n+(ii===0?' ★':'')+'</span>'
+        +'<span style="font-size:12px;font-weight:700;color:'+gc2(g2)+';background:'+gbg2(g2)+';padding:2px 8px;border-radius:8px">'+g2+'</span></div>'
+        +'<div style="font-size:11px;color:#6B6560">'+item.s+' 分・'+gd2(item.s)+'</div>'
+        +'<div style="margin-top:5px;height:5px;background:#E0DDD8;border-radius:3px">'
+        +'<div style="width:'+Math.min(item.s,100)+'%;height:100%;background:'+gc2(g2)+';border-radius:3px"></div></div></div>';
+    });
+    h+='</div>';
+  }
 
-    '<div class="sec">💰 收入工作</div>'+
-    '<div class="ig">'+
-      '<div class="ii"><div class="ik">月收入</div><div class="iv">'+(c.income?'NT$'+parseInt(c.income).toLocaleString():'—')+'</div></div>'+
-      '<div class="ii"><div class="ik">工作性質</div><div class="iv">'+(c.sc_job_type||'—')+'</div></div>'+
-      '<div class="ii"><div class="ik">年資</div><div class="iv">'+(c.sc_tenure?c.sc_tenure+'個月':'—')+'</div></div>'+
-      '<div class="ii"><div class="ik">薪資方式</div><div class="iv">'+(c.salary_type==='transfer'?'薪轉':c.salary_type==='non-transfer'?'轉帳':'現金')+'</div></div>'+
-      '<div class="ii"><div class="ik">收入佐證</div><div class="iv">'+(c.sc_income_proof||'—')+'</div></div>'+
-      '<div class="ii"><div class="ik">月負債</div><div class="iv">'+(c.loan_burden?'NT$'+parseInt(c.loan_burden).toLocaleString():'無')+'</div></div>'+
-    '</div>'+
+  // ── 所有資料區塊 ──
+  h+=section('基本資料',
+    row('姓名', c.name)
+    +row('手機', c.phone)
+    +row('出生日期', c.birth_date)
+    +row('戶籍地址', c.reg_addr)
+    +row('所屬通路', chName)
+    +row('申請時間', c.created_at?c.created_at.substr(0,16).replace('T',' '):'—')
+  );
 
-    '<div class="sec">📋 申請需求與擔保品</div>'+
-    '<div class="ig">'+
-      '<div class="ii"><div class="ik">申請金額</div><div class="iv" style="color:var(--bl);font-size:15px;font-weight:900">'+(c.need_amount?'NT$'+parseInt(c.need_amount).toLocaleString():'—')+'</div></div>'+
-      '<div class="ii"><div class="ik">期數</div><div class="iv">'+(c.period||'—')+'期</div></div>'+
-      '<div class="ii"><div class="ik">用途</div><div class="iv">'+(c.loan_purpose||'—')+'</div></div>'+
-      '<div class="ii"><div class="ik">通路</div><div class="iv">'+(CHANNELS[c.channel]?CHANNELS[c.channel].name:(c.channel||'直接'))+'</div></div>'+
-      (c.collateral_house&&c.collateral_house!=='無'?'<div class="ii"><div class="ik">房屋擔保</div><div class="iv">'+c.collateral_house+'</div></div>':'')+
-      (c.collateral_land&&c.collateral_land!=='無'?'<div class="ii"><div class="ik">土地擔保</div><div class="iv">'+c.collateral_land+'</div></div>':'')+
-      (c.collateral_car&&c.collateral_car!=='無'?'<div class="ii"><div class="ik">車輛擔保</div><div class="iv">'+c.collateral_car+'</div></div>':'')+
-    '</div>'+
+  h+=section('工作與收入',
+    row('公司名稱', c.company)
+    +row('公司電話', c.company_tel)
+    +row('工作性質', c.sc_job_type)
+    +row('工作年資', c.sc_tenure?c.sc_tenure+'個月':'—')
+    +row('月收入', c.income?'$'+Number(c.income).toLocaleString():'—', c.income>=30000?'#16A34A':c.income<20000?'#DC2626':'')
+    +row('薪資方式', c.salary_type)
+    +row('有無勞保', c.labor==='yes'?'✅ 有勞保':'❌ 無勞保', c.labor==='yes'?'#16A34A':'#DC2626')
+    +row('薪資轉帳', c.sc_salary_transfer==='有'?'✅ 有':'❌ 無', c.sc_salary_transfer==='有'?'#16A34A':'#DC2626')
+    +row('收入佐證', c.sc_income_proof)
+    +row('居住狀況', c.sc_residence)
+    +row('手機本人', c.sc_phone_owner==='是'?'✅ 是':'否')
+  );
 
-        (canSee('suggestion') ? (
-      (function(){
-        var sg = genSuggestion(c);
-        var sh = '<div class="sec">🎯 FlowHub 順策建議方案</div>';
-        var bh = '<div style="background:#FAFAF7;border:1px solid #E8D5A8;border-radius:8px;padding:14px;margin-bottom:12px">';
-        var oh = '';
-        if(sg.products.length){
-          oh += '<div style="font-size:12px;font-weight:600;color:#5C4A2A;margin-bottom:6px">建議送件商品：</div>';
-          sg.products.forEach(function(p,i){
-            var ns=['1️⃣','2️⃣','3️⃣','4️⃣','5️⃣'];
-            oh += '<div style="font-size:12px;padding:3px 0">'+ns[i]+' '+p.name+'（'+p.note+'）</div>';
-          });
-        }
-        if(sg.supplements.length){
-          oh += '<div style="font-size:12px;font-weight:600;color:#5C4A2A;margin:10px 0 4px">📎 補件建議：</div>';
-          sg.supplements.forEach(function(s){ oh += '<div style="font-size:12px">• '+s+'</div>'; });
-        }
-        if(sg.risks.length){
-          oh += '<div style="font-size:12px;font-weight:600;color:#C0392B;margin:10px 0 4px">⚠️ 風險提示：</div>';
-          sg.risks.forEach(function(r){ oh += '<div style="font-size:12px;color:#C0392B">• '+r+'</div>'; });
-        }
-        return sh + bh + oh + '</div>';
-      })()
-    ) : '<div style="background:#F5F0E8;border-radius:8px;padding:12px;margin-bottom:12px;text-align:center;font-size:12px;color:#999">🔒 升級進階版 — 解鎖完整建議方案</div>') +
+  h+=section('信用狀況',
+    row('有無信用卡', c.has_credit_card==='yes'?'有':'無')
+    +row('信用卡繳款', c.credit_card_status, c.credit_card_status==='正常'?'#16A34A':c.credit_card_status==='停卡'?'#DC2626':'')
+    +row('信用卡銀行', c.credit_card_bank)
+    +row('銀行查詢(3月)', (c.query_bank||'0')+'次', parseInt(c.query_bank)>2?'#DC2626':'')
+    +row('融資查詢(3月)', (c.query_fin||'0')+'次', parseInt(c.query_fin)>2?'#DC2626':'')
+    +row('警示狀態', c.is_alert==='yes'?'⚠️ 警示戶':'✅ 正常', c.is_alert==='yes'?'#DC2626':'#16A34A')
+  );
 
-'<div class="sec">📝 CRM 跟進備註</div>'+
-    '<div style="margin-bottom:12px">'+
-      '<div style="font-size:11px;color:var(--mu);margin-bottom:4px">跟進備註</div>'+
-      '<textarea id="ps_crm" rows="2" style="width:100%;border:1px solid var(--gm);border-radius:6px;padding:8px;font-size:12px;font-family:inherit;resize:none;outline:none" placeholder="聯繫記錄、客戶反應、補件進度...">'+( c.crm_note||'')+'</textarea>'+
-    '</div>'+
-    '<div style="margin-bottom:14px">'+
-      '<div style="font-size:11px;color:var(--mu);margin-bottom:4px">下次跟進日期</div>'+
-      '<input type="date" id="ps_follow" value="'+(c.next_follow_up||'')+'" style="border:1px solid var(--gm);border-radius:6px;padding:6px 10px;font-size:12px;font-family:inherit;outline:none"/>'+
-    '</div>'+
+  h+=section('負債與擔保',
+    row('申請金額', c.need_amount?'$'+Number(c.need_amount).toLocaleString():'—')
+    +row('還款期數', c.period?c.period+'期':'—')
+    +row('申請用途', c.loan_purpose)
+    +row('月還款額', c.loan_burden?'$'+Number(c.loan_burden).toLocaleString():'—')
+    +row('總負債', c.loan_burden_total?'$'+Number(c.loan_burden_total).toLocaleString():'—')
+    +row('有汽車', c.has_car==='yes'?'✅ 有':'無')
+    +row('有機車', c.has_moto==='yes'?'✅ 有':'無')
+    +row('房屋擔保', c.collateral_house||'無')
+    +row('土地擔保', c.collateral_land||'無')
+  );
 
-    '<div class="sec">📊 結果回饋（用於評分優化）</div>'+
-    '<div style="margin-bottom:10px">'+
-      '<div style="font-size:11px;color:var(--mu);margin-bottom:4px">實際送件結果</div>'+
-      '<select id="ps_result" style="width:100%;height:36px;border:1px solid var(--gm);border-radius:6px;padding:0 10px;font-size:13px;font-family:inherit;outline:none;background:#fff">'+
-        '<option value="">尚未送件</option>'+
-        '<option value="approved"'+(c.result_feedback==='approved'?' selected':'')+'>✅ 已核准</option>'+
-        '<option value="rejected"'+(c.result_feedback==='rejected'?' selected':'')+'>❌ 拒絕</option>'+
-        '<option value="pending"'+(c.result_feedback==='pending'?' selected':'')+'>⏳ 審核中</option>'+
-        '<option value="withdrawn"'+(c.result_feedback==='withdrawn'?' selected':'')+'>↩️ 客戶撤件</option>'+
-      '</select>'+
-    '</div>'+
-    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px">'+
-      '<div><div style="font-size:11px;color:var(--mu);margin-bottom:4px">核准銀行/機構</div>'+
-        '<input id="ps_rbank" value="'+(c.result_bank||'')+'" placeholder="例：玉山銀行" style="width:100%;height:36px;border:1px solid var(--gm);border-radius:6px;padding:0 10px;font-size:12px;font-family:inherit;outline:none"/></div>'+
-      '<div><div style="font-size:11px;color:var(--mu);margin-bottom:4px">核准利率 (%)</div>'+
-        '<input id="ps_rrate" type="number" step="0.1" value="'+(c.result_rate||'')+'" placeholder="例：5.88" style="width:100%;height:36px;border:1px solid var(--gm);border-radius:6px;padding:0 10px;font-size:12px;font-family:inherit;outline:none"/></div>'+
-    '</div>'+
+  if(c.has_fin==='yes'){
+    h+=section('過去融資分期',
+      row('配合公司', Array.isArray(c.fin_cos)?c.fin_cos.join('、'):(c.fin_cos||'—'))
+      +row('其他公司', c.fin_co_other||'—')
+      +row('繳款狀態', c.fin_status)
+      +row('繳款品質', c.fin_quality, c.fin_quality==='normal'?'#16A34A':c.fin_quality&&c.fin_quality.includes('late')?'#DC2626':'')
+    );
+  }
 
-    '<div class="sec">✍️ 審核操作</div>'+
-    '<select class="ssel" id="ps_st" onchange="toggleApprove()">'+
-    ['待處理','已聯繫','審核中','已核准','已撥款','不予承作'].map(function(s){
-      return '<option'+(c.status===s?' selected':'')+'>'+s+'</option>';
-    }).join('')+'</select>'+
+  // ── 核准記錄 ──
+  h+='<div style="background:linear-gradient(135deg,#FDF8F0,#FFFDF8);border:2px solid #C9A460;border-radius:12px;padding:14px;margin-bottom:12px">'
+    +'<div style="font-size:13px;font-weight:700;color:#92400E;margin-bottom:10px">核准記錄'
+    +(hasApprove?'<span style="font-size:10px;background:#DCFCE7;color:#16A34A;padding:1px 8px;border-radius:8px;font-weight:600;margin-left:8px">已填寫</span>':'')
+    +'</div>'
+    +(hasApprove?'<div style="background:#DCFCE7;border-radius:8px;padding:9px 12px;margin-bottom:10px;font-size:13px;color:#16A34A;font-weight:600;line-height:1.9">'
+      +'✅ 公司：'+(c.approved_company||'—')+'<br>'
+      +'💰 金額：'+(c.approved_amount?'$'+Number(c.approved_amount).toLocaleString():'—')+'<br>'
+      +'📅 撥款：'+(appDate||'—')
+      +'</div>':'')
+    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:7px">'
+    +'<div><div style="font-size:11px;color:#6B6560;font-weight:600;margin-bottom:3px">核准公司</div>'
+    +'<input id="adm_ac" placeholder="中租、裕富..." style="width:100%;height:36px;padding:0 10px;border:1.5px solid #E8D5A8;border-radius:6px;font-size:13px;font-family:inherit;outline:none"></div>'
+    +'<div><div style="font-size:11px;color:#6B6560;font-weight:600;margin-bottom:3px">核准金額（元）</div>'
+    +'<input id="adm_aa" type="number" placeholder="200000" style="width:100%;height:36px;padding:0 10px;border:1.5px solid #E8D5A8;border-radius:6px;font-size:13px;font-family:inherit;outline:none"></div>'
+    +'</div>'
+    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:10px">'
+    +'<div><div style="font-size:11px;color:#6B6560;font-weight:600;margin-bottom:3px">撥款日期</div>'
+    +'<input id="adm_ad" type="date" style="width:100%;height:36px;padding:0 10px;border:1.5px solid #E8D5A8;border-radius:6px;font-size:13px;font-family:inherit;outline:none"></div>'
+    +'<div><div style="font-size:11px;color:#6B6560;font-weight:600;margin-bottom:3px">備注</div>'
+    +'<input id="adm_an" placeholder="年利率9%，36期" style="width:100%;height:36px;padding:0 10px;border:1.5px solid #E8D5A8;border-radius:6px;font-size:13px;font-family:inherit;outline:none"></div>'
+    +'</div>'
+    +'<button class="adm-btn-approve" style="width:100%;height:38px;background:linear-gradient(135deg,#C9A460,#A07C3A);color:#fff;border:none;border-radius:7px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">✓ 儲存核准記錄</button>'
+    +'</div>';
 
-    '<div id="ap_fields" style="'+(c.status==='已核准'||c.status==='已撥款'?'':'display:none')+'">'+
-    '<div class="apbox">'+
-      '<div class="abt">💰 核准 & 撥款資訊</div>'+
-      '<div class="ag">'+
-        '<div><div class="al">核准金額（元）</div><input class="ai" id="ps_amt" type="number" placeholder="50000" value="'+(c.approved_amount||'')+'" oninput="calcCm()"/></div>'+
-        '<div><div class="al">手續費（元）</div><input class="ai" id="ps_fee" type="number" placeholder="5000" value="'+(c.fee_amount||'')+'"/></div>'+
-        '<div><div class="al">撥款金額（元）</div><input class="ai" id="ps_dis" type="number" placeholder="45000" value="'+(c.disbursed_amount||'')+'"/></div>'+
-        '<div><div class="al">撥款日期</div><input class="ai" id="ps_date" type="date" value="'+(c.disburse_date||'')+'"/></div>'+
-        '<div><div class="al">送件銀行</div><input class="ai" id="ps_bank" type="text" placeholder="例：玉山銀行" value="'+(c.bank_name||'')+'"/></div>'+
-        '<div><div class="al">貸款案號</div><input class="ai" id="ps_loan" type="text" placeholder="銀行核准案號" value="'+(c.loan_no||'')+'"/></div>'+
-      '</div>'+
-    '</div>'+
-    '<div class="cmbox">'+
-      '<div class="cmtitle">💸 通路分潤計算</div>'+
-      '<div class="cmgrid">'+
-        '<div><div class="cml">佣金率（%）</div><input class="cmi" id="ps_cmr" type="number" step="0.1" value="'+(c.commission_rate||CHANNELS[c.channel]?.commission_rate||3)+'" oninput="calcCm()"/></div>'+
-        '<div><div class="cml">佣金（元）自動計算</div><input class="cmi" id="ps_cm" type="number" value="'+(c.channel_commission||'')+'" style="color:var(--pu);font-weight:700"/></div>'+
-      '</div>'+
-      '<div id="cm_preview" style="font-size:12px;color:var(--pu);margin-top:6px;font-weight:600"></div>'+
-    '</div>'+
-    '</div>'+
+  // ── 案件狀態 ──
+  var curSt=c.status||'待處理';
+  var sts=[
+    {s:'待處理',c:'#D97706',bg:'#FEF3C7'},{s:'聯繫中',c:'#2563EB',bg:'#DBEAFE'},
+    {s:'補件中',c:'#7C3AED',bg:'#EDE9FE'},{s:'已送件',c:'#0891B2',bg:'#CFFAFE'},
+    {s:'已核准',c:'#16A34A',bg:'#DCFCE7'},{s:'未通過',c:'#DC2626',bg:'#FEE2E2'}
+  ];
+  var sb=sts.map(function(st){
+    var isA=curSt===st.s;
+    return '<button data-st="'+st.s+'" class="adm-st-btn" style="flex:1;min-width:60px;padding:7px 2px;border:1.5px solid '+(isA?st.c:'#E8D5A8')+';border-radius:6px;background:'+(isA?st.bg:'#fff')+';color:'+(isA?st.c:'#6B6560')+';font-size:11px;font-weight:'+(isA?'700':'400')+';cursor:pointer;font-family:inherit">'+st.s+'</button>';
+  }).join('');
+  h+='<div style="background:#F8F5EF;border-radius:9px;padding:12px 14px;margin-bottom:10px">'
+    +'<div style="font-size:11px;font-weight:700;color:#92400E;letter-spacing:.5px;margin-bottom:8px">案件狀態</div>'
+    +'<div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:8px">'+sb+'</div>'
+    +'<button class="adm-btn-status" style="width:100%;height:36px;background:#2A1F0E;color:#fff;border:none;border-radius:6px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">💾 儲存狀態</button>'
+    +'<div id="adm_st_msg" style="font-size:11px;color:#16A34A;min-height:16px;margin-top:5px"></div>'
+    +'</div>';
 
-    '<textarea class="nta" id="ps_notes" placeholder="備註...">'+(c.notes||'')+'</textarea>'+
-    '<button class="svbtn" onclick="saveCase(\''+c.id+'\')">💾 儲存更新</button>'+
-    '<div id="ps_msg" style="font-size:12px;color:#22C55E;margin-top:7px;min-height:16px"></div>';
+  // ── 管理員備注 ──
+  h+='<div style="background:#F8F5EF;border-radius:9px;padding:12px 14px">'
+    +'<div style="font-size:11px;font-weight:700;color:#92400E;letter-spacing:.5px;margin-bottom:6px">管理員備注</div>'
+    +'<textarea id="adm_crm" style="width:100%;border:1px solid #E8D5A8;border-radius:6px;padding:8px;font-size:12px;font-family:inherit;resize:none;height:60px;outline:none" placeholder="記錄聯繫進度、評估建議...">'+(c.crm_note||'')+'</textarea>'
+    +'<button class="adm-btn-crm" style="margin-top:6px;height:32px;padding:0 14px;border:1.5px solid #E8D5A8;border-radius:6px;font-size:12px;font-family:inherit;cursor:pointer;background:#fff;color:#92400E;font-weight:600">儲存備注</button>'
+    +'</div>';
 
-  $('panel_title').textContent=(c.name||'—')+' — '+g.g+'級 '+sc+'分';
-  $('panel_body').innerHTML=html;
-  $('ov').classList.add('on');
-  $('panel').classList.add('on');
+  // 寫入
+  window._admCaseId=c.id; window._admSts=sts; window._admSelectedStatus=curSt;
+  $('panel_title').textContent=(c.name||'—')+' — '+bestG+'級 '+bestScore+'分';
+  $('panel_body').innerHTML=h;
+
+  // 填入現有核准資料
+  var el; 
+  el=document.getElementById('adm_ac'); if(el)el.value=c.approved_company||'';
+  el=document.getElementById('adm_aa'); if(el)el.value=c.approved_amount||'';
+  el=document.getElementById('adm_ad'); if(el)el.value=appDate;
+  el=document.getElementById('adm_an'); if(el)el.value=c.approved_note||'';
+
+  // 事件委派
+  $('panel_body').addEventListener('click',function(e){
+    var btn=e.target.closest('button'); if(!btn)return;
+    var id2=window._admCaseId;
+    if(btn.classList.contains('adm-st-btn')){
+      $('panel_body').querySelectorAll('.adm-st-btn').forEach(function(b){
+        var s2=window._admSts.find(function(x){return x.s===b.getAttribute('data-st');});
+        if(s2){b.style.background='#fff';b.style.color='#6B6560';b.style.border='1.5px solid #E8D5A8';b.style.fontWeight='400';}
+      });
+      var mySt=window._admSts.find(function(x){return x.s===btn.getAttribute('data-st');});
+      if(mySt){btn.style.background=mySt.bg;btn.style.color=mySt.c;btn.style.border='1.5px solid '+mySt.c;btn.style.fontWeight='700';}
+      window._admSelectedStatus=btn.getAttribute('data-st');
+    }
+    else if(btn.classList.contains('adm-btn-approve')){admSaveApproval(id2);}
+    else if(btn.classList.contains('adm-btn-status')){admSaveStatus(id2);}
+    else if(btn.classList.contains('adm-btn-crm')){admSaveCRM(id2);}
+  });
+
+  $('ov').classList.add('on'); $('panel').classList.add('on');
 }
+window.admSaveApproval=async function(id){
+  var ac=document.getElementById('adm_ac'),aa=document.getElementById('adm_aa');
+  var ad=document.getElementById('adm_ad'),an=document.getElementById('adm_an');
+  var company=ac?ac.value.trim():'',amount=aa?aa.value.trim():'';
+  var date=ad?ad.value:'',note=an?an.value.trim():'';
+  if(!company&&!amount){alert('請填寫核准公司或金額');return;}
+  try{
+    var r=await fetch(SUPA_URL+'/rest/v1/applications?id=eq.'+id,{
+      method:'PATCH',headers:Object.assign({},H,{'Prefer':'return=minimal'}),
+      body:JSON.stringify({approved_company:company||null,approved_amount:amount?parseInt(amount):null,approved_at:date||null,approved_note:note||null,status:'已核准'})
+    });
+    if(r.ok){
+      var c=cases.find(function(x){return x.id==id;});
+      if(c){c.approved_company=company;c.approved_amount=parseInt(amount)||0;c.approved_at=date;c.approved_note=note;c.status='已核准';}
+      alert('✅ 核准記錄已儲存！');
+    }else{alert('儲存失敗 '+r.status);}
+  }catch(e){alert('錯誤：'+e.message);}
+};
+window.admSaveStatus=async function(id){
+  var st=window._admSelectedStatus;
+  if(!st){alert('請先選擇狀態');return;}
+  try{
+    var r=await fetch(SUPA_URL+'/rest/v1/applications?id=eq.'+id,{
+      method:'PATCH',headers:Object.assign({},H,{'Prefer':'return=minimal'}),
+      body:JSON.stringify({status:st})
+    });
+    if(r.ok){
+      var c=cases.find(function(x){return x.id==id;});if(c)c.status=st;
+      var msg=document.getElementById('adm_st_msg');
+      if(msg){msg.textContent='✅ 已儲存：'+st;setTimeout(function(){if(msg)msg.textContent='';},3000);}
+    }else{alert('儲存失敗');}
+  }catch(e){alert('錯誤：'+e.message);}
+};
+window.admSaveCRM=async function(id){
+  var el=document.getElementById('adm_crm');if(!el)return;
+  try{
+    var r=await fetch(SUPA_URL+'/rest/v1/applications?id=eq.'+id,{
+      method:'PATCH',headers:Object.assign({},H,{'Prefer':'return=minimal'}),
+      body:JSON.stringify({crm_note:el.value})
+    });
+    if(r.ok){var c=cases.find(function(x){return x.id==id;});if(c)c.crm_note=el.value;alert('✅ 備注已儲存');}
+    else{alert('儲存失敗');}
+  }catch(e){alert('錯誤：'+e.message);}
+};
 
 window.toggleApprove = function(){
   var s=$('ps_st').value;
