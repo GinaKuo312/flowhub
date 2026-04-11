@@ -218,6 +218,119 @@ tr:hover td{background:#FDFBF7;cursor:pointer}
   .ig{grid-template-columns:1fr}
   .ag,.cmgrid,.cs-stats{grid-template-columns:1fr 1fr}
 }
+
+/* ═══════════════════════════════════════
+   RWD 手機版 — 768px 以下
+═══════════════════════════════════════ */
+
+/* 漢堡選單按鈕 */
+.hamburger{display:none;flex-direction:column;justify-content:center;gap:5px;width:36px;height:36px;background:none;border:none;cursor:pointer;padding:6px}
+.hamburger span{display:block;height:2px;background:var(--dk);border-radius:2px;transition:all .25s}
+.hamburger.open span:nth-child(1){transform:translateY(7px) rotate(45deg)}
+.hamburger.open span:nth-child(2){opacity:0}
+.hamburger.open span:nth-child(3){transform:translateY(-7px) rotate(-45deg)}
+
+/* 手機版遮罩 */
+.sb-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.45);z-index:199}
+.sb-overlay.show{display:block}
+
+@media(max-width:768px){
+  /* Topbar */
+  .topbar{padding:0 14px;height:52px}
+  .tname{font-size:15px}
+  .tuser,.trole{display:none}
+  .hamburger{display:flex}
+
+  /* Sidebar 變抽屜 */
+  .sidebar{
+    position:fixed;top:52px;left:-220px;bottom:0;
+    width:220px;z-index:200;
+    transition:left .28s cubic-bezier(.4,0,.2,1);
+    box-shadow:3px 0 20px rgba(0,0,0,.12);
+    overflow-y:auto;
+  }
+  .sidebar.open{left:0}
+
+  /* Layout */
+  .layout{flex-direction:column}
+  .content{padding:12px;max-height:none}
+
+  /* Stats 卡片：2欄 */
+  .sg{grid-template-columns:repeat(2,1fr);gap:8px}
+  .sc-n{font-size:20px}
+
+  /* Table 工具列：wrap */
+  .th{flex-direction:column;align-items:stretch;gap:6px;padding:10px 12px}
+  .th input,.th select,.th button{width:100%;font-size:13px}
+  .qbtn{width:100%}
+
+  /* Table：卡片模式 */
+  .tbl thead{display:none}
+  .tbl tr{
+    display:block;
+    background:var(--w);
+    border:1px solid #E8E4DC;
+    border-radius:var(--rs);
+    margin-bottom:10px;
+    padding:12px 14px;
+    cursor:pointer;
+  }
+  .tbl tr:hover{background:var(--gl)}
+  .tbl td{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:4px 0;
+    border:none;
+    font-size:13px;
+  }
+  .tbl td:before{
+    content:attr(data-label);
+    font-size:11px;
+    color:var(--ht);
+    font-weight:600;
+    white-space:nowrap;
+    margin-right:8px;
+    flex-shrink:0;
+  }
+  /* 第一格（姓名）放大 */
+  .tbl td:first-child{
+    font-size:15px;
+    font-weight:700;
+    border-bottom:1px solid #F0EDE8;
+    padding-bottom:8px;
+    margin-bottom:4px;
+  }
+  .tbl td:first-child:before{display:none}
+
+  /* Panel */
+  #panel{
+    width:100%!important;
+    right:-100%!important;
+    bottom:0;top:52px;
+    border-radius:0!important;
+  }
+  #panel.open{right:0!important}
+
+  /* 登入頁 */
+  .lcard{width:100%;padding:32px 22px}
+
+  /* 按鈕 */
+  .btn-act{min-width:80px;font-size:12px;padding:6px 10px}
+
+  /* 通路設定表格 */
+  .tbl-cs thead{display:none}
+  .tbl-cs tr{display:block;border:1px solid #E8E4DC;border-radius:var(--rs);margin-bottom:8px;padding:10px 12px}
+  .tbl-cs td{display:flex;justify-content:space-between;padding:3px 0;font-size:12px;border:none}
+  .tbl-cs td:before{content:attr(data-label);color:var(--ht);font-size:11px;font-weight:600;flex-shrink:0;margin-right:8px}
+}
+
+@media(max-width:480px){
+  .sg{grid-template-columns:repeat(2,1fr);gap:6px}
+  .sc{padding:10px 12px}
+  .sc-n{font-size:18px}
+  .sc-l{font-size:9px}
+}
 </style>
 </head>
 <body>
@@ -243,6 +356,7 @@ tr:hover td{background:#FDFBF7;cursor:pointer}
 
 <!-- ===== 主後台 ===== -->
 <div id="app" style="display:none">
+<div class="sb-overlay" id="sb_overlay" onclick="closeSidebar()"></div>
 
   <!-- 頂部導覽列 -->
   <div class="topbar">
@@ -252,7 +366,8 @@ tr:hover td{background:#FDFBF7;cursor:pointer}
       <div class="tlogo-fb" id="tfb" style="display:none">F</div>
       <span class="tname">FlowHub 後台</span>
     </div>
-    <div class="tright">
+    <button class="hamburger" id="hamburger" onclick="toggleSidebar()" aria-label="選單"><span></span><span></span><span></span></button>
+  <div class="tright">
       <span id="sb_name" style="font-size:12px;color:#6B5B4E;margin-right:6px"></span>
       <span id="sb_role" style="font-size:11px;color:#C9A460;margin-right:12px;font-weight:600"></span>
       <span class="tuser" id="top_user"></span>
@@ -1231,7 +1346,7 @@ window.renderCasesTable = function(data){
   data.map(function(c){
     var sc=calcScore(c); var g=gi(sc);
     return '<tr onclick="openPanel(\''+c.id+'\')" style="cursor:pointer">'+
-      '<td><div class="nb2">'+(c.name||'—')+'</div>'+
+      '<td data-label="">'+'<div class="nb2">'+(c.name||'—')+'</div>'+
         (c.is_alert==='yes'?'<div class="ds" style="color:var(--rd)">⚠ 警示戶</div>':'')+'</td>'+
       '<td>'+(c.phone||'—')+'</td>'+
       '<td style="max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+(c.company||'—')+'</td>'+
@@ -1979,54 +2094,47 @@ async function submitAddChannel(){
   var type  = document.getElementById('ac_type').value;
   var name  = document.getElementById('ac_name').value.trim();
   var phone = document.getElementById('ac_phone').value.trim();
-  var pw    = document.getElementById('ac_pw').value.trim() || phone;
+  var pw    = (document.getElementById('ac_pw')?document.getElementById('ac_pw').value:'')||phone;
   var plan  = document.getElementById('ac_plan').value;
-  var trial = parseInt(document.getElementById('ac_trial').value);
+  var trial = parseInt(document.getElementById('ac_trial').value)||14;
 
-  if(!name){ err.textContent='請填寫姓名'; err.style.display='block'; return; }
-  if(!phone){ err.textContent='請填寫帳號（手機號碼）'; err.style.display='block'; return; }
+  if(!name){ err.textContent='請填寫姓名或公司名稱'; err.style.display='block'; return; }
+  if(!phone){ err.textContent='請填寫帳號'; err.style.display='block'; return; }
 
   var trialExp = trial > 0 ? new Date(Date.now() + trial*24*60*60*1000).toISOString() : null;
 
   var payload = {
-    code: phone,
-    biz_id: phone,
-    name: name,
-    contact_name: name,
-    phone_number: phone,
-    password: pw,
-    plan: plan,
-    apply_type: type,
-    status: 'active',
-    is_trial: trial > 0,
-    trial_expires_at: trialExp
+    biz_id: phone, code: phone,
+    name: name, contact_name: name, phone_number: phone,
+    password: pw, password_hash: pw,
+    plan: plan||'basic', apply_type: type||'personal',
+    status: 'active', is_trial: trial>0,
+    trial_expires_at: trialExp, crm_note: ''
   };
 
   try {
     var r = await fetch(SUPA_URL+'/rest/v1/channels', {
       method: 'POST',
       headers: {
-        'apikey': SUPA_KEY,
-        'Authorization': 'Bearer '+SUPA_KEY,
-        'Content-Type': 'application/json',
-        'Prefer': 'return=minimal'
+        'apikey': SUPA_KEY, 'Authorization': 'Bearer '+SUPA_KEY,
+        'Content-Type': 'application/json', 'Prefer': 'return=representation'
       },
       body: JSON.stringify(payload)
     });
+    var d = await r.json();
 
     if(r.ok || r.status===201){
       document.getElementById('add_channel_modal').remove();
-      alert('✅ 帳號建立成功！\n帳號：'+phone+'\n密碼：'+pw+'\n方案：'+plan+(trial>0?'\n試用：'+trial+'天':''));
       if(typeof window.loadChannels === 'function') window.loadChannels();
+      var planName = plan==='advanced'?'進階版':plan==='flagship'?'旗艦版':'基本版';
+      alert('帳號建立成功！' + '\n帳號：'+phone + '\n密碼：'+pw + '\n方案：'+planName + (trial>0?'\n試用：'+trial+'天':''));
     } else {
-      var d = await r.json();
-      if(d.code === '23505'){
-        err.textContent = '❌ 此手機號碼已存在，請換一個帳號';
-      } else if(d.message && d.message.includes('column')){
-        err.textContent = '❌ 資料庫欄位不足，請先執行 SQL 補欄位';
-      } else {
-        err.textContent = '❌ 建立失敗：'+(d.message||r.status);
-      }
+      var errMsg = '建立失敗';
+      if(d && d.code==='23505') errMsg = '此帳號已存在（'+phone+'），請換一個號碼';
+      else if(d && d.code==='23502') errMsg = '缺少必填欄位：'+(d.details||d.message||'');
+      else if(d && d.message) errMsg = d.message;
+      else errMsg = '建立失敗 HTTP '+r.status;
+      err.textContent = '❌ ' + errMsg;
       err.style.display='block';
     }
   } catch(e){
@@ -2034,6 +2142,32 @@ async function submitAddChannel(){
     err.style.display='block';
   }
 }
+
+
+window.toggleSidebar = function(){
+  var sb = document.querySelector('.sidebar');
+  var hb = document.getElementById('hamburger');
+  var ov = document.getElementById('sb_overlay');
+  if(!sb) return;
+  var isOpen = sb.classList.contains('open');
+  sb.classList.toggle('open', !isOpen);
+  hb.classList.toggle('open', !isOpen);
+  if(ov) ov.classList.toggle('show', !isOpen);
+};
+window.closeSidebar = function(){
+  var sb = document.querySelector('.sidebar');
+  var hb = document.getElementById('hamburger');
+  var ov = document.getElementById('sb_overlay');
+  if(sb) sb.classList.remove('open');
+  if(hb) hb.classList.remove('open');
+  if(ov) ov.classList.remove('show');
+};
+// 點 nav 項目後自動關閉 sidebar（手機版）
+document.addEventListener('click', function(e){
+  if(e.target.classList.contains('nb') && window.innerWidth <= 768){
+    window.closeSidebar();
+  }
+});
 </script>
 </body>
 </html>
