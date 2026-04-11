@@ -237,7 +237,7 @@ tr:hover td{background:#FDFBF7;cursor:pointer}
     <div class="fl">密碼</div>
     <input class="fi" type="password" id="p" placeholder="密碼" autocomplete="current-password"/>
     <div class="lerr" id="lerr"></div>
-    <button class="lbtn" id="lbtn_submit">登入後台</button>
+    <button class="lbtn" id="lbtn_submit" onclick="(function(){var u=document.getElementById('u').value.trim();var p=document.getElementById('p').value.trim();doLogin(u,p);})()">登入後台</button>
   </div>
 </div>
 

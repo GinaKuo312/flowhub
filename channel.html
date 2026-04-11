@@ -364,7 +364,7 @@ async function doLogin(){
     var data = await r.json();
     if(!data||!data[0]){ err.textContent='❌ 帳號不存在，請確認後重試'; return; }
     var ch = data[0];
-    if(ch.password_hash !== p){ err.textContent='❌ 密碼錯誤'; return; }
+    var storedPw = ch.password || ch.password_hash || ''; if(storedPw !== p){ err.textContent='❌ 密碼錯誤'; return; }
     if(ch.trial_expires_at && new Date(ch.trial_expires_at) < new Date()){
       err.innerHTML='⚠️ 試用期已結束，請透過 <a href="https://line.me/R/ti/p/@670rjsgv" target="_blank" style="color:#06C755;font-weight:600">LINE @670rjsgv</a> 升級方案'; return;
     }
