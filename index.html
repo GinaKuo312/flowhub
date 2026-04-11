@@ -1017,6 +1017,9 @@ function next(n){
 
 // ===== 摘要 =====
 function buildSummary(){
+  // 確保按鈕可用
+  var btn = id('btn_sb');
+  if(btn){ btn.style.opacity='1'; btn.disabled=false; }
   var items=[
     ['姓名',fd.name||'—'],
     ['手機',fd.phone||'—'],
@@ -1044,10 +1047,7 @@ function buildSummary(){
 
 // ===== 同意 =====
 function chkC(){
-  // 視覺提示用，送出時才真正驗證
-  var ok=id('c1').checked&&id('c2').checked;
-  var btn=id('btn_sb');
-  if(btn) btn.style.opacity=ok?'1':'0.7';
+  // checkbox 預設 checked，按鈕永遠可按
 }
 
 // ===== 評分 =====
@@ -1623,41 +1623,7 @@ function showResult(scores,best,bGi){
   });
   toast('✅ 申請已送出，業務將在24小時內聯繫您','ok');
 
-  // 融資分期推薦區塊（如果客戶有融資分期需求）
-  if(fd.has_fin==='yes' || (scores && scores.goods && scores.goods.s > 40)){
-    var recs = calcFinRecommend();
-    var finHtml = '<div style="margin-top:16px;background:#F8F5EF;border:1px solid #E8D5A8;border-radius:12px;padding:16px">'
-      +'<div style="font-size:13px;font-weight:700;color:#5C4A2A;margin-bottom:10px">融資分期推薦公司（初版 AI 規則）</div>';
-    recs.forEach(function(r,i){
-      var pct = r.score;
-      if(r.blocked){
-        finHtml += '<div style="margin-bottom:8px;display:flex;align-items:center;gap:8px">'
-          +'<span style="font-size:12px;font-weight:600;min-width:80px;color:#DC2626;text-decoration:line-through">'+r.name+'</span>'
-          +'<span style="font-size:11px;color:#DC2626;font-weight:600">⛔ 曾逾期，不建議送件</span>'
-          +'</div>';
-        return;
-      }
-      var color = i===0?'#C9A460':i===1?'#92400E':'#A09890';
-      var badge = i===0?'<span style="background:#C9A460;color:#fff;font-size:10px;padding:2px 6px;border-radius:8px;margin-left:6px">首推</span>':'';
-      finHtml += '<div style="margin-bottom:8px">'
-        +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:3px">'
-        +'<span style="font-size:12px;font-weight:600;color:#2A1F0E">'+r.name+badge+'</span>'
-        +'<span style="font-size:11px;color:#6B6560">'+r.note+'</span></div>'
-        +'<div style="height:6px;background:#E8D5A8;border-radius:3px;overflow:hidden">'
-        +'<div style="width:'+pct+'%;height:100%;background:'+color+';border-radius:3px"></div></div></div>';
-    });
-    finHtml += '<div style="font-size:10px;color:#A09890;margin-top:8px">規則基於市場大數據初版建立，累積案例後持續 AI 優化</div></div>';
-
-    var existingFinEl = document.getElementById('fin_recommend_block');
-    if(existingFinEl) existingFinEl.innerHTML = finHtml;
-    else {
-      var block = document.createElement('div');
-      block.id = 'fin_recommend_block';
-      block.innerHTML = finHtml;
-      var p6 = document.getElementById('p6');
-      if(p6) p6.appendChild(block);
-    }
-  }
+  
 
 }
 
