@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <meta name="robots" content="noindex,nofollow"/>
 <meta name="theme-color" content="#C9A460"/>
-<title>FlowHub 經銷版 — 後台管理系統</title>
+<title>FlowHub — 後台管理系統</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;800;900&display=swap" rel="stylesheet"/>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
@@ -231,37 +231,13 @@ tr:hover td{background:#FDFBF7;cursor:pointer}
       <div class="llogo-fb" id="lfb" style="display:none">F</div>
     </div>
     <div class="ltitle">FlowHub</div>
-    <div class="lsub">經銷版後台管理系統 · 內部使用</div>
+    <div class="lsub">後台管理系統 · 內部使用</div>
     <div class="fl">帳號</div>
     <input class="fi" type="text" id="u" placeholder="帳號" autocomplete="username"/>
     <div class="fl">密碼</div>
     <input class="fi" type="password" id="p" placeholder="密碼" autocomplete="current-password"/>
     <div class="lerr" id="lerr"></div>
-    <button class="lbtn" id="lbtn_submit" onclick="(function(){
-  var u=document.getElementById('u').value.trim();
-  var p=document.getElementById('p').value.trim();
-  var err=document.getElementById('lerr');
-  if(!u||!p){err.textContent='請填寫帳號密碼';return;}
-  err.textContent='驗證中...';
-  // 呼叫 script 裡的登入邏輯
-  if(typeof window.doLogin==='function'){
-    window.doLogin(u,p);
-  } else {
-    // 備用：直接 admin 登入
-    if(u==='admin'&&p==='FlowHub2024!'){
-      err.textContent='';
-      document.getElementById('lp').style.display='none';
-      document.getElementById('app').style.display='block';
-      document.getElementById('top_user').textContent='FlowHub 管理員';
-      if(document.getElementById('sb_name')) document.getElementById('sb_name').textContent='FlowHub 管理員';
-      if(document.getElementById('sb_role')) document.getElementById('sb_role').textContent='系統管理員';
-      window._ME='admin'; window._ROLE='admin'; window._CH=null;
-      if(typeof window.loadAll==='function') window.loadAll();
-    } else {
-      err.textContent='帳號或密碼錯誤';
-    }
-  }
-})()">登入後台</button>
+    <button class="lbtn" id="lbtn_submit">登入後台</button>
   </div>
 </div>
 
@@ -274,7 +250,7 @@ tr:hover td{background:#FDFBF7;cursor:pointer}
       <img src="logo.png" alt="FlowHub"
            onerror="this.style.display='none';document.getElementById('tfb').style.display='flex'">
       <div class="tlogo-fb" id="tfb" style="display:none">F</div>
-      <span class="tname">FlowHub 經銷版 後台</span>
+      <span class="tname">FlowHub 後台</span>
     </div>
     <div class="tright">
       <span id="sb_name" style="font-size:12px;color:#6B5B4E;margin-right:6px"></span>
@@ -474,7 +450,64 @@ tr:hover td{background:#FDFBF7;cursor:pointer}
           </div>
           <div style="margin-top:12px">
             <button class="btn-sm btn-gold" onclick="window.saveSettings&&window.saveSettings()">💾 儲存</button>
-          // NULL-SAFE $ 函式
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /main_area -->
+  </div><!-- /layout -->
+
+  <!-- 案件詳情側邊面板 -->
+  <div class="panel" id="panel" style="right:-420px">
+    <div class="ph">
+      <div class="panel-title" id="panel_title">案件詳情</div>
+      <button class="pclose" onclick="window.closePanel&&window.closePanel()">✕</button>
+    </div>
+    <div class="panel-body" id="panel_body"></div>
+  </div>
+
+  <!-- 面板遮罩 -->
+  <div id="ap_fields" class="overlay"
+       onclick="window.closePanel&&window.closePanel()"
+       style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.3);z-index:199"></div>
+
+  <!-- 結果記錄表單（隱藏） -->
+  <div id="rr_btns" style="display:none"></div>
+  <div id="rr_cancel" style="display:none"></div>
+  <input id="rr_product" type="hidden">
+  <input id="rr_note" type="hidden">
+
+</div><!-- /app -->
+
+<!-- Toast 通知 -->
+<div id="toast_area" style="position:fixed;bottom:24px;right:24px;z-index:9999;
+     display:flex;flex-direction:column;gap:8px;pointer-events:none"></div>
+
+
+<script>
+window.doLogin = async function(u, p){
+  var err = document.getElementById('lerr');
+  if(u === 'flowhub312' && p === 'Aa1234'){
+    err.textContent = '';
+    if(window.initApp) window.initApp(u, 'FlowHub 管理員', 'admin', null);
+    return;
+  }
+  try {
+    var r = await fetch(SUPA_URL+'/rest/v1/channels?biz_id=eq.'+encodeURIComponent(u)+'&status=eq.active', {headers:H});
+    var data = await r.json();
+    if(!data||!data[0]){ err.textContent='❌ 帳號不存在'; return; }
+    var ch = data[0];
+    if(ch.password_hash !== p){ err.textContent='❌ 密碼錯誤'; return; }
+    if(ch.trial_expires_at && new Date(ch.trial_expires_at) < new Date()){
+      err.textContent='⚠️ 試用期已結束，請聯繫 FlowHub'; return;
+    }
+    err.textContent = '';
+    if(window.initApp) window.initApp(u, ch.name||u, 'channel', u);
+  } catch(e) {
+    err.textContent = '❌ 連線失敗：'+e.message;
+  }
+};
+// NULL-SAFE $ 函式
 window.$ = function(id){
   var el = document.getElementById(id);
   if(!el){
@@ -517,7 +550,7 @@ var H = {
 };
 
 // ================================================================
-//  FlowHub 經銷版 — AI 評分回饋優化系統
+//  FlowHub 順策引擎 — AI 評分回饋優化系統
 // ================================================================
 
 // 評分權重（初始值，會隨案件累積自動調整）
@@ -559,6 +592,7 @@ window.recordResult = async function(caseId, result, product, note){
     // 達到50筆新結果時觸發權重重算
     await checkAndOptimize();
     toast('✅ 結果已記錄，持續優化評分中');
+    window.checkAndOptimize && window.checkAndOptimize();
   } catch(e){ toast('❌ 記錄失敗'); }
 };
 
@@ -825,33 +859,8 @@ window.logout = function(){
 // ================================================================
 //  資料載入
 // ================================================================
-
-window.doLogin = async function(u, p){
-  var err = document.getElementById('lerr');
-  // 管理員帳號（本地驗證）
-  if(u === 'admin' && p === 'FlowHub2024!'){
-    err.textContent = '';
-    window.initApp(u, 'FlowHub 管理員', 'admin', null);
-    return;
-  }
-  // 嘗試從 Supabase 驗證
-  try {
-    var r = await fetch(SUPA_URL+'/rest/v1/channels?biz_id=eq.'+u+'&status=eq.active', {headers:H});
-    var data = await r.json();
-    if(!data||!data[0]){ err.textContent='❌ 帳號不存在'; return; }
-    var ch = data[0];
-    if(ch.password_hash !== p){ err.textContent='❌ 密碼錯誤'; return; }
-    if(ch.trial_expires_at && new Date(ch.trial_expires_at) < new Date()){
-      err.textContent='⚠️ 試用期已結束，請聯繫 FlowHub'; return;
-    }
-    err.textContent = '';
-    window.initApp(u, ch.name||u, 'channel', u);
-  } catch(e) {
-    err.textContent = '❌ 連線失敗：'+e.message;
-  }
-};
-
 window.loadAll = async function(){
+  await window.loadWeights();
   await Promise.all([loadChannels(), loadCases()]);
 }
 
@@ -1748,29 +1757,6 @@ window.showRecordResult = function(caseId){
   okBtn.style.cssText='height:44px;background:#DCFCE7;color:#166534;border:2px solid #22C55E;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit';
   okBtn.onclick=function(){window.doRecord(caseId,'approved');};
   var ngBtn=document.createElement('button');
-  ngBtn.textContent='❌ 拒絕';
-  ngBtn.style.cssText='height:44px;background:#FEE2E2;color:#991B1B;border:2px solid #DC2626;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit';
-  ngBtn.onclick=function(){window.doRecord(caseId,'rejected');};
-  btnsEl.appendChild(okBtn);
-  btnsEl.appendChild(ngBtn);
-  document.getElementById('rr_cancel').onclick=function(){m.remove();};
-};
-
-window.doRecord = async function(caseId, result){
-  var prod=($('rr_product')||{}).value||'';
-  var note=($('rr_note')||{}).value||'';
-  var modal=document.getElementById('rr_modal');if(modal)modal.remove();
-  if(!caseId)return;
-  var status=result==='approved'?'已核准':'已拒絕';
-  try{
-    await fetch(SUPA_URL+'/rest/v1/applications?id=eq.'+caseId,{method:'PATCH',headers:H,body:JSON.stringify({status:status})});
-    await recordResult(caseId,result,prod,note);
-    await loadAll();
-    closePanel();
-    toast(result==='approved'?'✅ 已記錄核准，AI 評分持續優化中':'✅ 已記錄拒絕，AI 評分持續優化中');
-  }catch(e){toast('❌ 記錄失敗');}
-};
-n');
   ngBtn.textContent='❌ 拒絕';
   ngBtn.style.cssText='height:44px;background:#FEE2E2;color:#991B1B;border:2px solid #DC2626;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit';
   ngBtn.onclick=function(){window.doRecord(caseId,'rejected');};

@@ -374,20 +374,13 @@ select{background-image:url("data:image/svg+xml,%3Csvg width='12' height='8' vie
     <div class="field">
       <div class="lbl">薪資發放方式<span class="req">*</span></div>
       <div class="opts">
-        <button class="opt" onclick="fd.sal_t='薪轉';pg('g_st',this)">🏦 薪轉入帳</button>
-        <button class="opt" onclick="fd.sal_t='轉帳非薪轉';pg('g_st',this)">💳 轉帳入帳</button>
-        <button class="opt" onclick="fd.sal_t='現金';pg('g_st',this)">💵 領現金</button>
+        <button class="opt" onclick="fd.sal_t='薪轉';fd.sal_tr='有';pg('g_st',this)">🏦 薪轉帳戶入帳</button>
+        <button class="opt" onclick="fd.sal_t='轉帳非薪轉';fd.sal_tr='無';pg('g_st',this)">💳 一般帳戶轉帳</button>
+        <button class="opt" onclick="fd.sal_t='現金';fd.sal_tr='無';pg('g_st',this)">💵 領現金</button>
       </div>
       <div class="err" id="e_st">請選擇</div>
     </div>
-    <div class="field">
-      
-      <div class="opts">
-        <button class="opt" onclick="fd.sal_tr='有';pg('g_str',this)">✅ 有薪轉帳戶</button>
-        <button class="opt" onclick="fd.sal_tr='無';pg('g_str',this)">❌ 沒有</button>
-      </div>
-      <div class="err" id="e_str">請選擇</div>
-    </div>
+
     <div class="field">
       <div class="lbl">是否有收入佐證文件？<span class="req">*</span></div>
       <div class="opts">
@@ -953,15 +946,21 @@ function v1(){
 
 function v2(){
   var ok=true;
+  // 工作性質
   if(!fd.job){ sh('e_job'); ok=false; } else hd('e_job');
+  // 在職年資
   var ten=id('f_ten').value;
   if(!ten){ sh('e_ten'); ok=false; } else { hd('e_ten'); fd.tenure=ten; }
-  if(!fd.co_chk){ sh('e_coc'); ok=false; } else hd('e_coc');
+  // 月收入
   var inc=id('f_inc').value;
   if(!inc){ sh('e_inc'); ok=false; } else { hd('e_inc'); fd.income=inc; }
+  // 薪資發放方式
   if(!fd.sal_t){ sh('e_st'); ok=false; } else hd('e_st');
-  if(!fd.sal_tr){ sh('e_str'); ok=false; } else hd('e_str');
+  // 收入證明
   if(!fd.proof){ sh('e_pf'); ok=false; } else hd('e_pf');
+  // 自動設定（已移除的欄位）
+  fd.sal_tr = fd.sal_t === '薪轉' ? 'yes' : 'no';
+  fd.co_chk = 'yes';
   fd.burden=id('f_bur').value||'0';
   fd.debt=id('f_dbt').value||'0';
   return ok;
