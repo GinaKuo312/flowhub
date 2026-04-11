@@ -178,7 +178,12 @@ tr:hover td{background:#FAFAF7}
       <button class="btn-login" onclick="doLogin()">登入 →</button>
       <div class="lerr" id="lerr"></div>
     </div>
-    <div style="text-align:center;margin-top:16px;font-size:12px;color:var(--mu)">
+    <div style="text-align:center;margin-top:16px">
+    <a href="https://line.me/R/ti/p/@670rjsgv" target="_blank" style="display:inline-flex;align-items:center;gap:6px;background:#06C755;color:#fff;padding:8px 20px;border-radius:6px;text-decoration:none;font-size:13px;font-weight:600;margin-bottom:10px">
+      問題或申請升級：LINE @670rjsgv
+    </a>
+  </div>
+  <div style="text-align:center;margin-top:8px;font-size:12px;color:var(--mu)">
       還沒有帳號？<a href="apply.html" style="color:var(--gold);font-weight:600">免費申請試用</a>
     </div>
   </div>
@@ -361,7 +366,7 @@ async function doLogin(){
     var ch = data[0];
     if(ch.password_hash !== p){ err.textContent='❌ 密碼錯誤'; return; }
     if(ch.trial_expires_at && new Date(ch.trial_expires_at) < new Date()){
-      err.textContent='⚠️ 試用期已結束，請聯繫 FlowHub 升級方案'; return;
+      err.innerHTML='⚠️ 試用期已結束，請透過 <a href="https://line.me/R/ti/p/@670rjsgv" target="_blank" style="color:#06C755;font-weight:600">LINE @670rjsgv</a> 升級方案'; return;
     }
     var applyType = ch.apply_type || 'personal';
     me = {

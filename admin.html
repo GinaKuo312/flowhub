@@ -312,6 +312,7 @@ tr:hover td{background:#FDFBF7;cursor:pointer}
           <option value="">全部通路</option>
         </select>
         <button class="qbtn" onclick="window.exportAll&&window.exportAll()">⬇ 匯出</button>
+        <button class="qbtn" onclick="openAddChannelModal()" style="background:#2A1F0E;color:#fff;border-color:#2A1F0E">＋ 新增通路商</button>
       </div>
 
       <!-- 所有案件頁 -->
@@ -493,16 +494,18 @@ window.doLogin = async function(u, p){
     return;
   }
   try {
-    var r = await fetch(SUPA_URL+'/rest/v1/channels?biz_id=eq.'+encodeURIComponent(u)+'&status=eq.active', {headers:H});
+    var r = await fetch(SUPA_URL+'/rest/v1/channels?or=(biz_id.eq.'+encodeURIComponent(u)+',code.eq.'+encodeURIComponent(u)+',phone.eq.'+encodeURIComponent(u)+')&status=eq.active&limit=1', {headers:H});
     var data = await r.json();
     if(!data||!data[0]){ err.textContent='❌ 帳號不存在'; return; }
     var ch = data[0];
-    if(ch.password_hash !== p){ err.textContent='❌ 密碼錯誤'; return; }
+    // 同時支援 password 和 password_hash 欄位
+    var storedPw = ch.password || ch.password_hash || '';
+    if(storedPw !== p){ err.textContent='❌ 密碼錯誤'; return; }
     if(ch.trial_expires_at && new Date(ch.trial_expires_at) < new Date()){
-      err.textContent='⚠️ 試用期已結束，請聯繫 FlowHub'; return;
+      err.innerHTML='⚠️ 試用期已結束，請透過 <a href="https://line.me/R/ti/p/@670rjsgv" target="_blank" style="color:#06C755;font-weight:600">LINE @670rjsgv</a> 升級方案'; return;
     }
     err.textContent = '';
-    if(window.initApp) window.initApp(u, ch.name||u, 'channel', u);
+    if(window.initApp) window.initApp(u, ch.contact_name||ch.name||u, 'channel', u);
   } catch(e) {
     err.textContent = '❌ 連線失敗：'+e.message;
   }
@@ -1858,6 +1861,177 @@ async function upgradePlan(code){
     if(r.ok){ alert('✅ 已升級為 '+planNames[planKey]); window.loadChannels(); }
     else { alert('❌ 升級失敗'); }
   }catch(e){ alert('錯誤：'+e.message); }
+}
+
+
+// ── 新增通路商 Modal ──
+function openAddChannelModal(defaultPlan){
+  var existing = document.getElementById('add_channel_modal');
+  if(existing) existing.remove();
+
+  var modal = document.createElement('div');
+  modal.id = 'add_channel_modal';
+  modal.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.55);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px';
+
+  var inp = 'width:100%;padding:10px 12px;border:1.5px solid #E8D5A8;border-radius:8px;font-size:14px;font-family:inherit;box-sizing:border-box;outline:none';
+  var sel = 'width:100%;padding:10px 12px;border:1.5px solid #E8D5A8;border-radius:8px;font-size:14px;font-family:inherit';
+  var lbl = 'font-size:12px;font-weight:600;color:#6B6560;display:block;margin-bottom:5px';
+
+  var h = '<div style="background:#fff;border-radius:14px;width:460px;max-width:100%;max-height:90vh;overflow-y:auto">';
+  h += '<div style="padding:18px 22px;border-bottom:1px solid #F0EBE0;display:flex;align-items:center;justify-content:space-between">';
+  h += '<div style="font-size:16px;font-weight:700;color:#2A1F0E">新增通路帳號</div>';
+  h += '<button onclick="document.getElementById(\'add_channel_modal\').remove()" style="width:28px;height:28px;border:none;background:#F5F4F0;border-radius:50%;cursor:pointer;font-size:14px">✕</button></div>';
+  h += '<div style="padding:20px 22px">';
+
+  // 類型選擇
+  h += '<label style="font-size:12px;font-weight:600;color:#6B6560;display:block;margin-bottom:8px">申請類型</label>';
+  h += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px">';
+  h += '<div id="btn_personal" onclick="setType(\'personal\')" style="border:2px solid #3B82F6;background:#EFF6FF;border-radius:10px;padding:12px;text-align:center;cursor:pointer">';
+  h += '<div style="font-size:18px;margin-bottom:3px">&#128100;</div>';
+  h += '<div style="font-size:13px;font-weight:700;color:#1E40AF">個人業務</div>';
+  h += '<div style="font-size:11px;color:#3B82F6;margin-top:2px">基本/進階版</div></div>';
+  h += '<div id="btn_company" onclick="setType(\'company\')" style="border:2px solid #E8D5A8;background:#fff;border-radius:10px;padding:12px;text-align:center;cursor:pointer">';
+  h += '<div style="font-size:18px;margin-bottom:3px">&#127970;</div>';
+  h += '<div style="font-size:13px;font-weight:700;color:#6B6560">代辦公司</div>';
+  h += '<div style="font-size:11px;color:#A09890;margin-top:2px">旗艦/企業版</div></div></div>';
+  h += '<input type="hidden" id="ac_type" value="personal">';
+
+  // 個人欄位
+  h += '<div id="fields_personal">';
+  h += '<div style="margin-bottom:14px"><label style="'+lbl+'">業務姓名 *</label>';
+  h += '<input id="ac_name" type="text" placeholder="例：王小明" style="'+inp+'"></div></div>';
+
+  // 公司欄位
+  h += '<div id="fields_company" style="display:none">';
+  h += '<div style="margin-bottom:14px"><label style="'+lbl+'">公司名稱 *</label>';
+  h += '<input id="ac_company" type="text" placeholder="例：XX代辦有限公司" style="'+inp+'"></div>';
+  h += '<div style="margin-bottom:14px"><label style="'+lbl+'">負責人姓名 *</label>';
+  h += '<input id="ac_contact" type="text" placeholder="例：陳老闆" style="'+inp+'"></div>';
+  h += '<div style="margin-bottom:14px"><label style="'+lbl+'">業務人數</label>';
+  h += '<select id="ac_headcount" style="'+sel+'"><option value="1-5">1-5人</option><option value="6-10">6-10人</option><option value="11-20">11-20人</option><option value="20+">20人以上</option></select></div></div>';
+
+  // 通用欄位
+  h += '<div style="margin-bottom:14px"><label style="'+lbl+'">帳號（手機號碼）*</label>';
+  h += '<input id="ac_phone" type="text" placeholder="0912345678" style="'+inp+'" oninput="var pw=document.getElementById(\'ac_pw\');if(!pw.dataset.m)pw.value=this.value"></div>';
+  h += '<div style="margin-bottom:16px"><label style="'+lbl+'">密碼（留空則同帳號）</label>';
+  h += '<input id="ac_pw" type="text" placeholder="留空則與帳號相同" style="'+inp+'" oninput="this.dataset.m=1"></div>';
+
+  // 方案
+  h += '<label style="'+lbl+'">訂閱方案</label>';
+  h += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px">';
+  var plans = [{v:'basic',n:'基本版',p:'$1,490'},{v:'advanced',n:'進階版',p:'$3,490',hot:true},{v:'flagship',n:'旗艦版',p:'$8,900'},{v:'enterprise',n:'企業版',p:'$18,000'}];
+  plans.forEach(function(pl){
+    var isDefault = pl.v==='advanced';
+    var border = isDefault ? '2px solid #C9A460' : '1.5px solid #E8D5A8';
+    var bg = isDefault ? '#FDF8F0' : '#fff';
+    h += '<div id="plan_'+pl.v+'" onclick="selPlan(\''+pl.v+'\')" style="border:'+border+';background:'+bg+';border-radius:8px;padding:10px;text-align:center;cursor:pointer;transition:.15s">';
+    if(pl.hot) h += '<div style="font-size:9px;background:#C9A460;color:#fff;border-radius:3px;padding:1px 6px;display:inline-block;margin-bottom:2px">最多人選</div><br>';
+    h += '<div style="font-size:12px;font-weight:700;color:#2A1F0E">'+pl.n+'</div>';
+    h += '<div style="font-size:13px;color:#C9A460;font-weight:700">'+pl.p+'</div></div>';
+  });
+  h += '</div><input type="hidden" id="ac_plan" value="advanced">';
+
+  // 試用
+  h += '<div style="margin-bottom:16px"><label style="'+lbl+'">試用設定</label>';
+  h += '<select id="ac_trial" style="'+sel+'"><option value="3">免費試用 3 天</option><option value="7">免費試用 7 天</option><option value="30">免費試用 30 天</option><option value="0">正式訂閱（不試用）</option></select></div>';
+
+  // 錯誤 + 按鈕
+  h += '<div id="ac_err" style="color:#DC2626;font-size:12px;margin-bottom:10px;padding:8px 12px;background:#FEF2F2;border-radius:6px;display:none"></div>';
+  h += '<button onclick="submitAddChannel()" style="width:100%;padding:13px;border:none;border-radius:8px;background:#2A1F0E;color:#fff;cursor:pointer;font-size:15px;font-weight:700;font-family:inherit">建立帳號</button>';
+  h += '<div style="text-align:center;margin-top:8px;font-size:11px;color:#A09890">建立後立即生效，試用期內功能完整</div>';
+  h += '</div></div>';
+
+  modal.innerHTML = h;
+  document.body.appendChild(modal);
+  modal.addEventListener('click', function(e){ if(e.target===modal) modal.remove(); });
+
+  window.setType = function(t){
+    document.getElementById('ac_type').value = t;
+    var isC = t==='company';
+    document.getElementById('fields_personal').style.display = isC?'none':'block';
+    document.getElementById('fields_company').style.display  = isC?'block':'none';
+    document.getElementById('btn_personal').style.borderColor = isC?'#E8D5A8':'#3B82F6';
+    document.getElementById('btn_personal').style.background  = isC?'#fff':'#EFF6FF';
+    document.getElementById('btn_company').style.borderColor  = isC?'#C9A460':'#E8D5A8';
+    document.getElementById('btn_company').style.background   = isC?'#FDF8F0':'#fff';
+    selPlan(isC?'flagship':'advanced');
+  };
+
+  window.selPlan = function(v){
+    document.getElementById('ac_plan').value = v;
+    ['basic','advanced','flagship','enterprise'].forEach(function(p){
+      var el = document.getElementById('plan_'+p);
+      if(!el) return;
+      el.style.border = p===v ? '2px solid #C9A460' : '1.5px solid #E8D5A8';
+      el.style.background = p===v ? '#FDF8F0' : '#fff';
+    });
+  };
+
+  if(defaultPlan) selPlan(defaultPlan);
+  document.getElementById('ac_phone').focus();
+}
+
+async function submitAddChannel(){
+  var err = document.getElementById('ac_err');
+  err.style.display='none';
+
+  var type  = document.getElementById('ac_type').value;
+  var name  = document.getElementById('ac_name').value.trim();
+  var phone = document.getElementById('ac_phone').value.trim();
+  var pw    = document.getElementById('ac_pw').value.trim() || phone;
+  var plan  = document.getElementById('ac_plan').value;
+  var trial = parseInt(document.getElementById('ac_trial').value);
+
+  if(!name){ err.textContent='請填寫姓名'; err.style.display='block'; return; }
+  if(!phone){ err.textContent='請填寫帳號（手機號碼）'; err.style.display='block'; return; }
+
+  var trialExp = trial > 0 ? new Date(Date.now() + trial*24*60*60*1000).toISOString() : null;
+
+  var payload = {
+    code: phone,
+    biz_id: phone,
+    name: name,
+    contact_name: name,
+    phone: phone,
+    password: pw,
+    plan: plan,
+    apply_type: type,
+    status: 'active',
+    is_trial: trial > 0,
+    trial_expires_at: trialExp
+  };
+
+  try {
+    var r = await fetch(SUPA_URL+'/rest/v1/channels', {
+      method: 'POST',
+      headers: {
+        'apikey': SUPA_KEY,
+        'Authorization': 'Bearer '+SUPA_KEY,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=minimal'
+      },
+      body: JSON.stringify(payload)
+    });
+
+    if(r.ok || r.status===201){
+      document.getElementById('add_channel_modal').remove();
+      alert('✅ 帳號建立成功！\n帳號：'+phone+'\n密碼：'+pw+'\n方案：'+plan+(trial>0?'\n試用：'+trial+'天':''));
+      if(typeof window.loadChannels === 'function') window.loadChannels();
+    } else {
+      var d = await r.json();
+      if(d.code === '23505'){
+        err.textContent = '❌ 此手機號碼已存在，請換一個帳號';
+      } else if(d.message && d.message.includes('column')){
+        err.textContent = '❌ 資料庫欄位不足，請先執行 SQL 補欄位';
+      } else {
+        err.textContent = '❌ 建立失敗：'+(d.message||r.status);
+      }
+      err.style.display='block';
+    }
+  } catch(e){
+    err.textContent = '❌ 網路錯誤：'+e.message;
+    err.style.display='block';
+  }
 }
 </script>
 </body>
