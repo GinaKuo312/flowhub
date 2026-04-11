@@ -1,167 +1,44 @@
-<!DOCTYPE html>
-<html lang="zh-TW">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>FlowHub 經銷版 — 業務後台</title>
-<style>
-:root{
-  --gold:#C9A460;--gl:#FDF8F0;--gm:#E8D5A8;--gd:#92400E;
-  --w:#fff;--bg:#F5F4F0;--dk:#2A1F0E;--mu:#6B6560;--ht:#A09890;
-  --bl:#2563EB;--blbg:#DBEAFE;--r:12px;--rs:8px;
-  --gn:#16A34A;--gnbg:#DCFCE7;--rd:#DC2626;--rdbg:#FEE2E2;
-  --sidebar:240px;
+<!DOCTYPE html><html lang="zh-TW"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>FlowHub 經銷版 — 業務後台</title><style>:root{ --gold:#C9A460;--gl:#FDF8F0;--gm:#E8D5A8;--gd:#92400E; --w:#fff;--bg:#F5F4F0;--dk:#2A1F0E;--mu:#6B6560;--ht:#A09890; --bl:#2563EB;--blbg:#DBEAFE;--r:12px;--rs:8px; --gn:#16A34A;--gnbg:#DCFCE7;--rd:#DC2626;--rdbg:#FEE2E2; --sidebar:240px;}*{box-sizing:border-box;margin:0;padding:0}body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--dk);min-height:100vh}.login-wrap{max-width:420px;margin:0 auto;padding:60px 16px}.login-logo{text-align:center;margin-bottom:32px}.logo-f{width:52px;height:52px;background:var(--gold);border-radius:14px;display:inline-flex;align-items:center;justify-content:center;color:#fff;font-size:26px;font-weight:900;margin-bottom:10px}.logo-name{font-size:22px;font-weight:800;color:var(--dk);display:block}.logo-sub{font-size:12px;color:var(--mu);margin-top:2px;display:block}.login-card{background:var(--w);border-radius:var(--r);padding:28px 24px;border:1px solid var(--gm)}.login-title{font-size:17px;font-weight:700;color:var(--dk);margin-bottom:4px}.login-desc{font-size:12px;color:var(--mu);margin-bottom:20px}.lfi{margin-bottom:14px}.lfi label{display:block;font-size:12px;font-weight:600;color:var(--mu);margin-bottom:5px}.lfi input{width:100%;height:44px;border:1.5px solid var(--gm);border-radius:var(--rs);padding:0 12px;font-size:14px;font-family:inherit;color:var(--dk);background:#fff;outline:none;transition:.2s}.lfi input:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,164,96,.12)}.btn-login{width:100%;height:48px;background:linear-gradient(135deg,#C9A460,#A07C3A);color:#fff;border:none;border-radius:var(--rs);font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;margin-top:4px;transition:.2s}.btn-login:hover{opacity:.9}.lerr{font-size:13px;color:var(--rd);text-align:center;margin-top:10px;min-height:18px}#app{display:none;min-height:100vh}.header{height:56px;background:var(--dk);display:flex;align-items:center;padding:0 16px;gap:10px;position:sticky;top:0;z-index:100}.header-logo{font-size:16px;font-weight:700;color:#fff;flex:1}.header-badge{background:var(--gold);color:#fff;font-size:10px;padding:2px 8px;border-radius:99px;font-weight:700}.header-user{font-size:12px;color:rgba(255,255,255,.7)}.header-plan{font-size:11px;padding:3px 10px;border-radius:99px;font-weight:600}.plan-personal{background:var(--blbg);color:var(--bl)}.plan-company{background:var(--gnbg);color:var(--gn)}.btn-logout{background:none;border:1px solid rgba(255,255,255,.3);color:rgba(255,255,255,.8);padding:6px 14px;border-radius:6px;font-size:12px;cursor:pointer;font-family:inherit}.layout{display:flex;min-height:calc(100vh - 56px)}.sidebar{width:var(--sidebar);background:var(--w);border-right:1px solid var(--gm);padding:16px 0;flex-shrink:0}.nav-section{font-size:10px;font-weight:700;color:var(--ht);letter-spacing:.1em;padding:12px 16px 6px;text-transform:uppercase}.nav-item{display:flex;align-items:center;gap:10px;padding:10px 16px;cursor:pointer;font-size:13px;color:var(--mu);transition:.15s;border-left:3px solid transparent}.nav-item:hover{background:var(--gl);color:var(--dk)}.nav-item.active{background:var(--gl);color:var(--gd);font-weight:600;border-left-color:var(--gold)}.nav-icon{font-size:15px;width:20px;text-align:center}.main{flex:1;padding:24px;overflow-y:auto}.page-title{font-size:20px;font-weight:700;color:var(--dk);margin-bottom:4px}.page-sub{font-size:13px;color:var(--mu);margin-bottom:20px}.stats-grid{display:grid;gap:12px;margin-bottom:20px}.stats-4{grid-template-columns:repeat(4,1fr)}.stats-3{grid-template-columns:repeat(3,1fr)}.stats-2{grid-template-columns:repeat(2,1fr)}.stat-card{background:var(--w);border-radius:var(--r);padding:16px;border:1px solid var(--gm)}.stat-val{font-size:26px;font-weight:700;color:var(--dk);margin-bottom:2px}.stat-label{font-size:12px;color:var(--mu)}.stat-sub{font-size:11px;color:var(--ht);margin-top:4px}.stat-up{color:var(--gn);font-size:11px;font-weight:600}.stat-down{color:var(--rd);font-size:11px;font-weight:600}.table-wrap{background:var(--w);border-radius:var(--r);border:1px solid var(--gm);overflow:hidden;margin-bottom:20px}.table-header{display:flex;align-items:center;padding:14px 16px;border-bottom:1px solid var(--gm);gap:10px;flex-wrap:wrap}.table-title{font-size:14px;font-weight:700;color:var(--dk);flex:1}.search-box{height:34px;border:1.5px solid var(--gm);border-radius:6px;padding:0 10px;font-size:13px;font-family:inherit;color:var(--dk);outline:none;width:180px}.search-box:focus{border-color:var(--gold)}.btn-sm{height:32px;padding:0 12px;border:1.5px solid var(--gm);border-radius:6px;font-size:12px;font-family:inherit;cursor:pointer;background:#fff;color:var(--dk);transition:.2s}.btn-sm:hover{background:var(--gl)}.btn-sm.primary{background:var(--gold);border-color:var(--gold);color:#fff}table{width:100%;border-collapse:collapse}th{background:#FAFAF7;padding:10px 14px;text-align:left;font-size:11px;font-weight:600;color:var(--mu);text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--gm)}td{padding:12px 14px;font-size:13px;color:var(--dk);border-bottom:1px solid var(--gm)}tr:last-child td{border-bottom:none}tr:hover td{background:#FAFAF7}.grade{display:inline-block;padding:2px 10px;border-radius:99px;font-size:11px;font-weight:700}.grade-A{background:#DCFCE7;color:#16A34A}.grade-B{background:#DBEAFE;color:#2563EB}.grade-C{background:#FEF3C7;color:#D97706}.grade-D{background:#FFE4E6;color:#E11D48}.grade-E{background:#F1F5F9;color:#64748B}.status{display:inline-block;padding:2px 10px;border-radius:99px;font-size:11px;font-weight:600}.status-pending{background:#FEF3C7;color:#D97706}.status-approved{background:#DCFCE7;color:#16A34A}.status-rejected{background:#FFE4E6;color:#E11D48}.status-processing{background:#DBEAFE;color:#2563EB}.panel{position:fixed;right:-440px;top:56px;width:440px;height:calc(100vh - 56px);background:var(--w);border-left:1px solid var(--gm);overflow-y:auto;transition:.3s;z-index:50;padding:20px}.panel.open{right:0}.panel-close{position:absolute;top:16px;right:16px;background:none;border:none;font-size:18px;cursor:pointer;color:var(--mu);width:30px;height:30px}.panel-title{font-size:16px;font-weight:700;color:var(--dk);margin-bottom:16px;padding-right:40px}.suggest-card{background:var(--gl);border:1px solid var(--gm);border-radius:10px;padding:14px;margin-bottom:10px}.suggest-product{font-size:15px;font-weight:700;color:var(--gd);margin-bottom:4px}.suggest-score{font-size:22px;font-weight:900;color:var(--dk)}.suggest-desc{font-size:12px;color:var(--mu);margin-top:4px;line-height:1.6}.crm-box{background:#f8f9fa;border:1px solid var(--gm);border-radius:8px;padding:12px;margin-bottom:12px}.crm-title{font-size:12px;font-weight:600;color:var(--mu);margin-bottom:8px}.crm-note{width:100%;border:1px solid var(--gm);border-radius:6px;padding:8px;font-size:12px;font-family:inherit;resize:none;height:60px;outline:none}.crm-note:focus{border-color:var(--gold)}.lock-overlay{position:absolute;inset:0;background:rgba(255,255,255,.92);display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:var(--r);z-index:10}.lock-icon{font-size:32px;margin-bottom:8px}.lock-text{font-size:14px;font-weight:600;color:var(--dk);margin-bottom:4px}.lock-sub{font-size:12px;color:var(--mu);text-align:center}.btn-upgrade{margin-top:12px;background:var(--gold);color:#fff;border:none;padding:8px 20px;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit}.agent-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;margin-bottom:20px}.agent-card{background:var(--w);border:1px solid var(--gm);border-radius:10px;padding:14px;cursor:pointer;transition:.2s}.agent-card:hover{border-color:var(--gold);background:var(--gl)}.agent-avatar{width:36px;height:36px;border-radius:50%;background:var(--gold);color:#fff;font-size:14px;font-weight:700;display:flex;align-items:center;justify-content:center;margin-bottom:8px}.agent-name{font-size:13px;font-weight:600;color:var(--dk);margin-bottom:2px}.agent-stats{font-size:11px;color:var(--mu)}.line-setup{background:var(--w);border-radius:var(--r);border:1px solid var(--gm);padding:20px;margin-bottom:16px}.line-title{font-size:15px;font-weight:700;color:var(--dk);margin-bottom:4px;display:flex;align-items:center;gap:8px}.line-desc{font-size:12px;color:var(--mu);margin-bottom:16px;line-height:1.7}.line-input{display:flex;gap:10px;margin-bottom:10px}.line-input input{flex:1;height:40px;border:1.5px solid var(--gm);border-radius:6px;padding:0 12px;font-size:13px;font-family:inherit;outline:none}.line-input input:focus{border-color:var(--gold)}.line-input button{height:40px;padding:0 16px;background:var(--gold);border:none;border-radius:6px;color:#fff;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap}.line-step{display:flex;gap:10px;margin-bottom:10px;font-size:12px;color:var(--mu);align-items:flex-start}.step-num{background:var(--gm);color:var(--gd);width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;margin-top:1px}.view{display:none}.view.on{display:block}.empty{text-align:center;padding:40px;color:var(--ht);font-size:13px}
+/* ═══════ 漢堡按鈕 ═══════ */
+.hamburger{display:none;flex-direction:column;justify-content:center;gap:5px;width:38px;height:38px;background:none;border:none;cursor:pointer;padding:6px;flex-shrink:0}
+.hamburger span{display:block;height:2px;background:#fff;border-radius:2px;transition:all .25s}
+.hamburger.open span:nth-child(1){transform:translateY(7px) rotate(45deg)}
+.hamburger.open span:nth-child(2){opacity:0}
+.hamburger.open span:nth-child(3){transform:translateY(-7px) rotate(-45deg)}
+.mob-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:99}
+.mob-overlay.show{display:block}
+/* ═══════ 手機版 RWD ═══════ */
+@media(max-width:768px){
+  .hamburger{display:flex}
+  .header-user,.header-plan{display:none}
+  .sidebar{position:fixed;top:56px;left:-250px;bottom:0;width:240px;z-index:100;transition:left .28s cubic-bezier(.4,0,.2,1);box-shadow:4px 0 20px rgba(0,0,0,.15);overflow-y:auto}
+  .sidebar.open{left:0}
+  .layout{display:block}
+  .main{padding:12px}
+  .stats-4,.stats-3{grid-template-columns:repeat(2,1fr);gap:8px}
+  .stat-val{font-size:20px}
+  .table-header{flex-direction:column;align-items:stretch;gap:6px}
+  .search-box{width:100%}
+  .table-wrap table thead{display:none}
+  .table-wrap table tr{display:block;background:var(--w);border:1px solid var(--gm);border-radius:10px;margin-bottom:10px;padding:12px 14px}
+  .table-wrap table td{display:flex;justify-content:space-between;align-items:center;padding:4px 0;border:none;font-size:13px}
+  .table-wrap table td[data-l]:before{content:attr(data-l);font-size:11px;color:var(--ht);font-weight:600;min-width:44px;flex-shrink:0;margin-right:8px}
+  .table-wrap table td:first-child{font-size:15px;font-weight:700;border-bottom:1px solid var(--gm);padding-bottom:8px;margin-bottom:4px}
+  .table-wrap table td:first-child:before{display:none}
+  .table-wrap table td:last-child{justify-content:flex-end;padding-top:6px}
+  .panel{width:100%;right:-100%;top:56px;bottom:0;border-radius:0}
+  .panel.open{right:0}
+  .login-wrap{padding:30px 16px}
+  .login-card{padding:20px 16px}
+  .agent-grid{grid-template-columns:repeat(2,1fr)}
 }
-*{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--dk);min-height:100vh}
-
-/* ── 登入頁 ── */
-.login-wrap{max-width:420px;margin:0 auto;padding:60px 16px}
-.login-logo{text-align:center;margin-bottom:32px}
-.logo-f{width:52px;height:52px;background:var(--gold);border-radius:14px;display:inline-flex;align-items:center;justify-content:center;color:#fff;font-size:26px;font-weight:900;margin-bottom:10px}
-.logo-name{font-size:22px;font-weight:800;color:var(--dk);display:block}
-.logo-sub{font-size:12px;color:var(--mu);margin-top:2px;display:block}
-.login-card{background:var(--w);border-radius:var(--r);padding:28px 24px;border:1px solid var(--gm)}
-.login-title{font-size:17px;font-weight:700;color:var(--dk);margin-bottom:4px}
-.login-desc{font-size:12px;color:var(--mu);margin-bottom:20px}
-.lfi{margin-bottom:14px}
-.lfi label{display:block;font-size:12px;font-weight:600;color:var(--mu);margin-bottom:5px}
-.lfi input{width:100%;height:44px;border:1.5px solid var(--gm);border-radius:var(--rs);padding:0 12px;font-size:14px;font-family:inherit;color:var(--dk);background:#fff;outline:none;transition:.2s}
-.lfi input:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,164,96,.12)}
-.btn-login{width:100%;height:48px;background:linear-gradient(135deg,#C9A460,#A07C3A);color:#fff;border:none;border-radius:var(--rs);font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;margin-top:4px;transition:.2s}
-.btn-login:hover{opacity:.9}
-.lerr{font-size:13px;color:var(--rd);text-align:center;margin-top:10px;min-height:18px}
-
-/* ── 主介面 ── */
-#app{display:none;min-height:100vh}
-
-/* Header */
-.header{height:56px;background:var(--dk);display:flex;align-items:center;padding:0 20px;gap:12px;position:sticky;top:0;z-index:100}
-.header-logo{font-size:16px;font-weight:700;color:#fff;flex:1}
-.header-badge{background:var(--gold);color:#fff;font-size:10px;padding:2px 8px;border-radius:99px;font-weight:700}
-.header-user{font-size:12px;color:rgba(255,255,255,.7)}
-.header-plan{font-size:11px;padding:3px 10px;border-radius:99px;font-weight:600}
-.plan-personal{background:var(--blbg);color:var(--bl)}
-.plan-company{background:var(--gnbg);color:var(--gn)}
-.btn-logout{background:none;border:1px solid rgba(255,255,255,.3);color:rgba(255,255,255,.8);padding:6px 14px;border-radius:6px;font-size:12px;cursor:pointer;font-family:inherit}
-
-/* Layout */
-.layout{display:flex;min-height:calc(100vh - 56px)}
-
-/* Sidebar */
-.sidebar{width:var(--sidebar);background:var(--w);border-right:1px solid var(--gm);padding:16px 0;flex-shrink:0}
-.nav-section{font-size:10px;font-weight:700;color:var(--ht);letter-spacing:.1em;padding:12px 16px 6px;text-transform:uppercase}
-.nav-item{display:flex;align-items:center;gap:10px;padding:10px 16px;cursor:pointer;font-size:13px;color:var(--mu);border-radius:0;transition:.15s;border-left:3px solid transparent}
-.nav-item:hover{background:var(--gl);color:var(--dk)}
-.nav-item.active{background:var(--gl);color:var(--gd);font-weight:600;border-left-color:var(--gold)}
-.nav-icon{font-size:15px;width:20px;text-align:center}
-
-/* Main */
-.main{flex:1;padding:24px;overflow-y:auto}
-.page-title{font-size:20px;font-weight:700;color:var(--dk);margin-bottom:4px}
-.page-sub{font-size:13px;color:var(--mu);margin-bottom:20px}
-
-/* 數據卡片 */
-.stats-grid{display:grid;gap:12px;margin-bottom:20px}
-.stats-4{grid-template-columns:repeat(4,1fr)}
-.stats-3{grid-template-columns:repeat(3,1fr)}
-.stats-2{grid-template-columns:repeat(2,1fr)}
-.stat-card{background:var(--w);border-radius:var(--r);padding:16px;border:1px solid var(--gm)}
-.stat-val{font-size:26px;font-weight:700;color:var(--dk);margin-bottom:2px}
-.stat-label{font-size:12px;color:var(--mu)}
-.stat-sub{font-size:11px;color:var(--ht);margin-top:4px}
-.stat-up{color:var(--gn);font-size:11px;font-weight:600}
-.stat-down{color:var(--rd);font-size:11px;font-weight:600}
-
-/* 案件表格 */
-.table-wrap{background:var(--w);border-radius:var(--r);border:1px solid var(--gm);overflow:hidden;margin-bottom:20px}
-.table-header{display:flex;align-items:center;padding:14px 16px;border-bottom:1px solid var(--gm);gap:10px}
-.table-title{font-size:14px;font-weight:700;color:var(--dk);flex:1}
-.search-box{height:34px;border:1.5px solid var(--gm);border-radius:6px;padding:0 10px;font-size:13px;font-family:inherit;color:var(--dk);outline:none;width:180px}
-.search-box:focus{border-color:var(--gold)}
-.btn-sm{height:32px;padding:0 12px;border:1.5px solid var(--gm);border-radius:6px;font-size:12px;font-family:inherit;cursor:pointer;background:#fff;color:var(--dk);transition:.2s}
-.btn-sm:hover{background:var(--gl)}
-.btn-sm.primary{background:var(--gold);border-color:var(--gold);color:#fff}
-table{width:100%;border-collapse:collapse}
-th{background:#FAFAF7;padding:10px 14px;text-align:left;font-size:11px;font-weight:600;color:var(--mu);text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--gm)}
-td{padding:12px 14px;font-size:13px;color:var(--dk);border-bottom:1px solid var(--gm)}
-tr:last-child td{border-bottom:none}
-tr:hover td{background:#FAFAF7}
-
-/* 評等徽章 */
-.grade{display:inline-block;padding:2px 10px;border-radius:99px;font-size:11px;font-weight:700}
-.grade-A{background:#DCFCE7;color:#16A34A}
-.grade-B{background:#DBEAFE;color:#2563EB}
-.grade-C{background:#FEF3C7;color:#D97706}
-.grade-D{background:#FFE4E6;color:#E11D48}
-.grade-E{background:#F1F5F9;color:#64748B}
-
-/* 狀態 */
-.status{display:inline-block;padding:2px 10px;border-radius:99px;font-size:11px;font-weight:600}
-.status-pending{background:#FEF3C7;color:#D97706}
-.status-approved{background:#DCFCE7;color:#16A34A}
-.status-rejected{background:#FFE4E6;color:#E11D48}
-.status-processing{background:#DBEAFE;color:#2563EB}
-
-/* 面板 */
-.panel{position:fixed;right:-420px;top:56px;width:420px;height:calc(100vh - 56px);background:var(--w);border-left:1px solid var(--gm);overflow-y:auto;transition:.3s;z-index:50;padding:20px}
-.panel.open{right:0}
-.panel-close{position:absolute;top:16px;right:16px;background:none;border:none;font-size:18px;cursor:pointer;color:var(--mu);width:30px;height:30px}
-.panel-title{font-size:16px;font-weight:700;color:var(--dk);margin-bottom:16px;padding-right:40px}
-
-/* 建議方案 */
-.suggest-card{background:var(--gl);border:1px solid var(--gm);border-radius:10px;padding:14px;margin-bottom:10px}
-.suggest-product{font-size:15px;font-weight:700;color:var(--gd);margin-bottom:4px}
-.suggest-score{font-size:22px;font-weight:900;color:var(--dk)}
-.suggest-desc{font-size:12px;color:var(--mu);margin-top:4px;line-height:1.6}
-.suggest-banks{font-size:11px;color:var(--bl);margin-top:6px}
-
-/* CRM / 補件 */
-.crm-box{background:#f8f9fa;border:1px solid var(--gm);border-radius:8px;padding:12px;margin-bottom:12px}
-.crm-title{font-size:12px;font-weight:600;color:var(--mu);margin-bottom:8px}
-.crm-note{width:100%;border:1px solid var(--gm);border-radius:6px;padding:8px;font-size:12px;font-family:inherit;resize:none;height:60px;outline:none}
-.crm-note:focus{border-color:var(--gold)}
-
-/* 鎖定提示 */
-.lock-overlay{position:absolute;inset:0;background:rgba(255,255,255,.92);display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:var(--r);z-index:10}
-.lock-icon{font-size:32px;margin-bottom:8px}
-.lock-text{font-size:14px;font-weight:600;color:var(--dk);margin-bottom:4px}
-.lock-sub{font-size:12px;color:var(--mu);text-align:center}
-.btn-upgrade{margin-top:12px;background:var(--gold);color:#fff;border:none;padding:8px 20px;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit}
-
-/* PDF按鈕 */
-.btn-pdf{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;background:var(--rd);color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;transition:.2s}
-.btn-pdf:hover{opacity:.85}
-
-/* 公司後台：業務列表 */
-.agent-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;margin-bottom:20px}
-.agent-card{background:var(--w);border:1px solid var(--gm);border-radius:10px;padding:14px;cursor:pointer;transition:.2s}
-.agent-card:hover{border-color:var(--gold);background:var(--gl)}
-.agent-avatar{width:36px;height:36px;border-radius:50%;background:var(--gold);color:#fff;font-size:14px;font-weight:700;display:flex;align-items:center;justify-content:center;margin-bottom:8px}
-.agent-name{font-size:13px;font-weight:600;color:var(--dk);margin-bottom:2px}
-.agent-stats{font-size:11px;color:var(--mu)}
-
-/* LINE 設定 */
-.line-setup{background:var(--w);border-radius:var(--r);border:1px solid var(--gm);padding:20px;margin-bottom:16px}
-.line-title{font-size:15px;font-weight:700;color:var(--dk);margin-bottom:4px;display:flex;align-items:center;gap:8px}
-.line-desc{font-size:12px;color:var(--mu);margin-bottom:16px;line-height:1.7}
-.line-input{display:flex;gap:10px;margin-bottom:10px}
-.line-input input{flex:1;height:40px;border:1.5px solid var(--gm);border-radius:6px;padding:0 12px;font-size:13px;font-family:inherit;outline:none}
-.line-input input:focus{border-color:var(--gold)}
-.line-input button{height:40px;padding:0 16px;background:var(--gold);border:none;border-radius:6px;color:#fff;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap}
-.line-step{display:flex;gap:10px;margin-bottom:10px;font-size:12px;color:var(--mu);align-items:flex-start}
-.step-num{background:var(--gm);color:var(--gd);width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;margin-top:1px}
-
-/* PAGE VIEWS */
-.view{display:none}
-.view.on{display:block}
-
-.empty{text-align:center;padding:40px;color:var(--ht);font-size:13px}
-</style>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
-</head>
-<body>
-
+@media(max-width:480px){
+  .stats-4,.stats-3,.stats-2{grid-template-columns:repeat(2,1fr);gap:6px}
+  .stat-card{padding:10px 12px}
+  .stat-val{font-size:18px}
+}
+@media print{.sidebar,.header,.panel{display:none}.main{padding:0}}
+</style><link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet"></head><body>
 <!-- ===== 登入頁 ===== -->
 <div id="login_page">
   <div class="login-wrap">
@@ -179,34 +56,26 @@ tr:hover td{background:#FAFAF7}
       <div class="lerr" id="lerr"></div>
     </div>
     <div style="text-align:center;margin-top:16px">
-    <a href="https://line.me/R/ti/p/@670rjsgv" target="_blank" style="display:inline-flex;align-items:center;gap:6px;background:#06C755;color:#fff;padding:8px 20px;border-radius:6px;text-decoration:none;font-size:13px;font-weight:600;margin-bottom:10px">
-      問題或申請升級：LINE @670rjsgv
-    </a>
-  </div>
-  <div style="text-align:center;margin-top:8px;font-size:12px;color:var(--mu)">
-      還沒有帳號？<a href="apply.html" style="color:var(--gold);font-weight:600">免費申請試用</a>
+      <a href="https://line.me/R/ti/p/@670rjsgv" target="_blank" style="display:inline-flex;align-items:center;gap:6px;background:#06C755;color:#fff;padding:8px 20px;border-radius:6px;text-decoration:none;font-size:13px;font-weight:600;margin-bottom:10px">問題或申請升級：LINE @670rjsgv</a>
     </div>
+    <div style="text-align:center;margin-top:8px;font-size:12px;color:var(--mu)">還沒有帳號？<a href="apply.html" style="color:var(--gold);font-weight:600">免費申請試用</a></div>
   </div>
 </div>
-
 <!-- ===== 主介面 ===== -->
 <div id="app">
+  <div class="mob-overlay" id="mob_overlay" onclick="closeSidebar()"></div>
   <!-- Header -->
   <div class="header">
+    <button class="hamburger" id="hamburger" onclick="toggleSidebar()" aria-label="選單"><span></span><span></span><span></span></button>
     <div class="header-logo">FlowHub <span class="header-badge" id="hd_type">業務後台</span></div>
     <span class="header-user" id="hd_user"></span>
     <span class="header-plan" id="hd_plan"></span>
     <button class="btn-logout" onclick="doLogout()">登出</button>
   </div>
-
   <div class="layout">
-    <!-- Sidebar：根據類型動態生成 -->
     <div class="sidebar" id="sidebar"></div>
-
-    <!-- Main -->
     <div class="main" id="main_area">
-
-      <!-- ── 個人業務：案件列表 ── -->
+      <!-- 個人：案件列表 -->
       <div class="view" id="v_cases">
         <div class="page-title">我的案件</div>
         <div class="page-sub">所有透過 FlowHub 評估的客戶案件</div>
@@ -215,15 +84,13 @@ tr:hover td{background:#FAFAF7}
           <div class="table-header">
             <span class="table-title">案件列表</span>
             <input class="search-box" placeholder="搜尋姓名、手機..." id="search_cases" oninput="filterCases()"/>
-            <button class="btn-sm primary" onclick="window.open('index.html?ch='+chCode)">+ 新增填單連結</button>
+            <button class="btn-sm primary" onclick="showMyLink()">+ 新增填單連結</button>
           </div>
-          <table><thead><tr>
-            <th>姓名</th><th>手機</th><th>申請金額</th><th>評等</th><th>最佳商品</th><th>狀態</th><th>時間</th><th>操作</th>
-          </tr></thead><tbody id="cases_tbody"></tbody></table>
+          <table><thead><tr><th>姓名</th><th>手機</th><th>申請金額</th><th>評等</th><th>最佳商品</th><th>狀態</th><th>時間</th><th>操作</th></tr></thead>
+          <tbody id="cases_tbody"></tbody></table>
         </div>
       </div>
-
-      <!-- ── 個人業務：LINE 通知設定 ── -->
+      <!-- 個人：LINE 通知 -->
       <div class="view" id="v_line">
         <div class="page-title">LINE 推播通知</div>
         <div class="page-sub">新案件進來，自動推播到您的 LINE</div>
@@ -233,7 +100,7 @@ tr:hover td{background:#FAFAF7}
           <div style="background:#F0FBF4;border:1px solid #A8DFB8;border-radius:10px;padding:14px 16px;margin-bottom:16px">
             <div style="font-size:13px;font-weight:600;color:#1A7A3A;margin-bottom:10px">三步驟完成設定</div>
             <div class="line-step"><div class="step-num">1</div><div><div style="font-weight:600;font-size:13px;margin-bottom:2px">點下方按鈕前往 LINE Notify 申請</div><div style="font-size:12px;color:#6B6560">用您的 LINE 帳號登入，完全免費</div></div></div>
-            <div class="line-step"><div class="step-num">2</div><div><div style="font-weight:600;font-size:13px;margin-bottom:2px">點「發行權杖」→ 填名稱 → 選「1對1聊天」→ 按發行</div><div style="font-size:12px;color:#6B6560">名稱可填「FlowHub通知」，選1對1才能推到您個人 LINE</div></div></div>
+            <div class="line-step"><div class="step-num">2</div><div><div style="font-weight:600;font-size:13px;margin-bottom:2px">點「發行權杖」→ 填名稱 → 選「1對1聊天」→ 按發行</div><div style="font-size:12px;color:#6B6560">名稱可填「FlowHub通知」，選1對1才能推到您個人LINE</div></div></div>
             <div class="line-step"><div class="step-num">3</div><div><div style="font-weight:600;font-size:13px;margin-bottom:2px">複製 Token，貼到下方欄位並按儲存</div><div style="font-size:12px;color:#6B6560">Token 約40個英文數字，只顯示一次，請立刻複製</div></div></div>
           </div>
           <a href="https://notify-bot.line.me/zh_TW/" target="_blank" style="display:block;text-align:center;background:#06C755;color:#fff;text-decoration:none;padding:12px;border-radius:8px;font-weight:700;font-size:14px;margin-bottom:14px">前往 LINE Notify 申請 Token →</a>
@@ -244,14 +111,13 @@ tr:hover td{background:#FAFAF7}
           <div id="line_status" style="font-size:12px;color:var(--gn);min-height:18px;margin-top:6px"></div>
           <div style="font-size:11px;color:#A09890;margin-top:8px">Token 僅儲存在您的裝置，不會上傳到伺服器</div>
         </div>
-                <div class="line-setup" id="line_current" style="display:none">
+        <div class="line-setup" id="line_current" style="display:none">
           <div class="line-title">✅ LINE 通知已啟用</div>
           <div class="line-desc" id="line_current_desc"></div>
           <button class="btn-sm" onclick="removeLINEToken()" style="margin-top:8px">移除通知設定</button>
         </div>
       </div>
-
-      <!-- ── 個人業務：業績統計 ── -->
+      <!-- 個人：業績統計 -->
       <div class="view" id="v_stats">
         <div class="page-title">業績統計</div>
         <div class="page-sub">您的案件成效分析</div>
@@ -262,16 +128,14 @@ tr:hover td{background:#FAFAF7}
           <tbody id="approved_tbody"></tbody></table>
         </div>
       </div>
-
-      <!-- ── 公司後台：業務總覽 ── -->
+      <!-- 公司：業務總覽 -->
       <div class="view" id="v_agents">
         <div class="page-title">業務管理</div>
         <div class="page-sub" id="agents_sub">管理旗下所有業務帳號</div>
         <div class="stats-grid stats-4" id="company_stats"></div>
         <div class="agent-grid" id="agents_grid"></div>
       </div>
-
-      <!-- ── 公司後台：全部案件 ── -->
+      <!-- 公司：全部案件 -->
       <div class="view" id="v_all_cases">
         <div class="page-title">全部案件</div>
         <div class="page-sub">公司所有業務的案件總覽</div>
@@ -279,32 +143,23 @@ tr:hover td{background:#FAFAF7}
           <div class="table-header">
             <span class="table-title">案件列表</span>
             <input class="search-box" placeholder="搜尋姓名、業務..." id="search_all" oninput="filterAllCases()"/>
-            <select class="search-box" id="filter_agent" onchange="filterAllCases()" style="width:120px">
-              <option value="">全部業務</option>
-            </select>
+            <select class="search-box" id="filter_agent" onchange="filterAllCases()" style="width:120px"><option value="">全部業務</option></select>
           </div>
-          <table><thead><tr>
-            <th>客戶</th><th>業務</th><th>評等</th><th>最佳商品</th><th>狀態</th><th>時間</th><th>操作</th>
-          </tr></thead><tbody id="all_cases_tbody"></tbody></table>
+          <table><thead><tr><th>客戶</th><th>業務</th><th>評等</th><th>最佳商品</th><th>狀態</th><th>時間</th><th>操作</th></tr></thead>
+          <tbody id="all_cases_tbody"></tbody></table>
         </div>
       </div>
-
-      <!-- ── 公司後台：分潤管理 ── -->
+      <!-- 公司：分潤管理 -->
       <div class="view" id="v_commission">
         <div class="page-title">分潤管理</div>
         <div class="page-sub">各業務核准案件與分潤統計</div>
         <div class="table-wrap">
-          <div class="table-header">
-            <span class="table-title">本月分潤</span>
-            <button class="btn-pdf" onclick="exportPDF('commission')">📄 匯出 PDF</button>
-          </div>
-          <table><thead><tr>
-            <th>業務</th><th>案件數</th><th>核准件</th><th>核准率</th><th>預估分潤</th><th>狀態</th>
-          </tr></thead><tbody id="commission_tbody"></tbody></table>
+          <div class="table-header"><span class="table-title">本月分潤</span></div>
+          <table><thead><tr><th>業務</th><th>案件數</th><th>核准件</th><th>核准率</th><th>預估分潤</th><th>狀態</th></tr></thead>
+          <tbody id="commission_tbody"></tbody></table>
         </div>
       </div>
-
-      <!-- ── 設定 ── -->
+      <!-- 設定 -->
       <div class="view" id="v_settings">
         <div class="page-title">帳號設定</div>
         <div class="page-sub">管理您的帳號資料</div>
@@ -313,12 +168,10 @@ tr:hover td{background:#FAFAF7}
           <div id="plan_info" style="font-size:13px;color:var(--mu);line-height:2"></div>
         </div>
       </div>
-
-    </div><!-- /main -->
-  </div><!-- /layout -->
-</div><!-- /app -->
-
-<!-- ── 案件詳情面板 ── -->
+    </div>
+  </div>
+</div>
+<!-- 案件詳情面板 -->
 <div class="panel" id="panel">
   <button class="panel-close" onclick="closePanel()">✕</button>
   <div class="panel-title" id="panel_title">案件詳情</div>
@@ -326,699 +179,490 @@ tr:hover td{background:#FAFAF7}
 </div>
 
 <script>
-var SUPA_URL = 'https://qysgidxselirkgeuupxq.supabase.co';
-var SUPA_KEY = 'sb_publishable_ecIslOdeM5JLKLlEHwgdIw_K54AcO6y';
-var H = {'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Content-Type':'application/json'};
+var SUPA_URL='https://qysgidxselirkgeuupxq.supabase.co';
+var SUPA_KEY='sb_publishable_ecIslOdeM5JLKLlEHwgdIw_K54AcO6y';
+var H={'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Content-Type':'application/json'};
+var me={};var chCode='';var allCases=[];var allAgents=[];
+var lineToken=localStorage.getItem('fh_line_token')||'';
+function $(id){return document.getElementById(id);}
+function fmt(n){return n?n.toLocaleString():'—';}
+function fmtDate(s){return s?s.substr(0,10):'—';}
+function gradeHtml(g){var cls={A:'grade-A',B:'grade-B',C:'grade-C',D:'grade-D',E:'grade-E'}[g]||'grade-E';return '<span class="grade '+cls+'">'+(g||'?')+'</span>';}
+function statusHtml(s){var map={'待處理':'status-pending 待處理','已核准':'status-approved 已核准','已婉拒':'status-rejected 已婉拒','處理中':'status-processing 處理中','聯繫中':'status-processing 聯繫中','補件中':'status-pending 補件中','已送件':'status-processing 已送件','未通過':'status-rejected 未通過'};var cls=(map[s]||'status-pending '+(s||'待處理')).split(' ');return '<span class="status '+cls[0]+'">'+cls.slice(1).join(' ')+'</span>';}
 
-var me = {};        // 當前登入資訊
-var chCode = '';    // 通路代碼
-var allCases = [];  // 全部案件快取
-var allAgents = []; // 全部業務
-var lineToken = localStorage.getItem('fh_line_token') || '';
-
-function $(id){ return document.getElementById(id); }
-function fmt(n){ return n?n.toLocaleString():'—'; }
-function fmtDate(s){ return s?s.substr(0,10):'—'; }
-
-function gradeHtml(g){
-  var cls={A:'grade-A',B:'grade-B',C:'grade-C',D:'grade-D',E:'grade-E'}[g]||'grade-E';
-  return '<span class="grade '+cls+'">'+(g||'?')+'</span>';
-}
-function statusHtml(s){
-  var map={'待處理':'status-pending 待處理','已核准':'status-approved 已核准','已婉拒':'status-rejected 已婉拒','處理中':'status-processing 處理中'};
-  var cls = (map[s]||'status-pending '+s).split(' ');
-  return '<span class="status '+cls[0]+'">'+cls.slice(1).join(' ')+'</span>';
-}
-
-// ── 登入 ──
 async function doLogin(){
-  var u = $('u').value.trim();
-  var p = $('pw').value.trim();
-  var err = $('lerr');
-  if(!u||!p){ err.textContent='❌ 請填寫帳號與密碼'; return; }
-
-  // 管理員帳號
-  if(u==='flowhub312'&&p==='Aa1234'){
-    me = {type:'admin',name:'FlowHub 管理員',plan:'enterprise',u:u};
-    initApp(); return;
-  }
-
+  var u=$('u').value.trim();var p=$('pw').value.trim();var err=$('lerr');
+  if(!u||!p){err.textContent='❌ 請填寫帳號與密碼';return;}
+  if(u==='flowhub312'&&p==='Aa1234'){me={type:'admin',name:'FlowHub 管理員',plan:'enterprise',u:u};initApp();return;}
   err.textContent='🔄 驗證中...';
-  try {
-    var r = await fetch(SUPA_URL+'/rest/v1/channels?biz_id=eq.'+encodeURIComponent(u)+'&status=eq.active',{headers:H});
-    var data = await r.json();
-    if(!data||!data[0]){ err.textContent='❌ 帳號不存在，請確認後重試'; return; }
-    var ch = data[0];
-    var storedPw = ch.password || ch.password_hash || ''; if(storedPw !== p){ err.textContent='❌ 密碼錯誤'; return; }
-    if(ch.trial_expires_at && new Date(ch.trial_expires_at) < new Date()){
-      err.innerHTML='⚠️ 試用期已結束，請透過 <a href="https://line.me/R/ti/p/@670rjsgv" target="_blank" style="color:#06C755;font-weight:600">LINE @670rjsgv</a> 升級方案'; return;
-    }
-    var applyType = ch.apply_type || 'personal';
-    me = {
-      type: applyType,
-      name: ch.contact_name || ch.name || u,
-      company: ch.name || '',
-      plan: ch.plan || 'basic',
-      u: u,
-      ch: ch
-    };
-    chCode = u;
-    err.textContent='';
-    initApp();
-  } catch(e){
-    err.textContent='❌ 連線失敗：'+e.message;
-  }
+  try{
+    var r=await fetch(SUPA_URL+'/rest/v1/channels?biz_id=eq.'+encodeURIComponent(u)+'&status=eq.active',{headers:H});
+    var data=await r.json();
+    if(!data||!data[0]){err.textContent='❌ 帳號不存在';return;}
+    var ch=data[0];
+    var storedPw=ch.password||ch.password_hash||'';
+    if(storedPw!==p){err.textContent='❌ 密碼錯誤';return;}
+    if(ch.trial_expires_at&&new Date(ch.trial_expires_at)<new Date()){err.innerHTML='⚠️ 試用期已結束，請透過 <a href="https://line.me/R/ti/p/@670rjsgv" target="_blank" style="color:#06C755;font-weight:600">LINE @670rjsgv</a> 升級';return;}
+    me={type:ch.apply_type||'personal',name:ch.contact_name||ch.name||u,company:ch.name||'',plan:ch.plan||'basic',u:u,ch:ch};
+    chCode=u;err.textContent='';initApp();
+  }catch(e){err.textContent='❌ 連線失敗：'+e.message;}
 }
 
-function doLogout(){
-  me={}; chCode=''; allCases=[]; allAgents=[];
-  $('app').style.display='none';
-  $('login_page').style.display='block';
-  $('u').value=''; $('pw').value=''; $('lerr').textContent='';
-}
+function doLogout(){me={};chCode='';allCases=[];allAgents=[];$('app').style.display='none';$('login_page').style.display='block';$('u').value='';$('pw').value='';$('lerr').textContent='';}
 
-// ── 初始化介面 ──
 function initApp(){
-  $('login_page').style.display='none';
-  $('app').style.display='block';
-
-  // Header
-  $('hd_user').textContent = me.name + (me.company&&me.company!==me.name?' ('+me.company+')':'');
-  $('hd_type').textContent = me.type==='company'?'代辦公司後台':me.type==='admin'?'總管理':'個人業務後台';
-
-  var planNames = {basic:'基本版',advanced:'進階版',flagship:'旗艦版',enterprise:'企業版'};
-  var planEl = $('hd_plan');
-  planEl.textContent = planNames[me.plan]||me.plan;
-  planEl.className = 'header-plan '+(me.type==='company'?'plan-company':'plan-personal');
-
-  // Sidebar
+  $('login_page').style.display='none';$('app').style.display='block';
+  $('hd_user').textContent=me.name+(me.company&&me.company!==me.name?' ('+me.company+')':'');
+  $('hd_type').textContent=me.type==='company'?'代辦公司後台':me.type==='admin'?'總管理':'個人業務後台';
+  var pn={basic:'基本版',advanced:'進階版',flagship:'旗艦版',enterprise:'企業版'};
+  var pe=$('hd_plan');pe.textContent=pn[me.plan]||me.plan;
+  pe.className='header-plan '+(me.type==='company'?'plan-company':'plan-personal');
   buildSidebar();
-
-  // 載入資料
-  if(me.type==='company'||me.type==='admin'){
-    loadCompanyData();
-    showView('v_agents');
-  } else {
-    loadPersonalData();
-    showView('v_cases');
-
-    // LINE token
-    if(lineToken) showLINEStatus();
-  }
+  if(me.type==='company'||me.type==='admin'){loadCompanyData();showView('v_agents');}
+  else{loadPersonalData();showView('v_cases');if(lineToken)showLINEStatus();}
 }
 
 function buildSidebar(){
-  var isCompany = me.type==='company'||me.type==='admin';
-  var html = '';
-  if(isCompany){
-    html += '<div class="nav-section">公司管理</div>';
-    html += navItem('v_agents','👥','業務總覽');
-    html += navItem('v_all_cases','📋','全部案件');
-    html += navItem('v_commission','💰','分潤管理');
-    html += '<div class="nav-section">工具</div>';
-    html += navItem('v_line','💬','LINE 推播設定');
-    html += navItem('v_settings','⚙️','帳號設定');
-  } else {
-    html += '<div class="nav-section">我的業務</div>';
-    html += navItem('v_cases','📋','我的案件');
-    html += navItem('v_stats','📊','業績統計');
-    html += '<div class="nav-section">工具</div>';
-    html += navItem('v_line','💬','LINE 通知設定');
-    html += navItem('v_settings','⚙️','帳號設定');
-  }
-  $('sidebar').innerHTML = html;
+  var isC=me.type==='company'||me.type==='admin';var html='';
+  if(isC){html+='<div class="nav-section">公司管理</div>';html+=navItem('v_agents','👥','業務總覽');html+=navItem('v_all_cases','📋','全部案件');html+=navItem('v_commission','💰','分潤管理');html+='<div class="nav-section">工具</div>';html+=navItem('v_line','💬','LINE 設定');html+=navItem('v_settings','⚙️','帳號設定');}
+  else{html+='<div class="nav-section">我的業務</div>';html+=navItem('v_cases','📋','我的案件');html+=navItem('v_stats','📊','業績統計');html+='<div class="nav-section">工具</div>';html+=navItem('v_line','💬','LINE 通知');html+=navItem('v_settings','⚙️','帳號設定');}
+  $('sidebar').innerHTML=html;
 }
+function navItem(view,icon,label){return '<div class="nav-item" id="nav_'+view+'" onclick="showView(\''+view+'\')"><span class="nav-icon">'+icon+'</span><span>'+label+'</span></div>';}
 
-function navItem(view, icon, label){
-  return '<div class="nav-item" id="nav_'+view+'" onclick="showView(\''+view+'\')">'
-    +'<span class="nav-icon">'+icon+'</span><span>'+label+'</span></div>';
-}
-
+var _sv=null;
 function showView(v){
-  document.querySelectorAll('.view').forEach(function(el){ el.classList.remove('on'); });
-  document.querySelectorAll('.nav-item').forEach(function(el){ el.classList.remove('active'); });
-  var el = $(v); if(el) el.classList.add('on');
-  var nav = $('nav_'+v); if(nav) nav.classList.add('active');
-  closePanel();
+  document.querySelectorAll('.view').forEach(function(el){el.classList.remove('on');});
+  document.querySelectorAll('.nav-item').forEach(function(el){el.classList.remove('active');});
+  var el=$(v);if(el)el.classList.add('on');
+  var nav=$('nav_'+v);if(nav)nav.classList.add('active');
+  closePanel();closeSidebar();
+  if(v==='v_stats')renderPerfStats();
+  if(v==='v_line')showLINEStatus();
+  if(v==='v_settings')renderSettings();
 }
 
-// ── 個人業務：載入資料 ──
 async function loadPersonalData(){
-  try {
-    var r = await fetch(SUPA_URL+'/rest/v1/applications?channel=eq.'+encodeURIComponent(chCode)+'&order=created_at.desc&limit=200',{headers:H});
-    allCases = await r.json();
-    renderPersonalStats();
-    renderCasesTable();
-  } catch(e){ console.error(e); }
+  try{var r=await fetch(SUPA_URL+'/rest/v1/applications?channel=eq.'+encodeURIComponent(chCode)+'&order=created_at.desc&limit=200',{headers:H});allCases=await r.json();renderPersonalStats();renderCasesTable();}catch(e){console.error(e);}
 }
-
 function renderPersonalStats(){
-  var total = allCases.length;
-  var approved = allCases.filter(function(c){return c.status==='已核准';}).length;
-  var rate = total>0?Math.round(approved/total*100):0;
-  var thisMonth = allCases.filter(function(c){
-    return c.created_at && c.created_at.startsWith(new Date().toISOString().slice(0,7));
-  }).length;
-
-  $('personal_stats').innerHTML =
-    statCard(total,'累計案件','件','') +
-    statCard(approved,'已核准','件','<span class="stat-up">核准率 '+rate+'%</span>') +
-    statCard(thisMonth,'本月新案','件','') +
-    statCard('A-E','評等系統','FlowHub AI','<span class="stat-sub">即時評估</span>');
+  var total=allCases.length;var approved=allCases.filter(function(c){return c.status==='已核准';}).length;
+  var rate=total>0?Math.round(approved/total*100):0;
+  var thisMonth=allCases.filter(function(c){return c.created_at&&c.created_at.startsWith(new Date().toISOString().slice(0,7));}).length;
+  $('personal_stats').innerHTML=statCard(total,'累計案件','件','')+statCard(approved,'已核准','件','<span class="stat-up">核准率 '+rate+'%</span>')+statCard(thisMonth,'本月新案','件','')+statCard('A-E','評等系統','FlowHub AI','<span class="stat-sub" style="font-size:11px;color:var(--ht)">即時評估</span>');
 }
-
-function statCard(val,label,unit,sub){
-  return '<div class="stat-card"><div class="stat-val">'+val+'<span style="font-size:13px;font-weight:400;color:var(--mu)"> '+unit+'</span></div>'
-    +'<div class="stat-label">'+label+'</div>'+(sub?'<div style="margin-top:4px">'+sub+'</div>':'')+'</div>';
-}
+function statCard(val,label,unit,sub){return '<div class="stat-card"><div class="stat-val">'+val+'<span style="font-size:13px;font-weight:400;color:var(--mu)"> '+unit+'</span></div><div class="stat-label">'+label+'</div>'+(sub?'<div style="margin-top:4px">'+sub+'</div>':'')+'</div>';}
 
 function renderCasesTable(){
-  var q = $('search_cases') ? $('search_cases').value.toLowerCase() : '';
-  var list = allCases.filter(function(c){
-    return !q || (c.name||'').toLowerCase().includes(q) || (c.phone||'').includes(q);
-  });
-  var html = '';
-  if(!list.length){ html='<tr><td colspan="8" class="empty">暫無案件 — 分享填單連結給客戶開始使用</td></tr>'; }
+  var q=$('search_cases')?$('search_cases').value.toLowerCase():'';
+  var list=allCases.filter(function(c){return !q||(c.name||'').toLowerCase().includes(q)||(c.phone||'').includes(q);});
+  var html='';
+  if(!list.length){html='<tr><td colspan="8" class="empty">暫無案件 — 分享填單連結給客戶開始使用</td></tr>';}
   else list.forEach(function(c){
-    var amt = c.need_amount ? '$'+Number(c.need_amount).toLocaleString() : '—';
-    html += '<tr onclick="openCase(\''+c.id+'\')" style="cursor:pointer">'
-      +'<td><strong>'+( c.name||'—')+'</strong></td>'
-      +'<td>'+(c.phone||'—')+'</td>'
-      +'<td>'+amt+'</td>'
-      +'<td>'+gradeHtml(c.score_best_grade)+'</td>'
-      +'<td>'+(c.score_best_product||'—')+'</td>'
-      +'<td>'+statusHtml(c.status)+'</td>'
-      +'<td>'+fmtDate(c.created_at)+'</td>'
-      +'<td><button class="btn-sm" onclick="event.stopPropagation();openCase(\''+c.id+'\')">查看</button>'
-      +(me.plan!=='basic'?'<button class="btn-pdf" onclick="event.stopPropagation();genPDF(\''+c.id+'\')" style="margin-left:4px">PDF</button>':'')
-      +'</td></tr>';
-  });
-  $('cases_tbody').innerHTML = html;
-}
-
-function filterCases(){ renderCasesTable(); }
-
-// ── 個人業務：業績統計 ──
-function renderPerfStats(){
-  var approved = allCases.filter(function(c){return c.status==='已核准';});
-  var estComm = approved.length * 40000;
-  $('perf_stats').innerHTML =
-    statCard(approved.length,'核准案件','件','') +
-    statCard('$'+Math.round(estComm/10000),'預估佣金','萬元','<span class="stat-sub">以每件4萬估算</span>') +
-    statCard(allCases.length>0?Math.round(approved.length/allCases.length*100)+'%':'—','核准率','','');
-
-  var html = '';
-  approved.slice(0,20).forEach(function(c){
-    html += '<tr><td>'+(c.name||'—')+'</td><td>'+(c.score_best_product||'—')+'</td>'
-      +'<td>$'+(Number(c.need_amount||0)).toLocaleString()+'</td>'
-      +'<td style="color:var(--gn);font-weight:600">~$40,000</td>'
-      +'<td>'+fmtDate(c.created_at)+'</td></tr>';
-  });
-  $('approved_tbody').innerHTML = html||'<tr><td colspan="5" class="empty">本月尚無核准案件</td></tr>';
-}
-
-// ── 公司後台：載入資料 ──
-async function loadCompanyData(){
-  try {
-    // 載入所有隸屬此公司的通路（子業務）
-    var bizId = me.u;
-    var r1 = await fetch(SUPA_URL+'/rest/v1/channels?order=created_at.desc',{headers:H});
-    var channels = await r1.json();
-    allAgents = channels.filter(function(c){ return c.status==='active'; });
-
-    // 載入所有案件
-    var r2 = await fetch(SUPA_URL+'/rest/v1/applications?order=created_at.desc&limit=500',{headers:H});
-    allCases = await r2.json();
-
-    renderCompanyStats();
-    renderAgentsGrid();
-    renderAllCasesTable();
-    renderCommissionTable();
-  } catch(e){ console.error(e); }
-}
-
-function renderCompanyStats(){
-  var total = allCases.length;
-  var approved = allCases.filter(function(c){return c.status==='已核准';}).length;
-  var agents = allAgents.length;
-  var thisMonth = allCases.filter(function(c){
-    return c.created_at&&c.created_at.startsWith(new Date().toISOString().slice(0,7));
-  }).length;
-
-  $('company_stats').innerHTML =
-    statCard(agents,'業務帳號','個','') +
-    statCard(total,'總案件數','件','') +
-    statCard(approved,'已核准','件','<span class="stat-up">'+( total>0?Math.round(approved/total*100):0)+'%</span>') +
-    statCard(thisMonth,'本月新案','件','');
-}
-
-function renderAgentsGrid(){
-  var html='';
-  allAgents.slice(0,20).forEach(function(a){
-    var cases = allCases.filter(function(c){return c.channel===a.biz_id;}).length;
-    var apprvd = allCases.filter(function(c){return c.channel===a.biz_id&&c.status==='已核准';}).length;
-    var init = (a.contact_name||a.name||'?').charAt(0);
-    html += '<div class="agent-card" onclick="filterByAgent(\''+a.biz_id+'\')">'
-      +'<div class="agent-avatar">'+init+'</div>'
-      +'<div class="agent-name">'+(a.contact_name||a.name||a.biz_id)+'</div>'
-      +'<div class="agent-stats">案件 '+cases+' 件 / 核准 '+apprvd+' 件</div>'
-      +'<div class="agent-stats" style="color:var(--gold)">'+( (a.plan||'basic')==='advanced'?'進階版':'基本版')+'</div>'
-      +'</div>';
-  });
-  $('agents_grid').innerHTML = html || '<div class="empty">暫無業務帳號</div>';
-}
-
-function filterByAgent(agentId){
-  $('filter_agent').value = agentId;
-  showView('v_all_cases');
-  filterAllCases();
-}
-
-function renderAllCasesTable(){
-  // 填入業務篩選器
-  var sel = $('filter_agent');
-  sel.innerHTML = '<option value="">全部業務</option>';
-  allAgents.forEach(function(a){
-    var opt = document.createElement('option');
-    opt.value = a.biz_id;
-    opt.textContent = a.contact_name||a.name||a.biz_id;
-    sel.appendChild(opt);
-  });
-  filterAllCases();
-}
-
-function filterAllCases(){
-  var q = $('search_all').value.toLowerCase();
-  var agent = $('filter_agent').value;
-  var list = allCases.filter(function(c){
-    var matchQ = !q || (c.name||'').toLowerCase().includes(q);
-    var matchA = !agent || c.channel===agent;
-    return matchQ && matchA;
-  });
-  var html='';
-  if(!list.length) html='<tr><td colspan="7" class="empty">暫無案件</td></tr>';
-  else list.slice(0,50).forEach(function(c){
-    var agentName = '';
-    var ag = allAgents.find(function(a){return a.biz_id===c.channel;});
-    if(ag) agentName = ag.contact_name||ag.name||c.channel;
-    html += '<tr onclick="openCase(\''+c.id+'\')" style="cursor:pointer">'
-      +'<td><strong>'+(c.name||'—')+'</strong></td>'
-      +'<td>'+(agentName||c.channel||'—')+'</td>'
-      +'<td>'+gradeHtml(c.score_best_grade)+'</td>'
-      +'<td>'+(c.score_best_product||'—')+'</td>'
-      +'<td>'+statusHtml(c.status)+'</td>'
-      +'<td>'+fmtDate(c.created_at)+'</td>'
+    var amt=c.need_amount?'$'+Number(c.need_amount).toLocaleString():'—';
+    html+='<tr onclick="openCase(\''+c.id+'\')" style="cursor:pointer">'
+      +'<td data-l=""><strong>'+(c.name||'—')+'</strong></td>'
+      +'<td data-l="手機">'+(c.phone||'—')+'</td>'
+      +'<td data-l="金額">'+amt+'</td>'
+      +'<td data-l="評等">'+gradeHtml(c.score_best_grade)+'</td>'
+      +'<td data-l="商品">'+(c.score_best_product||'—')+'</td>'
+      +'<td data-l="狀態">'+statusHtml(c.status)+'</td>'
+      +'<td data-l="時間">'+fmtDate(c.created_at)+'</td>'
       +'<td><button class="btn-sm" onclick="event.stopPropagation();openCase(\''+c.id+'\')">查看</button></td></tr>';
   });
-  $('all_cases_tbody').innerHTML = html;
+  $('cases_tbody').innerHTML=html;
+}
+function filterCases(){renderCasesTable();}
+
+function renderPerfStats(){
+  var approved=allCases.filter(function(c){return c.status==='已核准';});
+  var estComm=approved.length*40000;
+  $('perf_stats').innerHTML=statCard(approved.length,'核准案件','件','')+statCard('$'+Math.round(estComm/10000),'預估佣金','萬元','<span style="font-size:11px;color:var(--ht)">以每件4萬估算</span>')+statCard(allCases.length>0?Math.round(approved.length/allCases.length*100)+'%':'—','核准率','','');
+  var html='';approved.slice(0,20).forEach(function(c){html+='<tr><td>'+(c.name||'—')+'</td><td>'+(c.score_best_product||'—')+'</td><td>$'+(Number(c.need_amount||0)).toLocaleString()+'</td><td style="color:var(--gn);font-weight:600">~$40,000</td><td>'+fmtDate(c.created_at)+'</td></tr>';});
+  $('approved_tbody').innerHTML=html||'<tr><td colspan="5" class="empty">本月尚無核准案件</td></tr>';
 }
 
+async function loadCompanyData(){
+  try{
+    var r1=await fetch(SUPA_URL+'/rest/v1/channels?order=created_at.desc',{headers:H});var channels=await r1.json();allAgents=channels.filter(function(c){return c.status==='active';});
+    var r2=await fetch(SUPA_URL+'/rest/v1/applications?order=created_at.desc&limit=500',{headers:H});allCases=await r2.json();
+    renderCompanyStats();renderAgentsGrid();renderAllCasesTable();renderCommissionTable();
+  }catch(e){console.error(e);}
+}
+function renderCompanyStats(){
+  var total=allCases.length;var approved=allCases.filter(function(c){return c.status==='已核准';}).length;
+  var agents=allAgents.length;var thisMonth=allCases.filter(function(c){return c.created_at&&c.created_at.startsWith(new Date().toISOString().slice(0,7));}).length;
+  $('company_stats').innerHTML=statCard(agents,'業務帳號','個','')+statCard(total,'總案件數','件','')+statCard(approved,'已核准','件','<span class="stat-up">'+(total>0?Math.round(approved/total*100):0)+'%</span>')+statCard(thisMonth,'本月新案','件','');
+}
+function renderAgentsGrid(){
+  var html='';allAgents.slice(0,20).forEach(function(a){
+    var cases=allCases.filter(function(c){return c.channel===a.biz_id;}).length;
+    var apprvd=allCases.filter(function(c){return c.channel===a.biz_id&&c.status==='已核准';}).length;
+    var init=(a.contact_name||a.name||'?').charAt(0);
+    html+='<div class="agent-card" onclick="filterByAgent(\''+a.biz_id+'\')">'+'<div class="agent-avatar">'+init+'</div>'+'<div class="agent-name">'+(a.contact_name||a.name||a.biz_id)+'</div>'+'<div class="agent-stats">案件 '+cases+' 件 / 核准 '+apprvd+' 件</div>'+'<div class="agent-stats" style="color:var(--gold)">'+((a.plan||'basic')==='advanced'?'進階版':'基本版')+'</div></div>';
+  });
+  $('agents_grid').innerHTML=html||'<div class="empty">暫無業務帳號</div>';
+}
+function filterByAgent(agentId){$('filter_agent').value=agentId;showView('v_all_cases');filterAllCases();}
+function renderAllCasesTable(){
+  var sel=$('filter_agent');sel.innerHTML='<option value="">全部業務</option>';
+  allAgents.forEach(function(a){var opt=document.createElement('option');opt.value=a.biz_id;opt.textContent=a.contact_name||a.name||a.biz_id;sel.appendChild(opt);});
+  filterAllCases();
+}
+function filterAllCases(){
+  var q=$('search_all').value.toLowerCase();var agent=$('filter_agent').value;
+  var list=allCases.filter(function(c){var mq=!q||(c.name||'').toLowerCase().includes(q);var ma=!agent||c.channel===agent;return mq&&ma;});
+  var html='';if(!list.length)html='<tr><td colspan="7" class="empty">暫無案件</td></tr>';
+  else list.slice(0,50).forEach(function(c){
+    var ag=allAgents.find(function(a){return a.biz_id===c.channel;});
+    var agName=ag?(ag.contact_name||ag.name||c.channel):(c.channel||'—');
+    html+='<tr onclick="openCase(\''+c.id+'\')" style="cursor:pointer">'
+      +'<td data-l=""><strong>'+(c.name||'—')+'</strong></td>'
+      +'<td data-l="業務">'+agName+'</td>'
+      +'<td data-l="評等">'+gradeHtml(c.score_best_grade)+'</td>'
+      +'<td data-l="商品">'+(c.score_best_product||'—')+'</td>'
+      +'<td data-l="狀態">'+statusHtml(c.status)+'</td>'
+      +'<td data-l="時間">'+fmtDate(c.created_at)+'</td>'
+      +'<td><button class="btn-sm" onclick="event.stopPropagation();openCase(\''+c.id+'\')">查看</button></td></tr>';
+  });
+  $('all_cases_tbody').innerHTML=html;
+}
 function renderCommissionTable(){
-  var html='';
-  allAgents.forEach(function(a){
-    var cases = allCases.filter(function(c){return c.channel===a.biz_id;});
-    var apprvd = cases.filter(function(c){return c.status==='已核准';});
-    var rate = cases.length>0?Math.round(apprvd.length/cases.length*100):0;
-    var est = apprvd.length * 40000;
-    html += '<tr><td>'+(a.contact_name||a.name||a.biz_id)+'</td><td>'+cases.length+'</td><td>'+apprvd.length+'</td>'
-      +'<td>'+rate+'%</td><td style="color:var(--gn);font-weight:600">~$'+Math.round(est/10000)+'萬</td>'
-      +'<td>'+statusHtml(apprvd.length>0?'已核准':'待處理')+'</td></tr>';
+  var html='';allAgents.forEach(function(a){
+    var cases=allCases.filter(function(c){return c.channel===a.biz_id;});
+    var apprvd=cases.filter(function(c){return c.status==='已核准';});
+    var rate=cases.length>0?Math.round(apprvd.length/cases.length*100):0;
+    var est=apprvd.length*40000;
+    html+='<tr><td>'+(a.contact_name||a.name||a.biz_id)+'</td><td>'+cases.length+'</td><td>'+apprvd.length+'</td><td>'+rate+'%</td><td style="color:var(--gn);font-weight:600">~$'+Math.round(est/10000)+'萬</td><td>'+statusHtml(apprvd.length>0?'已核准':'待處理')+'</td></tr>';
   });
-  $('commission_tbody').innerHTML = html || '<tr><td colspan="6" class="empty">暫無資料</td></tr>';
+  $('commission_tbody').innerHTML=html||'<tr><td colspan="6" class="empty">暫無資料</td></tr>';
 }
 
-// ── 案件詳情面板 ──
-async function openCase(id){
-  var c = allCases.find(function(x){return x.id==id;});
-  if(!c){ return; }
-  $('panel_title').textContent = (c.name||'客戶') + ' 的案件評估';
+// ── 案件詳情面板（完整評分卡，無 PDF）──
+function openCase(id){
+  var c=allCases.find(function(x){return x.id==id;});if(!c)return;
+  $('panel_title').textContent=(c.name||'客戶')+' 的評估報告';
 
-  var g = c.score_best_grade||'?';
-  var scores = [
-    ['信貸',c.score_credit||0],['汽機車貸',c.score_vehicle||0],
-    ['房貸',c.score_house||0],['土地貸',c.score_land||0],
-    ['商品分期',c.score_goods||0],['債務整合',c.score_debt_c||0]
-  ].sort(function(a,b){return b[1]-a[1];}).filter(function(x){return x[1]>0;});
+  function gi(s){return s>=82?'A':s>=68?'B':s>=55?'C':s>=40?'D':'E';}
+  function gc(g){return{A:'#16A34A',B:'#2563EB',C:'#D97706',D:'#EA580C',E:'#DC2626'}[g]||'#A09890';}
+  function gbg(g){return{A:'#DCFCE7',B:'#DBEAFE',C:'#FEF3C7',D:'#FFEDD5',E:'#FEE2E2'}[g]||'#F1F5F9';}
+  function gdesc(s){if(s>=82)return'條件優秀，核准機率高';if(s>=68)return'條件良好，建議送件';if(s>=55)return'條件尚可，需補件';if(s>=40)return'條件偏弱，需補強';return s>0?'暫不建議送件':'資料不足';}
 
-  var suggestHtml = scores.slice(0,3).map(function(s){
-    var gi = s[1]>=82?'A':s[1]>=68?'B':s[1]>=55?'C':s[1]>=40?'D':'E';
-    return '<div class="suggest-card">'
-      +'<div class="suggest-product">'+s[0]+' '+gradeHtml(gi)+'</div>'
-      +'<div class="suggest-score">'+s[1]+' 分</div>'
-      +'<div class="suggest-desc">'+getSuggestDesc(s[0],s[1])+'</div>'
-      +'</div>';
-  }).join('');
+  var allScores=[
+    {n:'信貸',      s:c.score_credit||0},
+    {n:'汽機車貸',  s:c.score_vehicle||0},
+    {n:'房貸',      s:c.score_house||0},
+    {n:'土地貸',    s:c.score_land||0},
+    {n:'商品分期',  s:c.score_goods||0},
+    {n:'債務整合',  s:c.score_debt_c||0}
+  ].sort(function(a,b){return b.s-a.s;});
 
+  var validScores = allScores.filter(function(x){return x.s>0;});
+  var best = validScores[0] || allScores[0];
+  var bestG = gi(best.s);
   var html = '';
-  // 基本資料
-  html += '<div class="crm-box"><div class="crm-title">基本資料</div>'
-    +'<div style="font-size:12px;color:var(--mu);line-height:2">'
-    +'手機：'+(c.phone||'—')+'<br>'
-    +'申請金額：$'+(Number(c.need_amount||0)).toLocaleString()+'<br>'
-    +'還款期數：'+(c.period||'—')+' 期<br>'
-    +'月收入：$'+(Number(c.income||0)).toLocaleString()+'<br>'
-    +'公司：'+(c.company||'—')+'<br>'
-    +'工作年資：'+(c.sc_tenure||'—')+' 月<br>'
-    +'薪資方式：'+(c.salary_type||'—')+'<br>'
-    +'警示狀態：'+(c.is_alert==='yes'?'⚠️ 警示戶':'✅ 正常')
-    +'</div></div>';
 
-  // 建議方案（進階版才顯示）
-  if(me.plan==='advanced'||me.plan==='flagship'||me.plan==='enterprise'){
-    html += '<div style="font-size:13px;font-weight:600;color:var(--dk);margin-bottom:8px">AI 建議方案</div>';
-    html += suggestHtml || '<div class="empty">無法評估（資料不足）</div>';
-  } else {
-    html += '<div style="position:relative;margin-bottom:12px"><div style="filter:blur(3px)">'+suggestHtml+'</div>'
-      +'<div class="lock-overlay"><div class="lock-icon">🔒</div>'
-      +'<div class="lock-text">升級進階版解鎖</div>'
-      +'<div class="lock-sub">AI 建議方案 · 補件建議 · PDF 匯出</div>'
-      +'<button class="btn-upgrade" onclick="window.location.href=\'apply.html\'">升級方案</button>'
-      +'</div></div>';
-  }
+  // ── 總覽大卡 ──
+  html += '<div style="background:'+gbg(bestG)+';border:1.5px solid '+gc(bestG)+';border-radius:12px;padding:14px 16px;margin-bottom:14px;display:flex;align-items:center;gap:14px">'
+    + '<div style="font-size:42px;font-weight:900;color:'+gc(bestG)+';line-height:1">'+bestG+'</div>'
+    + '<div>'
+    + '<div style="font-size:14px;font-weight:700;color:#2A1F0E">最佳方案：'+(c.score_best_product||best.n)+'</div>'
+    + '<div style="font-size:12px;color:#6B6560;margin-top:2px">'+(c.name||'客戶')+' ・ '+best.s+' 分</div>'
+    + '<div style="font-size:11px;color:'+gc(bestG)+';font-weight:600;margin-top:3px">'+gdesc(best.s)+'</div>'
+    + '</div></div>';
 
-  // 狀態更新
-  html += '<div class="crm-box"><div class="crm-title">更新案件狀態</div>'
-    +'<select id="case_status_sel" style="width:100%;height:36px;border:1.5px solid var(--gm);border-radius:6px;font-size:13px;font-family:inherit;padding:0 8px;margin-bottom:8px">'
-    +['待處理','處理中','已核准','已婉拒'].map(function(s){
-      return '<option value="'+s+'"'+(c.status===s?' selected':'')+'>'+s+'</option>';
-    }).join('')+'</select>'
-    +'<button class="btn-sm primary" onclick="updateStatus(\''+c.id+'\',document.getElementById(\'case_status_sel\').value)">更新狀態</button></div>';
-
-  // CRM 備註
-  html += '<div class="crm-box"><div class="crm-title">業務備註</div>'
-    +'<textarea class="crm-note" id="crm_note_input" placeholder="記錄聯繫進度、補件狀況...">'+(c.crm_note||'')+'</textarea>'
-    +'<button class="btn-sm" onclick="saveCRMNote(\''+c.id+'\')" style="margin-top:6px">儲存備註</button></div>';
-
-  // PDF 匯出
-  if(me.plan!=='basic'){
-    html += '<button class="btn-pdf" onclick="genPDF(\''+c.id+'\')" style="width:100%;justify-content:center;height:40px">📄 匯出 PDF 評估報告</button>';
-  }
-
-
-  // ── 核准記錄區塊 ──
-  var existingApproval = c.approved_company||c.approved_amount;
-  html += '<div class="crm-box" style="border:1.5px solid #C9A460">'
-    +'<div class="crm-title" style="color:#92400E">核准記錄</div>'
-    +'<div style="font-size:12px;color:#6B6560;margin-bottom:10px">填入後台核准結果，用於後續數據分析與業績統計</div>'
-    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">'
-    +'<div><div style="font-size:11px;color:#6B6560;margin-bottom:3px">核准公司</div>'
-    +'<input id="approve_company" value="'+(c.approved_company||'')+'" placeholder="如：中租、裕富、玉山銀行..." style="width:100%;height:36px;padding:0 10px;border:1px solid #E8D5A8;border-radius:6px;font-size:13px;font-family:inherit"/></div>'
-    +'<div><div style="font-size:11px;color:#6B6560;margin-bottom:3px">核准金額（元）</div>'
-    +'<input id="approve_amount" type="number" value="'+(c.approved_amount||'')+'" placeholder="如：200000" style="width:100%;height:36px;padding:0 10px;border:1px solid #E8D5A8;border-radius:6px;font-size:13px;font-family:inherit"/></div>'
-    +'</div>'
-    +'<div style="margin-bottom:8px"><div style="font-size:11px;color:#6B6560;margin-bottom:3px">備注（方案/條件等）</div>'
-    +'<input id="approve_note" value="'+(c.approved_note||'')+'" placeholder="如：年利率8%，24期，需薪轉帳戶" style="width:100%;height:36px;padding:0 10px;border:1px solid #E8D5A8;border-radius:6px;font-size:13px;font-family:inherit"/></div>'
-    +'<button class="btn-sm" onclick="saveApproval(\''+c.id+'\')" style="background:#C9A460;color:#fff;border:none;width:100%;height:36px;border-radius:6px;font-size:13px;font-weight:700;cursor:pointer">儲存核准記錄</button>'
-    +(existingApproval?'<div style="margin-top:8px;font-size:11px;color:#22C55E">✅ 已有核准記錄</div>':'')
-    +'</div>';
-
-  $('panel_content').innerHTML = html;
-  $('panel').classList.add('open');
-}
-
-function getSuggestDesc(product, score){
-  if(score>=82) return '條件優秀，核准機率高，可主動推薦多家銀行比較利率';
-  if(score>=68) return '條件良好，建議先送條件較寬鬆的銀行試試';
-  if(score>=55) return '條件尚可，建議補強收入證明或增加擔保品';
-  if(score>=40) return '條件偏弱，需要補件或改善聯徵紀錄';
-  return '建議暫緩申辦，改善條件後再評估';
-}
-
-function closePanel(){ $('panel').classList.remove('open'); }
-
-async function updateStatus(id, status){
-  try {
-    await fetch(SUPA_URL+'/rest/v1/applications?id=eq.'+id,{
-      method:'PATCH',headers:{...H,'Prefer':'return=minimal'},
-      body:JSON.stringify({status:status})
-    });
-    var c = allCases.find(function(x){return x.id==id;});
-    if(c){ c.status=status; }
-    renderCasesTable();
-    alert('✅ 狀態已更新為：'+status);
-    if(lineToken) sendLINENotify('案件狀態更新：'+(c?c.name:'')+'→ '+status);
-  } catch(e){ alert('更新失敗'); }
-}
-
-async function saveCRMNote(id){
-  var note = $('crm_note_input').value;
-  try {
-    await fetch(SUPA_URL+'/rest/v1/applications?id=eq.'+id,{
-      method:'PATCH',headers:{...H,'Prefer':'return=minimal'},
-      body:JSON.stringify({crm_note:note})
-    });
-    var c = allCases.find(function(x){return x.id==id;}); if(c) c.crm_note=note;
-    alert('✅ 備註已儲存');
-  } catch(e){ alert('儲存失敗'); }
-}
-
-async function saveApproval(id){
-  var company = document.getElementById('approve_company').value.trim();
-  var amount  = document.getElementById('approve_amount').value.trim();
-  var note    = document.getElementById('approve_note').value.trim();
-  if(!company && !amount){ alert('請填寫核准公司或金額'); return; }
-  try {
-    await fetch(SUPA_URL+'/rest/v1/applications?id=eq.'+id,{
-      method:'PATCH',
-      headers:{...H,'Prefer':'return=minimal'},
-      body:JSON.stringify({
-        approved_company: company||null,
-        approved_amount:  amount ? parseInt(amount) : null,
-        approved_note:    note||null,
-        status: '已核准'
-      })
-    });
-    var c=allCases.find(function(x){return x.id==id;});
-    if(c){ c.approved_company=company; c.approved_amount=parseInt(amount)||0; c.approved_note=note; c.status='已核准'; }
-    renderCasesTable();
-    alert('✅ 核准記錄已儲存！');
-  } catch(e){ alert('儲存失敗：'+e.message); }
-}
-
-
-// ── LINE 推播 ──
-async function sendLINENotify(msg){
-  if(!lineToken) return;
-  try {
-    await fetch('https://notify-api.line.me/api/notify',{
-      method:'POST',
-      headers:{'Authorization':'Bearer '+lineToken,'Content-Type':'application/x-www-form-urlencoded'},
-      body:'message='+encodeURIComponent('\n[FlowHub]\n'+msg)
-    });
-  } catch(e){ console.log('LINE notify failed',e); }
-}
-
-function saveLINEToken(){
-  var token = $('line_token').value.trim();
-  if(!token){ $('line_status').textContent='❌ 請輸入 Token'; return; }
-  lineToken = token;
-  localStorage.setItem('fh_line_token', token);
-  $('line_status').textContent='🔄 測試中...';
-  sendLINENotify('✅ FlowHub 推播通知已成功設定！\n業務：'+me.name+'\n\n新案件進來時，您會收到通知。').then(function(){
-    $('line_status').textContent='✅ 已成功測試，推播通知已啟用！';
-    showLINEStatus();
-  }).catch(function(){
-    $('line_status').textContent='⚠️ 測試失敗，請確認 Token 是否正確';
-  });
-}
-
-function showLINEStatus(){
-  if(!lineToken) return;
-  $('line_current').style.display='block';
-  $('line_current_desc').textContent='LINE 推播通知已啟用，新案件進來會自動通知您。Token：'+lineToken.substring(0,8)+'••••••';
-}
-
-function removeLINEToken(){
-  lineToken='';
-  localStorage.removeItem('fh_line_token');
-  $('line_current').style.display='none';
-  $('line_token').value='';
-  $('line_status').textContent='';
-}
-
-// ── PDF 匯出 ──
-function genPDF(caseId){
-  var c = allCases.find(function(x){return x.id==caseId;});
-  if(!c){ alert('找不到案件資料'); return; }
-
-  var scores = [
-    {n:'信貸',s:c.score_credit||0},{n:'汽機車貸',s:c.score_vehicle||0},
-    {n:'房貸',s:c.score_house||0},{n:'土地貸',s:c.score_land||0},
-    {n:'商品分期',s:c.score_goods||0},{n:'債務整合',s:c.score_debt_c||0}
-  ].filter(function(x){return x.s>0;}).sort(function(a,b){return b.s-a.s;});
-
-  var gi = function(s){ return s>=82?'A':s>=68?'B':s>=55?'C':s>=40?'D':'E'; };
-
-  var html = '<!DOCTYPE html><html><head><meta charset="UTF-8">'
-    +'<style>body{font-family:Arial,sans-serif;padding:40px;color:#2A1F0E;max-width:700px;margin:0 auto}'
-    +'.header{display:flex;align-items:center;gap:16px;margin-bottom:32px;padding-bottom:20px;border-bottom:2px solid #C9A460}'
-    +'.logo{width:48px;height:48px;background:#C9A460;border-radius:12px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:22px;font-weight:900;flex-shrink:0}'
-    +'.logo-text h1{font-size:18px;margin:0;color:#2A1F0E}.logo-text p{font-size:11px;color:#6B6560;margin:2px 0}'
-    +'.section{margin-bottom:24px}.section-title{font-size:14px;font-weight:700;color:#92400E;border-left:4px solid #C9A460;padding-left:10px;margin-bottom:12px}'
-    +'.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}'
-    +'.info-item{background:#FDF8F0;border-radius:8px;padding:10px 12px}'
-    +'.info-label{font-size:10px;color:#6B6560;margin-bottom:2px}.info-val{font-size:14px;font-weight:600;color:#2A1F0E}'
-    +'.score-card{background:#FDF8F0;border-radius:8px;padding:14px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center}'
-    +'.score-name{font-size:14px;font-weight:600}.score-num{font-size:24px;font-weight:900;color:#92400E}'
-    +'.grade-badge{padding:4px 12px;border-radius:99px;font-size:12px;font-weight:700}'
-    +'.grade-A{background:#DCFCE7;color:#16A34A}.grade-B{background:#DBEAFE;color:#2563EB}.grade-C{background:#FEF3C7;color:#D97706}.grade-D{background:#FFE4E6;color:#E11D48}.grade-E{background:#F1F5F9;color:#64748B}'
-    +'.footer{margin-top:40px;padding-top:16px;border-top:1px solid #E8D5A8;font-size:10px;color:#A09890;text-align:center}'
-    +'@media print{body{padding:20px}}'
-    +'</style></head><body>';
-
-  var date = new Date().toLocaleDateString('zh-TW');
-  html += '<div class="header"><div class="logo">F</div><div class="logo-text">'
-    +'<h1>FlowHub 貸款評估報告</h1><p>產生時間：'+date+' | 業務：'+me.name+'</p></div></div>';
-
-  html += '<div class="section"><div class="section-title">申請人資料</div><div class="info-grid">'
-    +'<div class="info-item"><div class="info-label">姓名</div><div class="info-val">'+(c.name||'—')+'</div></div>'
-    +'<div class="info-item"><div class="info-label">申請金額</div><div class="info-val">$'+Number(c.need_amount||0).toLocaleString()+'</div></div>'
-    +'<div class="info-item"><div class="info-label">月收入</div><div class="info-val">$'+Number(c.income||0).toLocaleString()+'</div></div>'
-    +'<div class="info-item"><div class="info-label">工作年資</div><div class="info-val">'+(c.sc_tenure||'—')+' 個月</div></div>'
-    +'<div class="info-item"><div class="info-label">薪資方式</div><div class="info-val">'+(c.salary_type||'—')+'</div></div>'
-    +'<div class="info-item"><div class="info-label">信用卡狀態</div><div class="info-val">'+(c.credit_card_status||'—')+'</div></div>'
-    +'</div></div>';
-
-  html += '<div class="section"><div class="section-title">FlowHub AI 評估結果</div>';
-  scores.forEach(function(s,i){
-    var g = gi(s.s);
-    var desc = i===0?'【最推薦】':i===1?'【次選方案】':'【備選方案】';
-    html += '<div class="score-card">'
-      +'<div><div class="score-name">'+desc+' '+s.n+'</div>'
-      +'<div style="font-size:11px;color:#6B6560;margin-top:4px">'+getSuggestDesc(s.n,s.s)+'</div></div>'
-      +'<div style="text-align:right"><div class="score-num">'+s.s+'</div>'
-      +'<div class="grade-badge grade-'+g+'">'+g+' 級</div></div></div>';
+  // ── 全部商品評分 2欄 ──
+  html += '<div style="font-size:11px;font-weight:600;color:#A09890;letter-spacing:.5px;margin-bottom:8px;text-transform:uppercase">全部商品評分</div>';
+  html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:16px">';
+  allScores.forEach(function(item,i){
+    var s=item.s; if(s===0)return;
+    var g=gi(s); var isTop=i===0;
+    html += '<div style="background:'+(isTop?gbg(g):'#FAFAF7')+';border:1px solid '+(isTop?gc(g):'#E8E4DC')+';border-radius:9px;padding:10px 12px">'
+      + '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px">'
+      + '<span style="font-size:12px;font-weight:600;color:#2A1F0E">'+item.n+(isTop?' ★':'')+'</span>'
+      + '<span style="font-size:11px;font-weight:700;color:'+gc(g)+';background:'+gbg(g)+';padding:1px 8px;border-radius:8px">'+g+'</span>'
+      + '</div>'
+      + '<div style="font-size:11px;color:#6B6560;margin-bottom:4px">'+s+' 分 ・ '+gdesc(s)+'</div>'
+      + '<div style="height:4px;background:#E8E4DC;border-radius:2px">'
+      + '<div style="width:'+Math.min(s,100)+'%;height:100%;background:'+gc(g)+';border-radius:2px;transition:width .4s"></div>'
+      + '</div></div>';
   });
   html += '</div>';
 
-  html += '<div class="footer">本報告由 FlowHub 經銷版 AI 評估系統自動產生，僅供業務參考使用。'
-    +'評估結果不代表銀行核准保證，最終核貸由各金融機構自行審核決定。'
-    +'© '+new Date().getFullYear()+' FlowHub 版權所有</div>';
-  html += '</body></html>';
+  // ── 商品分期推薦公司（大數據初版） ──
+  if((c.score_goods||0)>0||(c.has_fin==='yes')){
+    var inc=parseFloat(c.income)||0;
+    var ten=parseFloat(c.sc_tenure)||0;
+    var cc=c.credit_card_status||'';
+    var gs=Math.max(c.score_goods||0, 40); // 基礎分
 
-  var win = window.open('','_blank');
-  win.document.write(html);
-  win.document.close();
-  setTimeout(function(){ win.print(); }, 500);
-}
+    // 每家公司特色與條件（基於市場大數據）
+    var FIN_COS = [
+      {
+        id:'yingjiao', name:'銀角零卡', sub:'中租旗下・無卡分期',
+        color:'#185FA5', badge:'消費分期首選',
+        score:(function(){
+          var s=gs;
+          // 銀角：主打消費分期、額度3-30萬、門檻低
+          // 條件：18歲以上、有工作收入、信用正常
+          if(cc==='正常')s+=20; else if(cc==='最低')s+=5; else if(cc==='遲繳')s-=20; else if(cc==='停卡')s-=40;
+          if(ten>=6)s+=10; else if(ten>=3)s+=5; else s-=10;
+          if(inc>=20000)s+=10; else if(inc>=15000)s+=5; else s-=15;
+          // 適合消費型分期（手機、家電、購物）
+          if(c.loan_purpose==='消費'||c.loan_purpose==='週轉')s+=10;
+          if(parseInt(c.need_amount||0)<=200000)s+=10; else s-=10;
+          return Math.min(99,Math.max(0,s));
+        })(),
+        note:(function(){
+          if(cc==='停卡')return'停卡影響大，建議先修復';
+          if(inc<15000)return'收入偏低，通過率下降';
+          if(parseInt(c.need_amount||0)<=100000)return'小額消費分期，審核快速';
+          return '消費型首推，無卡分期最方便';
+        })()
+      },
+      {
+        id:'yufu', name:'裕富數位資融', sub:'裕融旗下・個人融資',
+        color:'#0F6E56', badge:'個貸穩定',
+        score:(function(){
+          var s=gs;
+          // 裕富/新鑫：個人信貸為主，收入門檻20-25萬/年
+          if(inc>=30000)s+=18; else if(inc>=22000)s+=10; else if(inc<18000)s-=20;
+          if(ten>=12)s+=15; else if(ten>=6)s+=8; else s-=12;
+          if(cc==='正常')s+=12; else if(cc==='最低')s+=3; else if(cc==='遲繳')s-=15; else if(cc==='停卡')s-=35;
+          var dti=(parseFloat(c.loan_burden||0)+Math.round(parseInt(c.need_amount||0)/36))/Math.max(inc,1);
+          if(dti<0.35)s+=8; else if(dti>0.5)s-=15;
+          if(c.has_car==='yes')s+=5;
+          return Math.min(99,Math.max(0,s));
+        })(),
+        note:(function(){
+          if(inc<18000)return'收入偏低，建議補強';
+          if(cc==='停卡')return'停卡退件率高';
+          if(ten>=12&&cc==='正常')return'正職薪轉，條件符合';
+          return '個人信貸穩定，可主力送件';
+        })()
+      },
+      {
+        id:'herun', name:'和潤企業', sub:'和泰集團・車貸強項',
+        color:'#854F0B', badge:'有車優先',
+        score:(function(){
+          var s=gs;
+          // 和潤：Toyota體系，車貸最強，有車加很多分
+          var hasCar=c.has_car==='yes'||c.has_moto==='yes';
+          if(hasCar)s+=30; else s-=20;
+          if(inc>=25000)s+=12; else if(inc>=18000)s+=5; else s-=12;
+          if(ten>=6)s+=10; else s-=10;
+          if(cc==='正常')s+=10; else if(cc==='遲繳')s-=15; else if(cc==='停卡')s-=30;
+          if(parseInt(c.need_amount||0)<=200000)s+=5; else if(parseInt(c.need_amount||0)>300000)s-=10;
+          return Math.min(99,Math.max(0,s));
+        })(),
+        note:(function(){
+          var hasCar=c.has_car==='yes'||c.has_moto==='yes';
+          if(hasCar)return'有車/機車，和潤最適合';
+          return '無車貸條件，建議優先送其他家';
+        })()
+      },
+      {
+        id:'c21', name:'21世紀(麻吉Pay)', sub:'PChome旗下・手機貸',
+        color:'#534AB7', badge:'小額快速',
+        score:(function(){
+          var s=gs;
+          // 21世紀/麻吉Pay：門檻最低，手機/機車小額，3-15萬
+          // 18-65歲，有工作收入即可
+          var amt=parseInt(c.need_amount||0);
+          if(amt<=120000)s+=25; else if(amt<=150000)s+=10; else s-=30; // 超過15萬不適合
+          if(inc>=15000)s+=10; else if(inc>=10000)s+=3; else s-=10;
+          if(ten>=3)s+=8; else s-=5;
+          if(cc==='停卡'||cc==='遲繳')s-=5; // 門檻低，信用影響較小
+          else if(cc==='正常')s+=8;
+          if(c.is_alert==='yes')s-=20; // 警示戶有機會但需保人
+          return Math.min(99,Math.max(0,s));
+        })(),
+        note:(function(){
+          var amt=parseInt(c.need_amount||0);
+          if(amt>150000)return'申請金額超出範圍（最高15萬）';
+          if(amt<=80000)return'小額快速，最快當天撥款';
+          return '信用小白/急需資金首選';
+        })()
+      },
+      {
+        id:'other', name:'其他融資公司', sub:'業務自填評估',
+        color:'#6B6560', badge:'依案件評估',
+        score: Math.round((gs + 50) / 2),
+        note:'請業務依客戶狀況自行評估適合的融資公司'
+      }
+    ];
 
-function exportPDF(type){
-  if(type==='commission'){
-    alert('📄 分潤報告匯出功能開發中，即將推出！');
+    FIN_COS.sort(function(a,b){return b.score-a.score;});
+
+    html += '<div style="background:#FDF8F0;border:1px solid #E8D5A8;border-radius:10px;padding:14px;margin-bottom:14px">';
+    html += '<div style="font-size:12px;font-weight:700;color:#92400E;margin-bottom:10px;display:flex;align-items:center;gap:6px">'
+      + '商品分期推薦公司 '
+      + '<span style="font-size:10px;font-weight:400;color:#A09890">（大數據初版，累積案例後AI優化）</span>'
+      + '</div>';
+
+    FIN_COS.forEach(function(co,i){
+      var isTop=i===0;
+      html += '<div style="margin-bottom:8px;padding-bottom:8px;border-bottom:'+(i<FIN_COS.length-1?'1px solid #F0EDE8':'none')+'">'
+        + '<div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">'
+        + '<span style="font-size:13px;font-weight:700;color:#2A1F0E;min-width:100px">'+co.name+'</span>'
+        + '<span style="font-size:10px;color:#6B6560">'+co.sub+'</span>'
+        + (isTop?'<span style="margin-left:auto;font-size:10px;background:#C9A460;color:#fff;padding:1px 8px;border-radius:8px;font-weight:700">首推</span>':'')
+        + '</div>'
+        + '<div style="display:flex;align-items:center;gap:8px">'
+        + '<div style="flex:1;height:6px;background:#E8D5A8;border-radius:3px">'
+        + '<div style="width:'+co.score+'%;height:100%;background:'+co.color+';border-radius:3px"></div></div>'
+        + '<span style="font-size:11px;color:#6B6560;min-width:32px;text-align:right;font-weight:600">'+Math.round(co.score)+'%</span>'
+        + '</div>'
+        + '<div style="font-size:11px;color:#6B6560;margin-top:3px">'+co.note+'</div>'
+        + '</div>';
+    });
+    html += '</div>';
   }
+
+  // ── 基本資料 ──
+  html += '<div class="crm-box"><div class="crm-title">基本資料</div>'
+    + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:4px 12px;font-size:12px;color:var(--mu);line-height:1.9">'
+    + '<span>📱 '+( c.phone||'—')+'</span>'
+    + '<span>💰 申請 $'+Number(c.need_amount||0).toLocaleString()+'</span>'
+    + '<span>💵 月收 $'+Number(c.income||0).toLocaleString()+'</span>'
+    + '<span>📅 年資 '+(c.sc_tenure||'—')+' 月</span>'
+    + '<span>🏢 '+(c.company||'未填')+'</span>'
+    + '<span>💳 信用卡 '+(c.credit_card_status||'—')+'</span>'
+    + '<span>🏠 '+(c.salary_type||'—')+'</span>'
+    + '<span style="color:'+(c.is_alert==='yes'?'#DC2626':'#16A34A')+'">'+(c.is_alert==='yes'?'⚠️ 警示戶':'✅ 信用正常')+'</span>'
+    + '</div></div>';
+
+  // ── 狀態按鈕（6個，一鍵切換）──
+  var curSt=c.status||'待處理';
+  var statuses=[
+    {s:'待處理',c:'#D97706',bg:'#FEF3C7'},
+    {s:'聯繫中',c:'#2563EB',bg:'#DBEAFE'},
+    {s:'補件中',c:'#7C3AED',bg:'#EDE9FE'},
+    {s:'已送件',c:'#0891B2',bg:'#CFFAFE'},
+    {s:'已核准',c:'#16A34A',bg:'#DCFCE7'},
+    {s:'未通過',c:'#DC2626',bg:'#FEE2E2'}
+  ];
+  var stBtns=statuses.map(function(st){
+    var isA=curSt===st.s;
+    return '<button data-cid="'+c.id+'" data-st="'+st.s+'" class="ch-st-btn" style="flex:1;min-width:60px;padding:8px 2px;border:1.5px solid '+(isA?st.c:'#E8D5A8')+';border-radius:7px;background:'+(isA?st.bg:'#fff')+';color:'+(isA?st.c:'#6B6560')+';font-size:11px;font-weight:'+(isA?'700':'500')+';cursor:pointer;font-family:inherit;transition:.15s">'+st.s+'</button>';
+  }).join('');
+  html+='<div class="crm-box"><div class="crm-title">案件狀態</div><div style="display:flex;gap:5px;flex-wrap:wrap">'+stBtns+'</div></div>';
+
+  // ── CRM 備註 ──
+  html+='<div class="crm-box"><div class="crm-title">業務備註</div>'
+    +'<textarea class="crm-note" id="crm_note_input" placeholder="記錄聯繫進度、補件狀況、溝通結果...">'+(c.crm_note||'')+'</textarea>'
+    +'<button data-cid="'+c.id+'" class="ch-save-crm" style="margin-top:6px;height:32px;padding:0 14px;border:1.5px solid var(--gm);border-radius:6px;font-size:12px;font-family:inherit;cursor:pointer;background:var(--gl);color:var(--gd);font-weight:600">儲存備註</button>'
+    +'</div>';
+
+  // ── 核准記錄（黃金框，高端感）──
+  var hasApprove=c.approved_company||c.approved_amount;
+  html+='<div style="background:linear-gradient(135deg,#FDF8F0,#FFFDF8);border:1.5px solid #C9A460;border-radius:12px;padding:16px;margin-bottom:12px">'
+    +'<div style="font-size:13px;font-weight:700;color:#92400E;margin-bottom:3px;display:flex;align-items:center;gap:6px">'
+    +'<span>核准記錄</span>'
+    +(hasApprove?'<span style="font-size:10px;background:#DCFCE7;color:#16A34A;padding:1px 7px;border-radius:8px;font-weight:600">已填寫</span>':'')
+    +'</div>'
+    +'<div style="font-size:11px;color:#A09890;margin-bottom:12px">填入核准結果，自動同步數據分析・業績統計</div>'
+    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">'
+    +'<div><div style="font-size:11px;color:#6B6560;margin-bottom:3px;font-weight:600">核准公司</div>'
+    +'<input id="approve_company" value="'+(c.approved_company||'')+'" placeholder="中租、裕富、玉山..." style="width:100%;height:38px;padding:0 10px;border:1.5px solid #E8D5A8;border-radius:7px;font-size:13px;font-family:inherit;outline:none;transition:.2s" onfocus="this.style.borderColor=\'#C9A460\'" onblur="this.style.borderColor=\'#E8D5A8\'"/></div>'
+    +'<div><div style="font-size:11px;color:#6B6560;margin-bottom:3px;font-weight:600">核准金額（元）</div>'
+    +'<input id="approve_amount" type="number" value="'+(c.approved_amount||'')+'" placeholder="如：200000" style="width:100%;height:38px;padding:0 10px;border:1.5px solid #E8D5A8;border-radius:7px;font-size:13px;font-family:inherit;outline:none;transition:.2s" onfocus="this.style.borderColor=\'#C9A460\'" onblur="this.style.borderColor=\'#E8D5A8\'"/></div>'
+    +'</div>'
+    +'<div style="margin-bottom:10px"><div style="font-size:11px;color:#6B6560;margin-bottom:3px;font-weight:600">方案備注（利率/期數/條件）</div>'
+    +'<input id="approve_note" value="'+(c.approved_note||'')+'" placeholder="例：年利率 9%，36期，需薪轉帳戶" style="width:100%;height:38px;padding:0 10px;border:1.5px solid #E8D5A8;border-radius:7px;font-size:13px;font-family:inherit;outline:none;transition:.2s" onfocus="this.style.borderColor=\'#C9A460\'" onblur="this.style.borderColor=\'#E8D5A8\'"/></div>'
+    +'<button data-cid="'+c.id+'" class="ch-save-approve" style="width:100%;height:40px;background:linear-gradient(135deg,#C9A460,#A07C3A);color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;letter-spacing:.3px">✓ 儲存核准記錄</button>'
+    +(hasApprove?'<div style="margin-top:10px;font-size:12px;color:#16A34A;font-weight:600">✅ 已核准：'+(c.approved_company||'')+(c.approved_amount?' ・ $'+Number(c.approved_amount).toLocaleString():'')+' </div>':'')
+    +'</div>';
+
+  $('panel_content').innerHTML=html;
+  $('panel').classList.add('open');
 }
 
-// ── 設定頁 ──
+// 事件委派 — panel 按鈕
+document.getElementById('panel').addEventListener('click',function(e){
+  var btn=e.target.closest('button');if(!btn)return;
+  var cid=btn.getAttribute('data-cid');
+  if(btn.classList.contains('ch-st-btn')&&cid){updateStatus(cid,btn.getAttribute('data-st'));}
+  else if(btn.classList.contains('ch-save-crm')&&cid){saveCRMNote(cid);}
+  else if(btn.classList.contains('ch-save-approve')&&cid){saveApproval(cid);}
+});
+
+function getSuggestDesc(product,score){if(score>=82)return'條件優秀，核准機率高';if(score>=68)return'條件良好，建議先送';if(score>=55)return'條件尚可，需補件';if(score>=40)return'條件偏弱，需補強';return'建議暫緩申辦';}
+function closePanel(){$('panel').classList.remove('open');}
+
+async function updateStatus(id,status){
+  try{
+    await fetch(SUPA_URL+'/rest/v1/applications?id=eq.'+id,{method:'PATCH',headers:{...H,'Prefer':'return=minimal'},body:JSON.stringify({status:status})});
+    var c=allCases.find(function(x){return x.id==id;});if(c)c.status=status;
+    renderCasesTable();filterAllCases();
+    alert('✅ 狀態已更新為：'+status);
+    if(lineToken)sendLINENotify('案件狀態更新：'+(c?c.name:'')+'→ '+status);
+  }catch(e){alert('更新失敗');}
+}
+async function saveCRMNote(id){
+  var note=$('crm_note_input').value;
+  try{await fetch(SUPA_URL+'/rest/v1/applications?id=eq.'+id,{method:'PATCH',headers:{...H,'Prefer':'return=minimal'},body:JSON.stringify({crm_note:note})});var c=allCases.find(function(x){return x.id==id;});if(c)c.crm_note=note;alert('✅ 備註已儲存');}catch(e){alert('儲存失敗');}
+}
+async function saveApproval(id){
+  var company=document.getElementById('approve_company').value.trim();
+  var amount=document.getElementById('approve_amount').value.trim();
+  var note=document.getElementById('approve_note').value.trim();
+  if(!company&&!amount){alert('請填寫核准公司或金額');return;}
+  try{
+    await fetch(SUPA_URL+'/rest/v1/applications?id=eq.'+id,{method:'PATCH',headers:{...H,'Prefer':'return=minimal'},body:JSON.stringify({approved_company:company||null,approved_amount:amount?parseInt(amount):null,approved_note:note||null,status:'已核准'})});
+    var c=allCases.find(function(x){return x.id==id;});if(c){c.approved_company=company;c.approved_amount=parseInt(amount)||0;c.approved_note=note;c.status='已核准';}
+    renderCasesTable();alert('✅ 核准記錄已儲存！');
+  }catch(e){alert('儲存失敗：'+e.message);}
+}
+
+async function sendLINENotify(msg){
+  if(!lineToken)return;
+  try{await fetch('https://notify-api.line.me/api/notify',{method:'POST',headers:{'Authorization':'Bearer '+lineToken,'Content-Type':'application/x-www-form-urlencoded'},body:'message='+encodeURIComponent('\n[FlowHub]\n'+msg)});}catch(e){}
+}
+function saveLINEToken(){
+  var token=$('line_token').value.trim();if(!token){$('line_status').textContent='❌ 請輸入 Token';return;}
+  lineToken=token;localStorage.setItem('fh_line_token',token);$('line_status').textContent='🔄 測試中...';
+  sendLINENotify('✅ FlowHub 推播通知已成功設定！\n業務：'+me.name+'\n\n新案件進來時，您會收到通知。').then(function(){$('line_status').textContent='✅ 已成功測試，推播通知已啟用！';showLINEStatus();}).catch(function(){$('line_status').textContent='⚠️ 測試失敗，請確認 Token 是否正確';});
+}
+function showLINEStatus(){if(!lineToken)return;$('line_current').style.display='block';$('line_current_desc').textContent='LINE 推播通知已啟用。Token：'+lineToken.substring(0,8)+'••••••';}
+function removeLINEToken(){lineToken='';localStorage.removeItem('fh_line_token');$('line_current').style.display='none';$('line_token').value='';$('line_status').textContent='';}
+
 function renderSettings(){
-  var planNames={basic:'基本版 $1,490/月',advanced:'進階版 $3,490/月',flagship:'旗艦版 $8,900/月',enterprise:'企業版 $18,000/月'};
-  $('plan_info').innerHTML =
-    '帳號類型：<strong>'+(me.type==='company'?'代辦公司':'個人業務')+'</strong><br>'
-    +'目前方案：<strong style="color:var(--gd)">'+(planNames[me.plan]||me.plan)+'</strong><br>'
-    +'帳號：<strong>'+me.u+'</strong><br>'
-    +(me.ch&&me.ch.trial_expires_at?'試用到期：<strong>'+fmtDate(me.ch.trial_expires_at)+'</strong><br>':'')
-    +'<br><a href="apply.html" style="color:var(--bl);font-size:13px">升級方案 →</a>';
+  var pn={basic:'基本版 $1,490/月',advanced:'進階版 $3,490/月',flagship:'旗艦版 $8,900/月',enterprise:'企業版 $18,000/月'};
+  $('plan_info').innerHTML='帳號類型：<strong>'+(me.type==='company'?'代辦公司':'個人業務')+'</strong><br>目前方案：<strong style="color:var(--gd)">'+(pn[me.plan]||me.plan)+'</strong><br>帳號：<strong>'+me.u+'</strong><br>'+(me.ch&&me.ch.trial_expires_at?'試用到期：<strong>'+fmtDate(me.ch.trial_expires_at)+'</strong><br>':'')+'<br><a href="apply.html" style="color:var(--bl);font-size:13px">升級方案 →</a>';
 }
-
-// 攔截 view 切換，在特定 view 時補充渲染
-var _showView = showView;
-showView = function(v){
-  _showView(v);
-  if(v==='v_stats') renderPerfStats();
-  if(v==='v_line') showLINEStatus();
-  if(v==='v_settings') renderSettings();
-};
-
-// 收到新案件時推播 LINE
-var lastCaseCount = 0;
-setInterval(async function(){
-  if(!me.u || !lineToken) return;
-  try {
-    var r = await fetch(SUPA_URL+'/rest/v1/applications?channel=eq.'+encodeURIComponent(chCode)+'&order=created_at.desc&limit=1&select=id,name,phone,created_at',{headers:H});
-    var data = await r.json();
-    if(data&&data.length&&lastCaseCount>0&&data.length>lastCaseCount){
-      var c = data[0];
-      sendLINENotify('🆕 新案件通知！\n客戶：'+(c.name||'未知')+'\n手機：'+(c.phone||'—')+'\n時間：'+fmtDate(c.created_at)+'\n\n請至 FlowHub 後台查看詳情');
-    }
-    lastCaseCount = data.length;
-  } catch(e){}
-}, 60000);
-
 
 function showMyLink(){
-  var base = 'https://elaborate-cassata-0ced26.netlify.app';
-  var url = base + '/index.html?ch=' + encodeURIComponent(chCode);
-  
-  var existing = document.getElementById('my_link_modal');
-  if(existing) existing.remove();
-  
-  var modal = document.createElement('div');
-  modal.id = 'my_link_modal';
-  modal.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.5);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px';
-  
-  var box = document.createElement('div');
-  box.style.cssText = 'background:#fff;border-radius:14px;padding:28px;width:480px;max-width:95vw';
-  
-  var title = document.createElement('div');
-  title.style.cssText = 'font-size:16px;font-weight:700;color:#2A1F0E;margin-bottom:6px';
-  title.textContent = '我的專屬填單連結';
-  
-  var sub = document.createElement('div');
-  sub.style.cssText = 'font-size:12px;color:#6B6560;margin-bottom:16px';
-  sub.textContent = '分享給客戶填寫，案件自動歸到您名下';
-  
-  var linkBox = document.createElement('div');
-  linkBox.id = 'my_link_url';
-  linkBox.style.cssText = 'background:#F5F4F0;border:1px solid #E8D5A8;border-radius:8px;padding:12px;word-break:break-all;font-size:13px;color:#2A1F0E;margin-bottom:16px;user-select:all';
-  linkBox.textContent = url;
-  
-  var btnRow = document.createElement('div');
-  btnRow.style.cssText = 'display:flex;gap:10px';
-  
-  var copyBtn = document.createElement('button');
-  copyBtn.style.cssText = 'flex:1;padding:11px;background:#C9A460;border:none;border-radius:8px;color:#fff;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit';
-  copyBtn.textContent = '📋 複製連結';
-  copyBtn.onclick = function(){
-    navigator.clipboard.writeText(url).then(function(){
-      copyBtn.textContent = '✅ 已複製！';
-      setTimeout(function(){ modal.remove(); }, 1200);
-    }).catch(function(){
-      var inp = document.createElement('input');
-      inp.value = url;
-      document.body.appendChild(inp);
-      inp.select();
-      document.execCommand('copy');
-      document.body.removeChild(inp);
-      copyBtn.textContent = '✅ 已複製！';
-      setTimeout(function(){ modal.remove(); }, 1200);
-    });
-  };
-  
-  var previewBtn = document.createElement('button');
-  previewBtn.style.cssText = 'padding:11px 16px;background:#fff;border:1.5px solid #E8D5A8;border-radius:8px;font-size:13px;cursor:pointer;font-family:inherit';
-  previewBtn.textContent = '開啟預覽';
-  previewBtn.onclick = function(){ window.open(url, '_blank'); };
-  
-  var closeBtn = document.createElement('button');
-  closeBtn.style.cssText = 'padding:11px 16px;background:#fff;border:1.5px solid #E8D5A8;border-radius:8px;font-size:13px;cursor:pointer;font-family:inherit';
-  closeBtn.textContent = '關閉';
-  closeBtn.onclick = function(){ modal.remove(); };
-  
-  var tip = document.createElement('div');
-  tip.style.cssText = 'margin-top:12px;font-size:11px;color:#A09890';
-  tip.textContent = '💡 可分享至 LINE、IG、貼到個人網站，客戶填完您會立即收到通知';
-  
-  btnRow.appendChild(copyBtn);
-  btnRow.appendChild(previewBtn);
-  btnRow.appendChild(closeBtn);
-  box.appendChild(title);
-  box.appendChild(sub);
-  box.appendChild(linkBox);
-  box.appendChild(btnRow);
-  box.appendChild(tip);
-  modal.appendChild(box);
-  document.body.appendChild(modal);
-  modal.addEventListener('click', function(e){ if(e.target===modal) modal.remove(); });
+  var base='https://elaborate-cassata-0ced26.netlify.app';
+  var url=base+'/index.html?ch='+encodeURIComponent(chCode);
+  var ex=document.getElementById('my_link_modal');if(ex)ex.remove();
+  var modal=document.createElement('div');modal.id='my_link_modal';
+  modal.style.cssText='position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.5);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px';
+  var box=document.createElement('div');box.style.cssText='background:#fff;border-radius:14px;padding:24px;width:480px;max-width:95vw';
+  box.innerHTML='<div style="font-size:16px;font-weight:700;margin-bottom:6px">我的專屬填單連結</div>'
+    +'<div style="font-size:12px;color:#6B6560;margin-bottom:14px">分享給客戶填寫，案件自動歸到您名下</div>'
+    +'<div style="background:#F5F4F0;border:1px solid #E8D5A8;border-radius:8px;padding:12px;word-break:break-all;font-size:13px;margin-bottom:14px;user-select:all">'+url+'</div>'
+    +'<div style="display:flex;gap:8px">'
+    +'<button id="ml_copy" style="flex:1;padding:11px;background:#C9A460;border:none;border-radius:8px;color:#fff;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit">📋 複製連結</button>'
+    +'<button onclick="window.open(\''+url+'\',\'_blank\')" style="padding:11px 14px;background:#fff;border:1.5px solid #E8D5A8;border-radius:8px;font-size:13px;cursor:pointer;font-family:inherit">預覽</button>'
+    +'<button onclick="document.getElementById(\'my_link_modal\').remove()" style="padding:11px 14px;background:#fff;border:1.5px solid #E8D5A8;border-radius:8px;font-size:13px;cursor:pointer;font-family:inherit">關閉</button>'
+    +'</div>'
+    +'<div style="margin-top:10px;font-size:11px;color:#A09890">💡 可分享至 LINE、IG、貼到個人網站，客戶填完您會立即收到通知</div>';
+  modal.appendChild(box);document.body.appendChild(modal);
+  document.getElementById('ml_copy').onclick=function(){
+    navigator.clipboard.writeText(url).then(function(){this.textContent='✅ 已複製！';var m=document.getElementById('my_link_modal');setTimeout(function(){if(m)m.remove();},1200);}.bind(this)).catch(function(){var inp=document.createElement('input');inp.value=url;document.body.appendChild(inp);inp.select();document.execCommand('copy');document.body.removeChild(inp);this.textContent='✅ 已複製！';}.bind(this));};
+  modal.addEventListener('click',function(e){if(e.target===modal)modal.remove();});
 }
+
+// ═══ 手機版 Sidebar 開關 ═══
+window.toggleSidebar=function(){
+  var sb=document.getElementById('sidebar'),hb=document.getElementById('hamburger'),ov=document.getElementById('mob_overlay');
+  if(!sb)return;var o=sb.classList.toggle('open');
+  if(hb)hb.classList.toggle('open',o);if(ov)ov.classList.toggle('show',o);
+};
+window.closeSidebar=function(){
+  var sb=document.getElementById('sidebar'),hb=document.getElementById('hamburger'),ov=document.getElementById('mob_overlay');
+  if(sb)sb.classList.remove('open');if(hb)hb.classList.remove('open');if(ov)ov.classList.remove('show');
+};
 </script>
-</body>
-</html>
+</body></html>
