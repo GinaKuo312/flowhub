@@ -333,13 +333,71 @@ select{background-image:url("data:image/svg+xml,%3Csvg width='12' height='8' vie
     <div class="field">
       <div class="lbl">工作性質<span class="req">*</span></div>
       <div class="opts">
-        <button class="opt" data-v="正職" onclick="pf('job',this)">👔 正職員工</button>
-        <button class="opt" data-v="自營" onclick="pf('job',this)">🏪 自營/老闆</button>
-        <button class="opt" data-v="兼職" onclick="pf('job',this)">🕐 兼職/接案</button>
-        <button class="opt" data-v="臨時" onclick="pf('job',this)">📋 臨時/約聘</button>
+        <button class="opt" data-v="正職" onclick="pf('job',this);tog('blk_biz',false)">👔 正職員工</button>
+        <button class="opt" data-v="自營" onclick="pf('job',this);tog('blk_biz',true)">🏪 自營/老闆</button>
+        <button class="opt" data-v="兼職" onclick="pf('job',this);tog('blk_biz',false)">🕐 兼職/接案</button>
+        <button class="opt" data-v="臨時" onclick="pf('job',this);tog('blk_biz',false)">📋 臨時/約聘</button>
       </div>
       <div class="err" id="e_job">請選擇工作性質</div>
     </div>
+    <!-- 自營商企業資訊（選自營才顯示）-->
+    <div class="coll" id="blk_biz" style="background:linear-gradient(135deg,#FDF8F0,#FFFBF5);border:1px solid #E8D5A8;border-radius:10px;padding:14px;margin-bottom:12px">
+      <div style="font-size:12px;font-weight:700;color:#92400E;margin-bottom:12px">🏢 企業/行號資訊（影響可申辦方案）</div>
+
+      <div class="field">
+        <div class="lbl">是否有公司/行號登記？<span class="req">*</span></div>
+        <div class="opts">
+          <button class="opt" onclick="fd.biz_reg='yes';pg('g_bizreg',this);tog('blk_biz2',true)">✅ 有登記（公司/行號）</button>
+          <button class="opt" onclick="fd.biz_reg='no';pg('g_bizreg',this);tog('blk_biz2',false)">❌ 無登記（個人/攤販）</button>
+        </div>
+        <div class="err" id="e_bizreg">請選擇</div>
+      </div>
+
+      <div class="coll" id="blk_biz2">
+        <div class="field">
+          <div class="lbl">公司/行號成立多久？</div>
+          <div class="opts">
+            <button class="opt" onclick="fd.biz_age='lt1';pg('g_bizage',this)">📅 未滿 1 年</button>
+            <button class="opt" onclick="fd.biz_age='1to3';pg('g_bizage',this)">📅 1–3 年</button>
+            <button class="opt" onclick="fd.biz_age='gt3';pg('g_bizage',this)">📅 3 年以上</button>
+          </div>
+        </div>
+
+        <div class="field">
+          <div class="lbl">年營業額大約？</div>
+          <div class="opts">
+            <button class="opt" onclick="fd.biz_rev='lt100';pg('g_bizrev',this)">💰 100 萬以下</button>
+            <button class="opt" onclick="fd.biz_rev='100to500';pg('g_bizrev',this)">💰 100–500 萬</button>
+            <button class="opt" onclick="fd.biz_rev='gt500';pg('g_bizrev',this)">💰 500 萬以上</button>
+          </div>
+        </div>
+
+        <div class="field">
+          <div class="lbl">是否有正常申報稅務？（401報表）</div>
+          <div class="opts">
+            <button class="opt" onclick="fd.biz_tax='yes';pg('g_biztax',this)">✅ 有正常報稅</button>
+            <button class="opt" onclick="fd.biz_tax='no';pg('g_biztax',this)">❌ 未報稅/剛開始</button>
+          </div>
+        </div>
+
+        <div class="field">
+          <div class="lbl">公司票債信用狀況</div>
+          <div class="opts">
+            <button class="opt" onclick="fd.biz_credit='ok';pg('g_bizcredit',this)">✅ 正常（無退票）</button>
+            <button class="opt" onclick="fd.biz_credit='bad';pg('g_bizcredit',this)">⚠️ 曾有退票/訴訟</button>
+          </div>
+        </div>
+
+        <div class="field">
+          <div class="lbl">是否為加盟業者？</div>
+          <div class="opts">
+            <button class="opt" onclick="fd.biz_franchise='yes';pg('g_bizfr',this)">🏪 是（有加盟合約）</button>
+            <button class="opt" onclick="fd.biz_franchise='no';pg('g_bizfr',this)">❌ 否（自行開業）</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div class="field">
       <div class="lbl">是否有勞保投保？<span class="req">*</span></div>
       <div class="opts">
