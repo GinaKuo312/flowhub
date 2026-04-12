@@ -362,7 +362,8 @@ function openCase(id){
     {n:'房貸',      s:c.score_house||0},
     {n:'土地貸',    s:c.score_land||0},
     {n:'商品分期',  s:c.score_goods||0},
-    {n:'債務整合',  s:c.score_debt_c||0}
+    {n:'債務整合',  s:c.score_debt_c||0},
+    {n:'企業貸',    s:c.score_biz_loan||0}
   ].sort(function(a,b){return b.s-a.s;});
 
   var validScores = allScores.filter(function(x){return x.s>0;});
@@ -570,6 +571,27 @@ function openCase(id){
     +'<button data-cid="'+c.id+'" class="ch-save-status" style="width:100%;height:36px;background:#2A1F0E;color:#fff;border:none;border-radius:7px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;letter-spacing:.3px">💾 儲存狀態</button>'
     +'<div id="status_saved_msg" style="font-size:11px;color:#16A34A;margin-top:5px;min-height:16px"></div>'
     +'</div>';
+
+  // ── 企業貸建議（自營商才顯示）──
+  if(c.sc_job_type==='自營' && (c.score_biz_loan||0)>0){
+    var bc2=c.score_biz_loan>=80?'#16A34A':c.score_biz_loan>=60?'#2563EB':'#D97706';
+    var bb2=c.score_biz_loan>=80?'#DCFCE7':c.score_biz_loan>=60?'#DBEAFE':'#FEF3C7';
+    html+='<div class="crm-box" style="border:1.5px solid '+bc2+';background:'+bb2+'">'
+      +'<div class="crm-title" style="color:'+bc2+'">🏢 企業貸 / 負責人信貸</div>'
+      +'<div style="font-size:13px;font-weight:700;color:#2A1F0E;margin-bottom:4px">'+(c.biz_suggest_type||'建議諮詢貸款專員')+'</div>'
+      +'<div style="font-size:11px;color:#6B6560;line-height:1.6;margin-bottom:8px">'+(c.biz_suggest_note||'')+'</div>'
+      +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:12px;margin-bottom:8px">'
+      +'<div style="background:#fff;border-radius:6px;padding:6px 9px"><span style="color:#6B6560">建議申辦</span><br><strong>'+(c.biz_suggest_amt?c.biz_suggest_amt+'萬':'洽詢')+'</strong></div>'
+      +'<div style="background:#fff;border-radius:6px;padding:6px 9px"><span style="color:#6B6560">公司評分</span><br><strong style="color:'+bc2+'">'+( c.score_biz_loan||0)+'分</strong></div>'
+      +'</div>'
+      +'<div style="background:#fff;border-radius:6px;padding:8px 10px;font-size:11px;display:grid;grid-template-columns:1fr 1fr;gap:4px">'
+      +'<div>登記：'+(c.biz_reg==='yes'?'✅ 有':'❌ 無')+'</div>'
+      +'<div>報稅：'+(c.biz_tax==='yes'?'✅ 有':'❌ 無')+'</div>'
+      +'<div>年資：'+(c.biz_age==='gt3'?'3年+':c.biz_age==='1to3'?'1-3年':'未滿1年')+'</div>'
+      +'<div>加盟：'+(c.biz_franchise==='yes'?'✅ 是':'否')+'</div>'
+      +'</div>'
+      +'</div>';
+  }
 
   // ── CRM 備註 ──
   html+='<div class="crm-box"><div class="crm-title">業務備註</div>'

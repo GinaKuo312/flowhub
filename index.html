@@ -977,6 +977,12 @@ function v2(){
   fd.co_chk = 'yes';
   fd.burden=id('f_bur').value||'0';
   fd.debt=id('f_dbt').value||'0';
+  // 自營商：有登記才需要驗證 biz_reg
+  if(fd.job === '自營' && !fd.biz_reg){
+    sh('e_bizreg'); ok=false;
+  } else if(id('e_bizreg')) {
+    hd('e_bizreg');
+  }
   return ok;
 }
 
@@ -1412,6 +1418,84 @@ function calcScores(){
   }
   // 不需要整合則不顯示此選項
 
+
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  //  7. 企業貸 / 負責人信貸（自營商專屬）
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  if(fd.job === '自營'){
+    // 無登記 → 直接封鎖
+    if(!fd.biz_reg || fd.biz_reg === 'no'){
+      res.biz_loan = {s:0, n:'企業貸/負責人信貸', i:'🏢', d:'需有公司或行號登記才可申辦', type:'block'};
+    } else if(fd.biz_credit === 'bad'){
+      // 退票/訴訟 → 封鎖
+      res.biz_loan = {s:0, n:'企業貸/負責人信貸', i:'🏢', d:'公司票債信用異常，暫不建議申辦', type:'block'};
+    } else {
+      var bs = 40; // 基礎分
+
+      // 成立年限
+      if(fd.biz_age === 'gt3')       bs += 25;
+      else if(fd.biz_age === '1to3') bs += 15;
+      else if(fd.biz_age === 'lt1')  bs -= 10; // 未滿1年走政府貸款
+
+      // 年營收
+      if(fd.biz_rev === 'gt500')       bs += 25;
+      else if(fd.biz_rev === '100to500') bs += 15;
+      else if(fd.biz_rev === 'lt100')  bs += 0;
+
+      // 有正常報稅
+      if(fd.biz_tax === 'yes')   bs += 20;
+      else if(fd.biz_tax === 'no') bs -= 15;
+
+      // 加盟業者額外加分（銀行最愛）
+      if(fd.biz_franchise === 'yes') bs += 15;
+
+      // 負責人個人信用加分
+      bs += ccScore(10, -5, -20, -40, 0);
+      bs += dtiScore(false);
+
+      // 計算建議申辦金額
+      var inc2 = parseInt(fd.income)||0;
+      var biz_rev_val = fd.biz_rev==='gt500'?500 : fd.biz_rev==='100to500'?200 : 50; // 萬
+      var suggest_amt = 0;
+      var suggest_type = '';
+      var suggest_note = '';
+
+      if(fd.biz_age === 'lt1'){
+        // 未滿1年 → 政府微型創業貸款
+        suggest_type = '政府微型創業貸款';
+        suggest_amt  = 200;
+        suggest_note = '勞動部方案，最高200萬，需參加18小時創業課程';
+      } else if(fd.biz_rev === 'lt100' || !fd.biz_rev){
+        // 小額 → 台灣銀行小額小微 / 負責人個人信貸
+        suggest_type = '負責人個人信貸 / 小額企業貸';
+        suggest_amt  = Math.min(100, Math.round(inc2*12/10000));
+        suggest_note = '月收入×12，建議先以負責人名義申辦個人信貸';
+      } else if(fd.biz_franchise === 'yes'){
+        // 加盟業者 → 特定銀行加盟方案
+        suggest_type = '加盟業者專案信貸';
+        suggest_amt  = Math.min(500, biz_rev_val * 0.8);
+        suggest_note = '有加盟合約可拿到較優惠利率（中信/台新/永豐）';
+      } else if(fd.biz_rev === 'gt500'){
+        // 大額 → 企業貸款
+        suggest_type = '中小企業貸款';
+        suggest_amt  = Math.min(1000, biz_rev_val * 0.6);
+        suggest_note = '年營收500萬以上，建議申辦企業貸款，額度最高1000萬';
+      } else {
+        // 一般 → 中小額企業貸
+        suggest_type = '負責人信貸 / 中小企業貸';
+        suggest_amt  = Math.min(300, biz_rev_val * 0.5);
+        suggest_note = '建議先試負責人信貸（快速），額度不足再申企業貸';
+      }
+
+      // 儲存建議到全域
+      window.bizLoanSuggest = {type: suggest_type, amt: suggest_amt, note: suggest_note};
+
+      var bizScore = Math.min(100, Math.max(0, bs));
+      var bizDesc  = suggest_type + '，建議申辦 ' + suggest_amt + '萬元';
+      res.biz_loan = {s: bizScore, n:'企業貸/負責人信貸', i:'🏢', d: bizDesc, suggest: window.bizLoanSuggest};
+    }
+  }
+
   return res;
 }
 
@@ -1447,7 +1531,7 @@ async function doSubmit(){
   var scores = calcScores();
 
   // ── 安全找最佳商品（避免 undefined.s 崩潰）──
-  var allKeys = ['credit','vehicle','house','land','goods','debt_consolidation'];
+  var allKeys = ['credit','vehicle','house','land','goods','debt_consolidation','biz_loan'];
   var validKeys = allKeys.filter(function(k){
     return scores[k] && typeof scores[k].s === 'number' && scores[k].s > 0;
   });
@@ -1532,7 +1616,18 @@ async function doSubmit(){
     fin_co_other:        fd.fin_co_other || null,
     fin_status:          fd.fin_status || null,
     fin_quality:         fd.fin_quality || null,
-    fin_score:           parseFloat(window.finScore)||0
+    fin_score:           parseFloat(window.finScore)||0,
+    biz_reg:             fd.biz_reg       || null,
+    biz_age:             fd.biz_age       || null,
+    biz_rev:             fd.biz_rev       || null,
+    biz_tax:             fd.biz_tax       || null,
+    biz_credit:          fd.biz_credit    || null,
+    biz_franchise:       fd.biz_franchise || null,
+    score_biz_loan:      scores.biz_loan  ? parseFloat(scores.biz_loan.s)||0 : 0,
+    biz_suggest_type:    (window.bizLoanSuggest&&window.bizLoanSuggest.type) || null,
+    biz_suggest_amt:     (window.bizLoanSuggest&&window.bizLoanSuggest.amt)  || null,
+    biz_suggest_note:    (window.bizLoanSuggest&&window.bizLoanSuggest.note) || null,
+    labor_insurance:     fd.labor || null
   };
 
   // ── 送出到 Supabase（10秒 timeout）──
