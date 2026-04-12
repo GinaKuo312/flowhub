@@ -348,9 +348,9 @@ tr:hover td{background:#FDFBF7;cursor:pointer}
     <div class="fl">帳號</div>
     <input class="fi" type="text" id="u" placeholder="帳號" autocomplete="username"/>
     <div class="fl">密碼</div>
-    <input class="fi" type="password" id="p" placeholder="密碼" autocomplete="current-password"/>
+    <input class="fi" type="password" id="p" placeholder="密碼" autocomplete="current-password" onkeydown="if(event.key==='Enter'){document.getElementById('lbtn_submit').click();}"/>
     <div class="lerr" id="lerr"></div>
-    <button class="lbtn" id="lbtn_submit" onclick="(function(){var u=document.getElementById('u').value.trim();var p=document.getElementById('p').value.trim();doLogin(u,p);})()">登入後台</button>
+    <button class="lbtn" id="lbtn_submit" onclick="(function(){var u=document.getElementById('u').value.trim();var p=document.getElementById('p').value.trim();if(!u||!p){document.getElementById('lerr').textContent='請填寫帳號和密碼';return;}doLogin(u,p);})()" style="width:100%">登入後台</button>
   </div>
 </div>
 
@@ -595,18 +595,38 @@ tr:hover td{background:#FDFBF7;cursor:pointer}
 
 </div><!-- /app -->
 
-<!-- Toast 通知 -->
-<div id="toast_area" style="position:fixed;bottom:24px;right:24px;z-index:9999;
-     display:flex;flex-direction:column;gap:8px;pointer-events:none"></div>
+<script>
+window.initApp = function(u, name, role, chCode){
+  ME=u; ROLE=role; CH=chCode;
+  $('lp').style.display='none';
+  $('app').style.display='block';
+  $('top_user').textContent=name;
+  if($('sb_name')) $('sb_name').textContent=name;
+  if($('sb_role')) $('sb_role').textContent=role==='admin'?'系統管理員':role==='staff'?'內部人員':'合作通路';
+  $('set_url').value=SUPA_URL;
+  // 通路帳號限制
+  if(role==='channel'){
+    ['nav_stats','nav_commission','nav_channels','nav_ch_setup','nav_settings'].forEach(function(id){ var e=$(id); if(e) e.style.display='none'; });
+  }
+  loadAll();
+}
 
-
-<script>var ME=null,ROLE=null,CH=null,cases=[],CHANNELS={};
+var ME=null,ROLE=null,CH=null,cases=[],CHANNELS={};
 
 window.doLogin = async function(u, p){
   var err = document.getElementById('lerr');
+  // 管理員帳號
   if(u === 'flowhub312' && p === 'Aa1234'){
     err.textContent = '';
-    if(window.initApp) window.initApp(u, 'FlowHub 管理員', 'admin', null);
+    // 確保 initApp 已定義（等 DOM 完全載入）
+    if(typeof window.initApp === 'function'){
+      window.initApp(u, 'FlowHub 管理員', 'admin', null);
+    } else {
+      setTimeout(function(){
+        if(typeof window.initApp === 'function')
+          window.initApp(u, 'FlowHub 管理員', 'admin', null);
+      }, 300);
+    }
     return;
   }
   try {
@@ -878,7 +898,8 @@ function genSuggestion(c) {
     house:   c.score_house   || 0,
     land:    c.score_land    || 0,
     goods:   c.score_goods   || 0,
-    debt_c:  c.score_debt_c  || 0
+    debt_c:  c.score_debt_c  || 0,
+    biz_loan: c.score_biz_loan || 0
   };
 
   var products     = [];
@@ -954,20 +975,7 @@ function genSuggestion(c) {
 }
 
 
-window.initApp = function(u, name, role, chCode){
-  ME=u; ROLE=role; CH=chCode;
-  $('lp').style.display='none';
-  $('app').style.display='block';
-  $('top_user').textContent=name;
-  if($('sb_name')) $('sb_name').textContent=name;
-  if($('sb_role')) $('sb_role').textContent=role==='admin'?'系統管理員':role==='staff'?'內部人員':'合作通路';
-  $('set_url').value=SUPA_URL;
-  // 通路帳號限制
-  if(role==='channel'){
-    ['nav_stats','nav_commission','nav_channels','nav_ch_setup','nav_settings'].forEach(function(id){ var e=$(id); if(e) e.style.display='none'; });
-  }
-  loadAll();
-}
+window.// initApp moved to top
 
 window.logout = function(){
   ME=ROLE=CH=null; cases=[]; CHANNELS={};
@@ -1466,18 +1474,18 @@ window.openPanel = function(caseId){
     row('公司名稱', c.company)
     +row('公司電話', c.company_tel)
     +row('工作性質', c.sc_job_type)
-    +row('工作年資', c.sc_tenure?c.sc_tenure+'個月':'—')
+    +row('工作年資',c.sc_tenure?c.sc_tenure+'個月':'—')+row('有無勞保',c.labor_insurance==='yes'?'✅ 有勞保':c.labor_insurance==='no'?'❌ 無勞保':'—')
     +row('月收入', c.income?'$'+Number(c.income).toLocaleString():'—', c.income>=30000?'#16A34A':c.income<20000?'#DC2626':'')
-    +row('薪資方式', c.salary_type)
-    +row('有無勞保', c.labor==='yes'?'✅ 有勞保':'❌ 無勞保', c.labor==='yes'?'#16A34A':'#DC2626')
+    +row('薪資方式', c.salary_type==='transfer'?'✅ 薪轉帳戶':c.salary_type==='cash'?'現金/支票':c.salary_type||'—')
+    +row('有無勞保', c.labor_insurance==='yes'?'✅ 有勞保':c.labor_insurance==='no'?'❌ 無勞保':'—', c.labor==='yes'?'#16A34A':'#DC2626')
     +row('薪資轉帳', c.sc_salary_transfer==='有'?'✅ 有':'❌ 無', c.sc_salary_transfer==='有'?'#16A34A':'#DC2626')
-    +row('收入佐證', c.sc_income_proof)
+    +row('薪轉帳戶',c.sc_salary_transfer==='yes'?'✅ 有薪轉':'無薪轉')+row('收入佐證',c.sc_income_proof)
     +row('居住狀況', c.sc_residence)
-    +row('手機本人', c.sc_phone_owner==='是'?'✅ 是':'否')
+    +row('手機本人', (c.sc_phone_owner==='是'||c.sc_phone_owner==='yes')?'✅ 本人門號':'非本人')
   );
 
   h+=section('信用狀況',
-    row('有無信用卡', c.has_credit_card==='yes'?'有':'無')
+    row('有無信用卡', c.has_credit_card==='yes'?'✅ 有信用卡':'無信用卡')
     +row('信用卡繳款', c.credit_card_status, c.credit_card_status==='正常'?'#16A34A':c.credit_card_status==='停卡'?'#DC2626':'')
     +row('信用卡銀行', c.credit_card_bank)
     +row('銀行查詢(3月)', (c.query_bank||'0')+'次', parseInt(c.query_bank)>2?'#DC2626':'')
@@ -1499,7 +1507,7 @@ window.openPanel = function(caseId){
 
   if(c.has_fin==='yes'){
     h+=section('過去融資分期',
-      row('配合公司', Array.isArray(c.fin_cos)?c.fin_cos.join('、'):(c.fin_cos||'—'))
+      row('配合公司', (c.fin_cos?c.fin_cos.split(',').join('、'):'—'))
       +row('其他公司', c.fin_co_other||'—')
       +row('繳款狀態', c.fin_status)
       +row('繳款品質', c.fin_quality, c.fin_quality==='normal'?'#16A34A':c.fin_quality&&c.fin_quality.includes('late')?'#DC2626':'')
@@ -2240,6 +2248,12 @@ window.closeSidebar = function(){
   if(ov) ov.classList.remove('show');
 };
 // 點 nav 項目後自動關閉 sidebar（手機版）
+document.addEventListener('click', function(e){
+  if(e.target.classList.contains('nb') && window.innerWidth <= 768){
+    window.closeSidebar();
+  }
+});
+// nav 項目後自動關閉 sidebar（手機版）
 document.addEventListener('click', function(e){
   if(e.target.classList.contains('nb') && window.innerWidth <= 768){
     window.closeSidebar();
