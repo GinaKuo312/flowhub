@@ -576,7 +576,6 @@
 <div class="copyright-bar">&copy; 2026 FlowHub. All rights reserved. 未經授權禁止複製或使用本系統。</div>
 <div id="toast" class="toast hidden"></div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pako/2.1.0/pako.min.js"></script>
 <script>
 const ADMIN_PW='Aa1234';
 let adminUnlocked=false;
@@ -981,18 +980,9 @@ function getStoreUrl(storeId){
     compact.f.push([idx,plans]);
   });
   const json=JSON.stringify(compact);
-  // zlib 壓縮（使用 pako，若無則 fallback 到純 b64）
-  try{
-    if(window.pako){
-      const compressed=window.pako.deflate(new TextEncoder().encode(json));
-      const b64=btoa(String.fromCharCode(...compressed))
-        .replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
-      return base+'#z='+b64;
-    }
-  }catch(e){}
-  // Fallback: 純 base64
+  // 純 base64（不依賴外部函式庫）
   const b64=btoa(unescape(encodeURIComponent(json)));
-  return base+'#c='+b64;
+  return base+'#z='+b64;
 }
 
 function _decodeZHash(hash){
@@ -1003,11 +993,7 @@ function _decodeZHash(hash){
     const bytes=new Uint8Array(bin.length);
     for(let i=0;i<bin.length;i++)bytes[i]=bin.charCodeAt(i);
     let json;
-    if(window.pako){
-      json=new TextDecoder().decode(window.pako.inflate(bytes));
-    } else {
-      json=decodeURIComponent(escape(bin)); // fallback
-    }
+    json=decodeURIComponent(escape(bin));
     const cd=JSON.parse(json);
     if(!cd||!cd.n||!cd.f)return null;
     const vs={id:'_portable',name:cd.n,note:'',active:true,
