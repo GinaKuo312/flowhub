@@ -125,14 +125,7 @@
   .rt tr:nth-child(even) td{background:var(--g50)}
   .rt tr:hover td{background:var(--cream-dark)}
   .rt .period{font-weight:700;color:var(--g600);font-size:15px}
-  .rt .period span{
-    display:inline-flex;align-items:center;justify-content:center;
-    background:linear-gradient(135deg,#6b5740,#8b7355);
-    color:#fff;font-size:13px;font-weight:800;
-    width:56px;height:56px;border-radius:12px;
-    box-shadow:0 3px 8px rgba(107,87,64,.25);
-    letter-spacing:.3px
-  }
+  .rt .period span{display:inline-flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#6b5740,#8b7355);color:#fff;font-size:13px;font-weight:800;width:56px;height:56px;border-radius:12px;box-shadow:0 3px 8px rgba(107,87,64,.25);letter-spacing:.3px}
   .rt .monthly{font-size:20px;font-weight:800;color:var(--brand-dark);letter-spacing:.5px}
   .rt .note{font-size:11px;color:var(--g400);font-style:italic;padding:10px 18px;background:var(--g50)}
 
@@ -256,6 +249,10 @@
   .st-fc-add button{padding:4px 10px;background:var(--brand);color:#fff;border:none;border-radius:5px;font-size:11px;cursor:pointer;font-weight:600}
 
   /* Store Link */
+  .expiry-badge{display:inline-block;padding:3px 8px;border-radius:8px;font-size:12px;font-weight:700;line-height:1.4;text-align:center}
+  .expiry-ok{color:var(--text-light)}
+  .expiry-warn{background:#fff8e8;color:#8a6d00}
+  .expiry-expired{background:#fce8e6;color:var(--red)}
   .store-link{display:flex;align-items:center;gap:6px;margin-top:6px}
   .store-link input{flex:1;padding:5px 8px;border:1px solid var(--g200);border-radius:6px;font-size:11px;color:var(--text-light);background:var(--cream);cursor:text}
   .store-link button{padding:4px 10px;background:var(--gold-pale);color:var(--gold-deep);border:1px solid var(--gold-light);border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap;transition:.2s}
@@ -271,40 +268,6 @@
   .disb-toggle-btn{padding:4px 12px;border:1px solid var(--sage-lt);background:var(--sage-bg);color:var(--sage-dark);border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;transition:.2s}
   .disb-toggle-btn:hover{background:var(--sage-lt)}
   .disb-toggle-btn.revealed{background:var(--cream-dark);border-color:var(--g300);color:var(--text-light)}
-
-  /* ===== SHARE MODAL ===== */
-  .share-modal-wrap{max-width:540px}
-  .share-hero{display:flex;gap:24px;align-items:flex-start;flex-wrap:wrap;margin-bottom:20px}
-  .share-qr-box{
-    flex-shrink:0;width:160px;height:160px;border-radius:14px;
-    border:2px solid var(--gold-light);background:var(--white);
-    display:flex;align-items:center;justify-content:center;
-    box-shadow:var(--shadow-md);overflow:hidden;position:relative
-  }
-  .share-qr-box canvas{display:block}
-  .share-qr-box .qr-loading{font-size:11px;color:var(--g400);text-align:center;padding:8px}
-  .share-info{flex:1;min-width:180px;display:flex;flex-direction:column;gap:10px}
-  .share-store-label{font-size:13px;font-weight:700;color:var(--brand);text-transform:uppercase;letter-spacing:1px}
-  .share-store-name{font-size:20px;font-weight:800;color:var(--brand-dark);line-height:1.2}
-  .share-store-meta{font-size:12px;color:var(--text-muted)}
-  .share-url-box{background:var(--cream);border:1.5px solid var(--g200);border-radius:10px;padding:10px 12px;font-size:11px;color:var(--text-light);word-break:break-all;line-height:1.5;cursor:text;font-family:monospace;max-height:60px;overflow-y:auto}
-  .share-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:4px}
-  .share-btn-copy{
-    flex:1;padding:11px 16px;
-    background:linear-gradient(135deg,var(--brand-dark),var(--brand-light));
-    color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:700;
-    cursor:pointer;transition:.2s;letter-spacing:.3px;display:flex;align-items:center;justify-content:center;gap:6px
-  }
-  .share-btn-copy:hover{opacity:.9;transform:translateY(-1px)}
-  .share-btn-copy.copied-ok{background:linear-gradient(135deg,var(--sage-dark),var(--sage))}
-  .share-btn-dl{
-    padding:11px 14px;background:var(--white);color:var(--brand);
-    border:1.5px solid var(--gold-light);border-radius:10px;font-size:13px;
-    font-weight:600;cursor:pointer;transition:.2s;white-space:nowrap
-  }
-  .share-btn-dl:hover{background:var(--gold-pale);border-color:var(--gold)}
-  .share-divider{border:none;border-top:1px solid var(--g100);margin:16px 0}
-  .share-tips{font-size:11px;color:var(--text-muted);line-height:1.7;background:var(--cream);border-radius:8px;padding:10px 12px}
 
   /* Copyright watermark */
   .copyright-bar{text-align:center;padding:10px;font-size:10px;color:var(--text-muted);letter-spacing:.3px;background:var(--cream-dark);border-top:1px solid var(--g200)}
@@ -452,7 +415,7 @@
       <div class="toolbar-a"><button class="btn btn-p" onclick="openStM()">+ 新增店家</button></div>
     </div>
     <div style="overflow-x:auto">
-      <table class="at"><thead><tr><th>店家名稱</th><th>配合分期公司</th><th>預設方案</th><th>訂閱到期</th><th>專屬連結</th><th>狀態</th><th>操作</th></tr></thead>
+      <table class="at"><thead><tr><th>店家名稱</th><th>配合分期公司</th><th>預設方案</th><th>到期日</th><th>專屬連結</th><th>狀態</th><th>操作</th></tr></thead>
       <tbody id="st-tbody"></tbody></table>
     </div>
   </div></div>
@@ -510,8 +473,8 @@
   <div class="fg-row">
     <div class="fg"><label>備註</label><input id="st-note" placeholder="選填"></div>
     <div class="fg">
-      <label>訂閱到期日 <span style="font-weight:400;color:var(--g400);font-size:11px">（到期後試算頁面自動失效）</span></label>
-      <input type="date" id="st-expiry" style="width:100%;padding:9px 12px;border:1.5px solid var(--g300);border-radius:8px;font-size:14px;outline:none;background:var(--white);transition:.2s" onfocus="this.style.borderColor='var(--gold)'" onblur="this.style.borderColor='var(--g300)'">
+      <label>訂閱到期日 <span style="font-weight:400;color:var(--g400);font-size:11px">（到期後自動失效）</span></label>
+      <input type="date" id="st-expiry" style="width:100%;padding:9px 12px;border:1.5px solid var(--g300);border-radius:8px;font-size:14px;outline:none;background:var(--white)">
     </div>
   </div>
   <div class="fg">
@@ -525,58 +488,45 @@
   <div class="m-foot"><button class="btn btn-o" onclick="closeStM()">取消</button><button class="btn btn-p" onclick="saveSt()">💾 儲存</button></div>
 </div></div>
 
+
 <!-- ====== SHARE MODAL ====== -->
 <div id="share-modal" class="overlay hidden" onclick="event.target===this&&closeShareM()">
-<div class="modal share-modal-wrap">
+<div class="modal" style="max-width:520px">
   <div class="m-head">
     <h3>🔗 店家專屬連結</h3>
     <button class="m-close" onclick="closeShareM()">&times;</button>
   </div>
-  <div class="share-hero">
-    <div class="share-qr-box" id="share-qr-box">
-      <div class="qr-loading">產生中…</div>
+  <div style="display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap;margin-bottom:16px">
+    <div id="share-qr-box" style="flex-shrink:0;width:150px;height:150px;border:2px solid var(--gold-light);border-radius:12px;background:var(--white);display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow-md)">
+      <div style="font-size:11px;color:var(--g400);text-align:center">產生中…</div>
     </div>
-    <div class="share-info">
+    <div style="flex:1;min-width:180px;display:flex;flex-direction:column;gap:10px">
       <div>
-        <div class="share-store-label">店家名稱</div>
-        <div class="share-store-name" id="share-store-name">—</div>
-        <div class="share-store-meta" id="share-store-meta"></div>
+        <div style="font-size:11px;font-weight:700;color:var(--brand);letter-spacing:1px;margin-bottom:4px">店家名稱</div>
+        <div id="share-store-name" style="font-size:18px;font-weight:800;color:var(--brand-dark)">—</div>
+        <div id="share-store-meta" style="font-size:12px;color:var(--text-muted);margin-top:2px"></div>
       </div>
-
-      <!-- 短網址區塊 -->
-      <div id="short-url-section">
-        <div style="font-size:11px;font-weight:700;color:var(--brand);letter-spacing:.8px;margin-bottom:6px;text-transform:uppercase">短網址</div>
-        <div id="short-url-box" class="share-url-box" onclick="selectShortUrl(this)" style="font-size:13px;font-weight:700;letter-spacing:.3px;min-height:36px;display:flex;align-items:center">
-          <span id="short-url-text" style="color:var(--g400);font-size:12px;font-weight:400">產生中…</span>
-        </div>
-        <div class="share-actions" style="margin-top:8px">
-          <button class="share-btn-copy" id="share-copy-btn" onclick="copyShortUrl()">
-            <span>📋</span><span id="share-copy-label">複製短網址</span>
-          </button>
-          <button class="share-btn-dl" onclick="downloadQr()" title="下載 QR Code">⬇ QR</button>
-        </div>
+      <div>
+        <div style="font-size:11px;font-weight:700;color:var(--brand);letter-spacing:1px;margin-bottom:4px">短網址</div>
+        <div id="share-short-url" onclick="selectEl(this)" style="background:var(--cream);border:1.5px solid var(--g200);border-radius:8px;padding:8px 10px;font-size:12px;color:var(--text-light);word-break:break-all;cursor:text;min-height:32px">產生中…</div>
       </div>
-
-      <!-- 原始長網址（收折） -->
-      <div style="margin-top:8px">
-        <div onclick="toggleLongUrl()" style="font-size:11px;color:var(--text-muted);cursor:pointer;user-select:none">▸ 查看原始連結</div>
-        <div id="long-url-wrap" class="hidden">
-          <div class="share-url-box" id="share-url-box" onclick="selectShareUrl(this)" style="margin-top:4px;font-size:10px;max-height:48px;overflow-y:auto">—</div>
-        </div>
+      <div style="display:flex;gap:8px">
+        <button id="share-copy-btn" onclick="copyShareUrl()" style="flex:1;padding:10px;background:linear-gradient(135deg,var(--brand-dark),var(--brand-light));color:#fff;border:none;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer">📋 複製短網址</button>
+        <button onclick="downloadShareQr()" style="padding:10px 14px;background:var(--white);color:var(--brand);border:1.5px solid var(--gold-light);border-radius:10px;font-size:13px;font-weight:600;cursor:pointer">⬇ QR</button>
       </div>
+      <div style="font-size:10px;color:var(--text-muted)">▸ <span onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display?'':'block';this.textContent=this.textContent.includes('▸')?'▾ 隱藏':'▸ 查看原始連結'" style="cursor:pointer">查看原始連結</span><div id="share-long-url" style="display:none;margin-top:4px;word-break:break-all;background:var(--cream);padding:6px 8px;border-radius:6px;font-family:monospace"></div></div>
     </div>
   </div>
-  <hr class="share-divider">
-  <div class="share-tips">
-    💡 短網址可直接傳給店家使用，掃碼或點開後只會看到該店試算頁面，<strong>不顯示後台或其他店家</strong>。
+  <div style="font-size:11px;color:var(--text-muted);background:var(--cream);border-radius:8px;padding:10px 12px;line-height:1.6">
+    💡 客人掃碼或點開後只會看到該店試算頁面，<strong>不會顯示後台或其他店家</strong>。
   </div>
 </div>
 </div>
-
 <div class="copyright-bar">&copy; 2026 FlowHub. All rights reserved. 未經授權禁止複製或使用本系統。</div>
 <div id="toast" class="toast hidden"></div>
 
 <script>
+const SK='flowhub_v2';
 const ADMIN_PW='Aa1234';
 let adminUnlocked=false;
 
@@ -944,21 +894,15 @@ function renderFc(){
 function togFc(id){const f=D.financeCompanies.find(x=>x.id===id);if(f){f.active=!f.active;save();renderStats();renderFc();toast(f.active?'已啟用':'已停用')}}
 function delFc(id){const f=D.financeCompanies.find(x=>x.id===id);if(!f||!confirm('確定刪除「'+f.name+'」？'))return;D.financeCompanies=D.financeCompanies.filter(x=>x.id!==id);D.stores.forEach(s=>{s.fcConfigs=(s.fcConfigs||[]).filter(x=>x.fcId!==id)});save();renderStats();renderFc();renderSt();toast('已刪除')}
 
-function getBaseUrl(){
-  if(D.baseUrl&&D.baseUrl.startsWith('http'))return D.baseUrl;
-  // Always use current page URL as base — works automatically on GitHub Pages / any host
-  const p=location.pathname.replace(/\/$/,'');
-  return location.origin+p;
-}
-// 分期公司代碼表（存在系統裡，不進連結）
+function getBaseUrl(){return D.baseUrl||location.origin+location.pathname}
+// 分期公司代碼表
 const FC_IDX={fc1:1,fc2:2,fc3:3,fc4:4,fc5:5,fc6:6,fc7:7};
-const FC_IDX_REV={1:'fc1',2:'fc2',3:'fc3',4:'fc4',5:'fc5',6:'fc6',7:'fc7'};
+const FC_IDX_REV={'1':'fc1','2':'fc2','3':'fc3','4':'fc4','5':'fc5','6':'fc6','7':'fc7'};
 
 function getStoreUrl(storeId){
   const base=getBaseUrl();
   const store=D.stores.find(s=>s.id===storeId);
   if(!store)return base;
-  // 超壓縮格式 #z=
   const compact={n:store.name,f:[]};
   if(store.defaultType==='zero')compact.t='z';
   if(store.expiry)compact.e=store.expiry;
@@ -969,76 +913,19 @@ function getStoreUrl(storeId){
     const plans=(cfg.plans||[]).map(p=>{
       const coef=Math.round((p.coefficient||0)*100000);
       const fee=Math.round((p.feeRate||0)*100000);
-      let row;
-      if(p.type==='zero')row=[p.period,0,fee];
-      else if(p.type==='general')row=[p.period,coef,0];
-      else row=[p.period,coef,fee];
-      // 尾部 0 省略
+      let row=p.type==='zero'?[p.period,0,fee]:p.type==='general'?[p.period,coef,0]:[p.period,coef,fee];
       while(row.length>1&&row[row.length-1]===0)row.pop();
       return row;
     });
     compact.f.push([idx,plans]);
   });
   const json=JSON.stringify(compact);
-  // 純 base64（不依賴外部函式庫）
   const b64=btoa(unescape(encodeURIComponent(json)));
   return base+'#z='+b64;
 }
-
-function _decodeZHash(hash){
-  if(!hash.startsWith('#z='))return null;
-  try{
-    const b64=hash.substring(3).replace(/-/g,'+').replace(/_/g,'/');
-    const bin=atob(b64);
-    const bytes=new Uint8Array(bin.length);
-    for(let i=0;i<bin.length;i++)bytes[i]=bin.charCodeAt(i);
-    let json;
-    json=decodeURIComponent(escape(bin));
-    const cd=JSON.parse(json);
-    if(!cd||!cd.n||!cd.f)return null;
-    const vs={id:'_portable',name:cd.n,note:'',active:true,
-      defaultType:cd.t==='z'?'zero':'general',
-      expiry:cd.e||'',fcConfigs:[]};
-    const vfcs=[];
-    cd.f.forEach(([idx,plans])=>{
-      const fcId=FC_IDX_REV[idx]||('fc'+idx);
-      // 從 D 找分期公司資料，或用預設
-      const existing=D.financeCompanies.find(f=>f.id===fcId);
-      const fcPlans=plans.map(row=>{
-        const period=row[0];
-        const coef=(row[1]||0)/100000;
-        const fee=(row[2]||0)/100000;
-        const type=coef>0&&fee>0?'both':coef>0?'general':'zero';
-        return{period,type,coefficient:coef,feeRate:fee};
-      });
-      if(existing){
-        vfcs.push({...existing,plans:fcPlans});
-      } else {
-        vfcs.push({id:fcId,name:fcId,note:'',active:true,useCoefficient:false,plans:fcPlans});
-      }
-      vs.fcConfigs.push({fcId,plans:fcPlans});
-    });
-    return{stores:[vs],fcs:vfcs};
-  }catch(e){console.warn('z-hash decode error:',e);return null}
-}
-
 function getAdminUrl(){
   const base=getBaseUrl();
-  return base+'?admin=1';
-}
-
-// GitHub JSON 資料來源（與 HTML 同目錄）
-const DATA_JSON_URL='https://ginakuo312.github.io/flowhub/flowhub-data.json';
-
-async function fetchStoreData(storeId){
-  try{
-    const res=await fetch(DATA_JSON_URL+'?t='+Date.now());
-    if(!res.ok)return null;
-    const data=await res.json();
-    const store=data.stores.find(s=>s.id===storeId&&s.active);
-    if(!store)return null;
-    return{store,financeCompanies:data.financeCompanies||[]};
-  }catch(e){return null}
+  return base+(base.includes('?')?'&':'?')+'admin=1';
 }
 
 function saveBaseUrl(){
@@ -1077,21 +964,7 @@ function testBaseUrl(){
   window.open(D.baseUrl,'_blank');
 }
 
-function copyLinkDirect(storeId){
-  const s=D.stores.find(x=>x.id===storeId);
-  if(!s||!s.shortUrl){toast('請先點「🔗 分享」產生短網址');return}
-  const btn=document.getElementById('quick-copy-'+storeId);
-  navigator.clipboard.writeText(s.shortUrl).then(()=>{
-    if(btn){btn.textContent='已複製！';btn.style.background='var(--sage-bg)';btn.style.color='var(--sage-dark)';
-      setTimeout(()=>{btn.textContent='複製';btn.style.background='';btn.style.color=''},2000)}
-    toast('已複製短網址');
-  }).catch(()=>{
-    const ta=document.createElement('textarea');ta.value=s.shortUrl;ta.style.cssText='position:fixed;opacity:0';
-    document.body.appendChild(ta);ta.focus();ta.select();
-    try{document.execCommand('copy');toast('已複製短網址')}catch(e){toast('請手動複製')}
-    document.body.removeChild(ta);
-  });
-}
+function copyLink(btn,storeId){
   const url=getStoreUrl(storeId);
   navigator.clipboard.writeText(url).then(()=>{
     btn.textContent='已複製';btn.classList.add('copied');
@@ -1112,12 +985,7 @@ function renderSt(){
     let linkCell;
     if(urlOk){
       const stUrl=getStoreUrl(s.id);
-      const displayUrl=s.shortUrl||stUrl;
-      const displayLabel=s.shortUrl?s.shortUrl:'（點分享產生短網址）';
-      linkCell=`<div>
-        <div style="font-size:12px;color:var(--brand-dark);font-weight:700;margin-bottom:4px;word-break:break-all">${s.shortUrl?`<a href="${esc(s.shortUrl)}" target="_blank" style="color:var(--gold-deep);text-decoration:none">${esc(s.shortUrl)}</a>`:'<span style="color:var(--g400);font-style:italic">點「🔗 分享」產生短網址</span>'}</div>
-        <div class="store-link" style="margin-top:4px"><button onclick="copyLinkDirect('${s.id}')" style="padding:3px 10px;background:var(--gold-pale);color:var(--gold-deep);border:1px solid var(--gold-light);border-radius:6px;font-size:11px;font-weight:600;cursor:pointer" id="quick-copy-${s.id}">${s.shortUrl?'複製':'—'}</button><a href="${esc(stUrl)}" target="_blank" class="btn btn-o" style="font-size:11px;padding:3px 8px;text-decoration:none;margin-left:4px">開啟</a></div>
-      </div>`;
+      linkCell=`<div class="store-link"><input type="text" value="${esc(stUrl)}" readonly onclick="this.select()"><button onclick="copyLink(this,'${s.id}')">複製連結</button><a href="${esc(stUrl)}" target="_blank" class="btn btn-o" style="font-size:11px;padding:4px 8px;text-decoration:none;margin-left:4px">開啟</a></div>`;
     } else {
       linkCell=`<span style="font-size:11px;color:#8a6d00">⚠ 請先設定網址</span>`;
     }
@@ -1126,16 +994,11 @@ function renderSt(){
     const isExpired=expiry&&expiry<today;
     const daysLeft=expiry?Math.ceil((new Date(expiry)-new Date(today))/(1000*60*60*24)):null;
     let expiryCell;
-    if(!expiry){
-      expiryCell='<span style="color:var(--g400);font-size:12px">未設定</span>';
-    } else if(isExpired){
-      expiryCell=`<span style="background:#fce8e6;color:var(--red);padding:3px 8px;border-radius:8px;font-size:12px;font-weight:700">⛔ 已到期<br><small>${expiry}</small></span>`;
-    } else if(daysLeft<=7){
-      expiryCell=`<span style="background:#fff8e8;color:#8a6d00;padding:3px 8px;border-radius:8px;font-size:12px;font-weight:700">⚠ 剩${daysLeft}天<br><small>${expiry}</small></span>`;
-    } else {
-      expiryCell=`<span style="font-size:12px;color:var(--text-light)">${expiry}<br><small style="color:var(--sage)">剩 ${daysLeft} 天</small></span>`;
-    }
-    return`<tr>
+    if(!expiry){expiryCell='<span style="color:var(--g400);font-size:12px">未設定</span>'}
+    else if(isExpired){expiryCell=`<span class="expiry-badge expiry-expired">⛔ 已到期<br><small>${expiry}</small></span>`}
+    else if(daysLeft<=7){expiryCell=`<span class="expiry-badge expiry-warn">⚠ 剩${daysLeft}天<br><small>${expiry}</small></span>`}
+    else{expiryCell=`<span class="expiry-ok">${expiry}<br><small style="color:var(--sage)">剩${daysLeft}天</small></span>`}
+    return\`<tr>
       <td><strong>${esc(s.name)}</strong>${s.note?'<br><span style="font-size:11px;color:var(--g400)">'+esc(s.note)+'</span>':''}</td>
       <td><div class="tags">${fcn||'<span style="color:var(--g400)">未設定</span>'}</div></td>
       <td>${s.defaultType==='zero'?'<span class="tag tag-z">零利率</span>':'<span class="tag tag-g">一般專案</span>'}</td>
@@ -1209,18 +1072,10 @@ function openStM(id){
   stEid=id||null;document.getElementById('st-mt').textContent=id?'編輯店家':'新增店家';
   if(id){
     const s=D.stores.find(x=>x.id===id);if(!s)return;
-    document.getElementById('st-name').value=s.name;
-    document.getElementById('st-note').value=s.note||'';
-    document.getElementById('st-def').value=s.defaultType||'general';
-    document.getElementById('st-expiry').value=s.expiry||'';
+    document.getElementById('st-name').value=s.name;document.getElementById('st-note').value=s.note||'';document.getElementById('st-def').value=s.defaultType||'general';document.getElementById('st-expiry').value=s.expiry||'';
     stFcData=JSON.parse(JSON.stringify(s.fcConfigs||[]));
   } else {
-    document.getElementById('st-name').value='';
-    document.getElementById('st-note').value='';
-    document.getElementById('st-def').value='general';
-    // Default expiry: 1 month from today
-    const d=new Date();d.setMonth(d.getMonth()+1);
-    document.getElementById('st-expiry').value=d.toISOString().split('T')[0];
+    document.getElementById('st-name').value='';document.getElementById('st-note').value='';document.getElementById('st-def').value='general';const _d=new Date();_d.setMonth(_d.getMonth()+1);document.getElementById('st-expiry').value=_d.toISOString().split('T')[0];
     stFcData=[];
   }
   refreshStAddFc();renderStFcCards();
@@ -1353,13 +1208,10 @@ function saveSt(){
     });
   });
   const fcConfigs=JSON.parse(JSON.stringify(stFcData));
-  const expiry=document.getElementById('st-expiry').value||'';
-  if(stEid){const s=D.stores.find(x=>x.id===stEid);if(s){s.name=name;s.note=document.getElementById('st-note').value.trim();s.defaultType=document.getElementById('st-def').value;s.expiry=expiry;s.fcConfigs=fcConfigs;delete s.fcIds}}
-  else{D.stores.push({id:gid('s'),name,note:document.getElementById('st-note').value.trim(),active:true,defaultType:document.getElementById('st-def').value,expiry,fcConfigs})}
-  save();closeStM();renderStats();renderSt();fillStoreSel();onStoreChange();
-  const savedId=stEid||(D.stores[D.stores.length-1].id);
-  toast(stEid?'已更新':'已新增');
-  if(!stEid){setTimeout(()=>openShareM(savedId),300)}
+  const _expiry=document.getElementById('st-expiry').value||'';
+  if(stEid){const s=D.stores.find(x=>x.id===stEid);if(s){s.name=name;s.note=document.getElementById('st-note').value.trim();s.defaultType=document.getElementById('st-def').value;s.expiry=_expiry;s.fcConfigs=fcConfigs;delete s.fcIds}}
+  else{D.stores.push({id:gid('s'),name,note:document.getElementById('st-note').value.trim(),active:true,defaultType:document.getElementById('st-def').value,expiry:_expiry,fcConfigs})}
+  save();closeStM();renderStats();renderSt();fillStoreSel();onStoreChange();toast(stEid?'已更新':'已新增');
 }
 
 /* Import/Export */
@@ -1371,27 +1223,18 @@ let storeMode=false;
 
 function enterStoreView(store){
   storeMode=true;
-
-  // ── 訂閱到期檢查 ──
+  // 訂閱到期檢查
   if(store.expiry){
     const today=new Date().toISOString().split('T')[0];
     if(store.expiry<today){
-      // 隱藏所有內容，顯示到期畫面
       document.getElementById('admin-nav-btn').classList.add('hidden');
       document.querySelectorAll('.nav-tabs')[0].classList.add('hidden');
-      document.getElementById('pg-calc').innerHTML=`
-        <div style="max-width:480px;margin:80px auto;text-align:center;padding:20px">
-          <div style="font-size:64px;margin-bottom:20px">🔒</div>
-          <h2 style="font-size:22px;font-weight:800;color:var(--brand-dark);margin-bottom:12px">${esc(store.name)}</h2>
-          <p style="font-size:15px;color:var(--text-light);margin-bottom:8px">此試算服務的訂閱已到期</p>
-          <p style="font-size:13px;color:var(--text-muted)">請聯繫服務提供商續訂後繼續使用</p>
-          <div style="margin-top:28px;padding:16px 20px;background:var(--cream);border-radius:12px;font-size:12px;color:var(--text-muted)">
-            到期日：${store.expiry}
-          </div>
-        </div>`;
+      document.getElementById('pg-calc').innerHTML=`<div style="max-width:440px;margin:80px auto;text-align:center;padding:24px"><div style="font-size:60px;margin-bottom:16px">🔒</div><h2 style="font-size:20px;font-weight:800;color:var(--brand-dark);margin-bottom:10px">${esc(store.name)}</h2><p style="color:var(--text-light);margin-bottom:6px">此試算服務的訂閱已到期</p><p style="font-size:12px;color:var(--text-muted)">請聯繫服務提供商續訂後繼續使用</p><div style="margin-top:24px;padding:14px;background:var(--cream);border-radius:10px;font-size:12px;color:var(--text-muted)">到期日：${store.expiry}</div></div>`;
       return;
     }
   }
+
+  // Hide admin nav button and store selector
   document.getElementById('admin-nav-btn').classList.add('hidden');
   document.getElementById('c-store').classList.add('hidden');
   document.querySelectorAll('.nav-tabs')[0].classList.add('hidden');
@@ -1409,6 +1252,29 @@ function enterStoreView(store){
   // Populate FC selector for this store
   fillFcSel(store);
   updToggle();calc();
+}
+
+function _decodeZHash(hash){
+  if(!hash.startsWith('#z='))return null;
+  try{
+    const json=decodeURIComponent(escape(atob(hash.substring(3))));
+    const cd=JSON.parse(json);
+    if(!cd||!cd.n||!cd.f)return null;
+    const vs={id:'_portable',name:cd.n,note:'',active:true,
+      defaultType:cd.t==='z'?'zero':'general',expiry:cd.e||'',fcConfigs:[]};
+    const vfcs=[];
+    cd.f.forEach(([idx,plans])=>{
+      const fcId=FC_IDX_REV[String(idx)]||('fc'+idx);
+      const existing=D.financeCompanies.find(f=>f.id===fcId);
+      const fcPlans=plans.map(row=>{
+        const period=row[0],coef=(row[1]||0)/100000,fee=(row[2]||0)/100000;
+        return{period,type:coef>0&&fee>0?'both':coef>0?'general':'zero',coefficient:coef,feeRate:fee};
+      });
+      vfcs.push(existing?{...existing,plans:fcPlans}:{id:fcId,name:fcId,note:'',active:true,useCoefficient:false,plans:fcPlans});
+      vs.fcConfigs.push({fcId,plans:fcPlans});
+    });
+    return{stores:[vs],fcs:vfcs};
+  }catch(e){return null}
 }
 
 function _decodePortableHash(hash){
@@ -1460,14 +1326,35 @@ function _decodePortableHash(hash){
   }
   return null;
 }
-/* ======== SHARE MODAL ======== */
-let _qrLib=null;
-let _shareUrl='';
-let _shortUrl='';
-let _shareStoreId='';
-let _shareStoreName='';
+function initApp(){
+  const hash=location.hash;
+  // 新壓縮格式 #z=
+  const zdecoded=_decodeZHash(hash);
+  if(zdecoded){D.stores=zdecoded.stores;D.financeCompanies=zdecoded.fcs.length?zdecoded.fcs:D.financeCompanies;enterStoreView(zdecoded.stores[0]);return}
+  // 舊格式 #c= #d=
+  const portable=_decodePortableHash(hash);
+  if(portable){
+    D.stores=portable.stores;
+    D.financeCompanies=portable.fcs;
+    enterStoreView(portable.stores[0]);return;
+  }
+  const params=new URLSearchParams(location.search);
+  // Check for store-specific URL (legacy)
+  const storeId=params.get('store');
+  if(storeId){
+    const store=D.stores.find(s=>s.id===storeId&&s.active);
+    if(store){enterStoreView(store);return}
+  }
+  // Check for admin direct access
+  if(params.get('admin')==='1'){goAdmin();return}
+  // Normal mode
+  fillStoreSel();onStoreChange();
+}
 
-function _loadQrLib(cb){
+/* ======== SHARE MODAL ======== */
+let _qrLib=null,_shareUrl='',_shortUrl='',_shareStoreId='',_shareStoreName='';
+
+function _loadQr(cb){
   if(_qrLib){cb();return}
   const s=document.createElement('script');
   s.src='https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js';
@@ -1476,177 +1363,63 @@ function _loadQrLib(cb){
   document.head.appendChild(s);
 }
 
-function _renderQr(url){
-  const box=document.getElementById('share-qr-box');
-  box.innerHTML='';
-  if(!url){box.innerHTML='<div class="qr-loading">—</div>';return}
-  _loadQrLib(()=>{
-    if(_qrLib==='err'){box.innerHTML='<div class="qr-loading" style="color:var(--red)">QR 失敗</div>';return}
-    try{new QRCode(box,{text:url,width:148,height:148,colorDark:'#3e3836',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.M})}
-    catch(e){box.innerHTML='<div class="qr-loading" style="color:var(--red);font-size:10px">連結過長</div>'}
-  });
-}
-
-async function _genShortUrl(longUrl){
-  // Check cache first (stored per store)
-  const store=D.stores.find(s=>s.id===_shareStoreId);
-  if(store&&store.shortUrl&&store.shortUrlSrc===longUrl)return store.shortUrl;
-  // Call TinyURL API
-  try{
-    const res=await fetch('https://tinyurl.com/api-create.php?url='+encodeURIComponent(longUrl));
-    if(res.ok){
-      const short=await res.text();
-      if(short.startsWith('http')){
-        // Cache it on the store object
-        if(store){store.shortUrl=short;store.shortUrlSrc=longUrl;save()}
-        return short;
-      }
-    }
-  }catch(e){}
-  return null; // fallback: use long URL
-}
-
-function _setShortUrlDisplay(url){
-  _shortUrl=url||_shareUrl;
-  const el=document.getElementById('short-url-text');
-  if(url){
-    el.textContent=url;
-    el.style.color='var(--brand-dark)';
-    el.style.fontWeight='700';
-  } else {
-    el.textContent='短網址產生失敗，使用原始連結';
-    el.style.color='var(--text-muted)';
-    el.style.fontWeight='400';
-  }
-  // QR uses short URL
-  _renderQr(_shortUrl);
-}
-
-function toggleLongUrl(){
-  const wrap=document.getElementById('long-url-wrap');
-  const btn=wrap.previousElementSibling;
-  const hidden=wrap.classList.toggle('hidden');
-  btn.textContent=(hidden?'▸':'▾')+' 查看原始連結';
+function selectEl(el){
+  const r=document.createRange();r.selectNodeContents(el);
+  const s=window.getSelection();s.removeAllRanges();s.addRange(r);
 }
 
 function openShareM(storeId){
-  const store=D.stores.find(s=>s.id===storeId);
-  if(!store)return;
-  _shareStoreId=storeId;
-  _shareStoreName=store.name;
-  _shareUrl=getStoreUrl(storeId);
-  _shortUrl=_shareUrl; // fallback
-
-  // Fill store info
+  const store=D.stores.find(s=>s.id===storeId);if(!store)return;
+  _shareStoreId=storeId;_shareStoreName=store.name;
+  _shareUrl=getStoreUrl(storeId);_shortUrl=_shareUrl;
   document.getElementById('share-store-name').textContent=store.name;
-  const fcNames=(store.fcConfigs||[]).map(c=>{
-    const f=D.financeCompanies.find(x=>x.id===c.fcId);
-    return f?f.name.replace(/\(.*?\)/,'').trim():'';
-  }).filter(Boolean).join('・');
-  document.getElementById('share-store-meta').textContent=
-    (store.defaultType==='zero'?'零利率模式':'一般專案模式')+(fcNames?' ｜ '+fcNames:'');
-
-  // Long URL display
-  document.getElementById('share-url-box').textContent=_shareUrl;
-  document.getElementById('long-url-wrap').classList.add('hidden');
-  document.getElementById('long-url-wrap').previousElementSibling.textContent='▸ 查看原始連結';
-
-  // Reset copy button
-  document.getElementById('share-copy-label').textContent='複製短網址';
-  document.getElementById('share-copy-btn').classList.remove('copied-ok');
-
-  // Short URL: show loading state
-  document.getElementById('short-url-text').textContent='產生中…';
-  document.getElementById('short-url-text').style.color='var(--g400)';
-  document.getElementById('short-url-text').style.fontWeight='400';
-
-  // QR: show loading
-  document.getElementById('share-qr-box').innerHTML='<div class="qr-loading">產生中…</div>';
-
+  const fcNames=(store.fcConfigs||[]).map(c=>{const f=D.financeCompanies.find(x=>x.id===c.fcId);return f?f.name.replace(/\(.*?\)/,'').trim():''}).filter(Boolean).join('・');
+  document.getElementById('share-store-meta').textContent=(store.defaultType==='zero'?'零利率':'一般專案')+(fcNames?' ｜ '+fcNames:'');
+  document.getElementById('share-long-url').textContent=_shareUrl;
+  document.getElementById('share-short-url').textContent='產生中…';
+  document.getElementById('share-copy-btn').textContent='📋 複製短網址';
+  document.getElementById('share-qr-box').innerHTML='<div style="font-size:11px;color:var(--g400);text-align:center">產生中…</div>';
   document.getElementById('share-modal').classList.remove('hidden');
-
-  // Generate short URL async
-  _genShortUrl(_shareUrl).then(short=>{
-    _setShortUrlDisplay(short);
-  });
+  // 產生短網址
+  fetch('https://tinyurl.com/api-create.php?url='+encodeURIComponent(_shareUrl))
+    .then(r=>r.text()).then(short=>{
+      if(short.startsWith('http')){_shortUrl=short;}
+      document.getElementById('share-short-url').textContent=_shortUrl;
+      // QR
+      _loadQr(()=>{
+        const box=document.getElementById('share-qr-box');box.innerHTML='';
+        if(_qrLib==='err'){box.innerHTML='<div style="font-size:10px;color:var(--red);text-align:center">QR失敗</div>';return}
+        try{new QRCode(box,{text:_shortUrl,width:144,height:144,colorDark:'#3e3836',colorLight:'#fff',correctLevel:QRCode.CorrectLevel.M})}catch(e){}
+      });
+    }).catch(()=>{
+      _shortUrl=_shareUrl;
+      document.getElementById('share-short-url').textContent=_shortUrl;
+    });
 }
 
 function closeShareM(){document.getElementById('share-modal').classList.add('hidden')}
 
-function selectShortUrl(el){
-  const range=document.createRange();range.selectNodeContents(el);
-  const sel=window.getSelection();sel.removeAllRanges();sel.addRange(range);
-}
-function selectShareUrl(el){
-  const range=document.createRange();range.selectNodeContents(el);
-  const sel=window.getSelection();sel.removeAllRanges();sel.addRange(range);
-}
-
-function copyShortUrl(){
+function copyShareUrl(){
   const btn=document.getElementById('share-copy-btn');
-  const lbl=document.getElementById('share-copy-label');
-  const done=()=>{lbl.textContent='✓ 已複製！';btn.classList.add('copied-ok');
-    setTimeout(()=>{lbl.textContent='複製短網址';btn.classList.remove('copied-ok')},2000)};
+  const done=()=>{btn.textContent='✓ 已複製！';btn.style.background='linear-gradient(135deg,var(--sage-dark),var(--sage))';setTimeout(()=>{btn.textContent='📋 複製短網址';btn.style.background=''},2000)};
   navigator.clipboard.writeText(_shortUrl).then(done).catch(()=>{
-    const ta=document.createElement('textarea');
-    ta.value=_shortUrl;ta.style.cssText='position:fixed;opacity:0';
+    const ta=document.createElement('textarea');ta.value=_shortUrl;ta.style.cssText='position:fixed;opacity:0';
     document.body.appendChild(ta);ta.focus();ta.select();
     try{document.execCommand('copy');done()}catch(e){toast('請手動複製')}
     document.body.removeChild(ta);
   });
 }
 
-// Keep old copyShareUrl as alias
-function copyShareUrl(){copyShortUrl()}
-
-function downloadQr(){
-  const canvas=document.getElementById('share-qr-box').querySelector('canvas');
-  if(!canvas){toast('QR Code 尚未產生');return}
+function downloadShareQr(){
+  const c=document.getElementById('share-qr-box').querySelector('canvas');
+  if(!c){toast('QR尚未產生');return}
   const a=document.createElement('a');
-  a.download='FlowHub_QR_'+_shareStoreName.replace(/[\s\/]/g,'_')+'.png';
-  a.href=canvas.toDataURL('image/png');a.click();
-  toast('QR Code 已下載');
+  a.download='QR_'+_shareStoreName.replace(/[\s\/]/g,'_')+'.png';
+  a.href=c.toDataURL('image/png');a.click();toast('QR已下載');
 }
 /* ======== END SHARE MODAL ======== */
 
 /* INIT */
-async function initApp(){
-  const hash=location.hash;
-
-  // 1. 新壓縮格式 #z=（zlib+base64）
-  if(hash.startsWith('#z=')){
-    const decoded=_decodeZHash(hash);
-    if(decoded){
-      D.stores=decoded.stores;
-      D.financeCompanies=decoded.fcs.length?decoded.fcs:D.financeCompanies;
-      enterStoreView(decoded.stores[0]);return;
-    }
-  }
-
-  // 2. 舊格式 #c= #d=
-  const portable=_decodePortableHash(hash);
-  if(portable){
-    D.stores=portable.stores;
-    D.financeCompanies=portable.fcs;
-    enterStoreView(portable.stores[0]);return;
-  }
-
-  const params=new URLSearchParams(location.search);
-
-  // 3. 舊 ?store= 格式
-  const storeId=params.get('store');
-  if(storeId){
-    const store=D.stores.find(s=>s.id===storeId&&s.active);
-    if(store){enterStoreView(store);return}
-  }
-
-  // 4. 後台直接進入
-  if(params.get('admin')==='1'){goAdmin();return}
-
-  // 5. 一般模式
-  fillStoreSel();onStoreChange();
-}
-
 initApp();
 </script>
 </body>
