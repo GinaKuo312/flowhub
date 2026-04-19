@@ -393,7 +393,7 @@
   </div></div>
 
   <div id="tab-store" class="card"><div class="card-body">
-    <div id="url-setup-box" style="border-radius:10px;padding:14px 16px;margin-bottom:16px">
+    <div id="url-setup-box" style="display:none" style="border-radius:10px;padding:14px 16px;margin-bottom:16px">
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
         <span style="font-size:14px">🌐</span>
         <label style="font-size:13px;font-weight:700;color:var(--brand)">系統對外網址設定</label>
@@ -882,7 +882,7 @@ function renderFc(){
 function togFc(id){const f=D.financeCompanies.find(x=>x.id===id);if(f){f.active=!f.active;save();renderStats();renderFc();toast(f.active?'已啟用':'已停用')}}
 function delFc(id){const f=D.financeCompanies.find(x=>x.id===id);if(!f||!confirm('確定刪除「'+f.name+'」？'))return;D.financeCompanies=D.financeCompanies.filter(x=>x.id!==id);D.stores.forEach(s=>{s.fcConfigs=(s.fcConfigs||[]).filter(x=>x.fcId!==id)});save();renderStats();renderFc();renderSt();toast('已刪除')}
 
-function getBaseUrl(){return D.baseUrl||location.origin+location.pathname}
+function getBaseUrl(){if(D.baseUrl&&D.baseUrl.startsWith('http'))return D.baseUrl;return location.origin+location.pathname}
 function getStoreUrl(storeId){
   const base=getBaseUrl();
   const store=D.stores.find(s=>s.id===storeId);
@@ -926,10 +926,7 @@ function loadBaseUrl(){
   updateUrlStatus();
 }
 
-function isUrlReady(){
-  const base=D.baseUrl||'';
-  return base.startsWith('http://') || base.startsWith('https://');
-}
+function isUrlReady(){return true}
 
 function updateUrlStatus(){
   const box=document.getElementById('url-setup-box');
@@ -969,12 +966,16 @@ function renderSt(){
   const urlOk=isUrlReady();
   document.getElementById('st-tbody').innerHTML=D.stores.map(s=>{
     const fcn=(s.fcConfigs||[]).map(cfg=>{const f=D.financeCompanies.find(x=>x.id===cfg.fcId);if(!f)return'';const pCnt=(cfg.plans||[]).length;return`<span class="tag tag-fc">${esc(f.name)} <small style="opacity:.6">(${pCnt}期)</small></span>`}).join('');
+    const stUrl=getStoreUrl(s.id);
+    const shortUrl=s.shortUrl||'';
     let linkCell;
-    if(urlOk){
-      const stUrl=getStoreUrl(s.id);
-      linkCell=`<div class="store-link"><input type="text" value="${esc(stUrl)}" readonly onclick="this.select()"><button onclick="copyLink(this,'${s.id}')">複製連結</button><a href="${esc(stUrl)}" target="_blank" class="btn btn-o" style="font-size:11px;padding:4px 8px;text-decoration:none;margin-left:4px">開啟</a></div>`;
+    if(shortUrl){
+      linkCell=`<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+        <a href="${esc(shortUrl)}" target="_blank" style="font-size:12px;font-weight:700;color:var(--gold-deep);text-decoration:none">${esc(shortUrl)}</a>
+        <button onclick="quickCopyShort('${s.id}')" id="qc-${s.id}" style="padding:2px 8px;font-size:11px;font-weight:600;background:var(--gold-pale);color:var(--gold-deep);border:1px solid var(--gold-light);border-radius:5px;cursor:pointer">複製</button>
+      </div>`;
     } else {
-      linkCell=`<span style="font-size:11px;color:#8a6d00">⚠ 請先設定網址</span>`;
+      linkCell=`<button onclick="openShareM('${s.id}')" style="padding:4px 12px;font-size:12px;font-weight:600;background:var(--cream);color:var(--brand);border:1px solid var(--g300);border-radius:6px;cursor:pointer">點此產生短網址</button>`;
     }
     return`<tr>
       <td><strong>${esc(s.name)}</strong>${s.note?'<br><span style="font-size:11px;color:var(--g400)">'+esc(s.note)+'</span>':''}</td>
@@ -1291,12 +1292,28 @@ function initApp(){
   fillStoreSel();onStoreChange();
 }
 
+
+function quickCopyShort(sid){
+  var s=D.stores.find(function(x){return x.id===sid});
+  if(!s||!s.shortUrl){toast('請先點「🔗 分享」產生短網址');return}
+  var btn=document.getElementById('qc-'+sid);
+  var done=function(){if(btn){btn.textContent='已複製！';btn.style.background='var(--sage-bg)';btn.style.color='var(--sage-dark)';setTimeout(function(){btn.textContent='複製';btn.style.background='var(--gold-pale)';btn.style.color='var(--gold-deep)'},2000)}toast('已複製短網址')}
+  if(navigator.clipboard){navigator.clipboard.writeText(s.shortUrl).then(done).catch(function(){_fbCopy(s.shortUrl,done)})}
+  else{_fbCopy(s.shortUrl,done)}
+}
+function _fbCopy(text,done){
+  var ta=document.createElement('textarea');ta.value=text;ta.style.cssText='position:fixed;top:-9999px;opacity:0';
+  document.body.appendChild(ta);ta.focus();ta.select();
+  try{document.execCommand('copy');done()}catch(e){toast('請手動複製')}
+  document.body.removeChild(ta);
+}
+
 /* == SHARE MODAL == */
-var _sQrLib=null,_sUrl='',_sShort='',_sName='';
+var _sQrLib=null,_sUrl='',_sShort='',_sName='',_sStoreId='';
 function selectAllText(el){var r=document.createRange();r.selectNodeContents(el);var s=window.getSelection();s.removeAllRanges();s.addRange(r)}
 function openShareM(sid){
   var store=D.stores.find(function(s){return s.id===sid});if(!store)return;
-  _sName=store.name;
+  _sName=store.name;_sStoreId=sid;
   _sUrl=getStoreUrl(sid);_sShort=_sUrl;
   document.getElementById('share-store-name').textContent=store.name;
   var fcn=(store.fcConfigs||[]).map(function(c){var f=D.financeCompanies.find(function(x){return x.id===c.fcId});return f?f.name.replace(/\(.*?\)/,'').trim():''}).filter(Boolean).join('・');
@@ -1312,6 +1329,9 @@ function openShareM(sid){
       if(short&&short.startsWith('http'))_sShort=short;
       document.getElementById('share-short-url').textContent=_sShort;
       _loadQrAndRender(_sShort);
+      // 儲存短網址到店家資料，更新列表
+      var st=D.stores.find(function(x){return x.id===_sStoreId});
+      if(st&&_sShort!==_sUrl){st.shortUrl=_sShort;save();renderSt()}
     }).catch(function(){
       document.getElementById('share-short-url').textContent=_sShort;
       _loadQrAndRender(_sShort);
