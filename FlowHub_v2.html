@@ -496,7 +496,7 @@
         <div id="share-store-meta" style="font-size:12px;color:var(--text-muted)"></div>
       </div>
       <div>
-        <div style="font-size:11px;font-weight:700;color:var(--brand);letter-spacing:1px;margin-bottom:3px">短網址</div>
+        <div style="font-size:11px;font-weight:700;color:var(--brand);letter-spacing:1px;margin-bottom:3px">專屬連結</div>
         <div id="share-short-url" style="background:var(--cream);border:1.5px solid var(--g200);border-radius:8px;padding:8px 10px;font-size:12px;color:var(--text);word-break:break-all;min-height:32px;cursor:text" onclick="selectAllText(this)">產生中…</div>
       </div>
       <div style="display:flex;gap:8px">
@@ -506,7 +506,7 @@
     </div>
   </div>
   <div style="font-size:11px;color:var(--text-muted);background:var(--cream);border-radius:8px;padding:10px 12px;line-height:1.6">
-    💡 客人點開或掃碼後只會看到該店試算頁面，不會顯示後台或其他店家資料。
+    💡 可直接複製連結給店家，或貼到 <a href="https://tinyurl.com" target="_blank" style="color:var(--gold-deep)">TinyURL.com</a> 縮短後再分享。掃描 QR Code 也可直接進入該店試算頁面。
   </div>
 </div>
 </div>
@@ -1319,19 +1319,16 @@ function openShareM(sid){
   var fcn=(store.fcConfigs||[]).map(function(c){var f=D.financeCompanies.find(function(x){return x.id===c.fcId});return f?f.name.replace(/\(.*?\)/,'').trim():''}).filter(Boolean).join('・');
   document.getElementById('share-store-meta').textContent=(store.defaultType==='zero'?'零利率':'一般專案')+(fcn?' | '+fcn:'');
   document.getElementById('share-short-url').textContent='產生中…';
-  document.getElementById('share-copy-btn').textContent='📋 複製短網址';
+  document.getElementById('share-copy-btn').textContent='📋 複製連結';
   document.getElementById('share-copy-btn').style.background='linear-gradient(135deg,var(--brand-dark),var(--brand-light))';
   document.getElementById('share-qr-box').innerHTML='<span style="font-size:11px;color:var(--g400)">產生中…</span>';
   document.getElementById('share-modal').classList.remove('hidden');
-  // 使用 is.gd（支援 CORS）
-  fetch('https://is.gd/create.php?format=simple&url='+encodeURIComponent(_sUrl))
-    .then(function(r){return r.text()})
-    .then(function(short){
-      short=(short||'').trim();
-      if(short&&short.startsWith('http'))_sShort=short;
-      document.getElementById('share-short-url').textContent=_sShort;
-      _loadQrAndRender(_sShort);
-      var st=D.stores.find(function(x){return x.id===_sStoreId});
+  // 直接顯示對外連結（穩定可靠）
+  _sShort = _sUrl;
+  document.getElementById('share-short-url').textContent = _sShort;
+  _loadQrAndRender(_sShort);
+  var st=D.stores.find(function(x){return x.id===_sStoreId});
+  if(st){st.shortUrl=_sShort;save();renderSt()}
       if(st&&_sShort!==_sUrl){st.shortUrl=_sShort;save();renderSt()}
     }).catch(function(){
       // fallback：直接用原始連結
@@ -1357,7 +1354,7 @@ function _doRenderQr(url){
 function closeShareM(){document.getElementById('share-modal').classList.add('hidden')}
 function doShareCopy(){
   var btn=document.getElementById('share-copy-btn');
-  var done=function(){btn.textContent='✓ 已複製！';btn.style.background='linear-gradient(135deg,var(--sage-dark),var(--sage))';setTimeout(function(){btn.textContent='📋 複製短網址';btn.style.background='linear-gradient(135deg,var(--brand-dark),var(--brand-light))'},2000)};
+  var done=function(){btn.textContent='✓ 已複製！';btn.style.background='linear-gradient(135deg,var(--sage-dark),var(--sage))';setTimeout(function(){btn.textContent='📋 複製連結';btn.style.background='linear-gradient(135deg,var(--brand-dark),var(--brand-light))'},2000)};
   if(navigator.clipboard){navigator.clipboard.writeText(_sShort).then(done).catch(function(){_fallbackCopy(done)})}
   else{_fallbackCopy(done)}
 }
