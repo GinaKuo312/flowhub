@@ -393,7 +393,7 @@
   </div></div>
 
   <div id="tab-store" class="card"><div class="card-body">
-    <div id="url-setup-box" style="display:none" style="border-radius:10px;padding:14px 16px;margin-bottom:16px">
+    <div id="url-setup-box" style="border-radius:10px;padding:14px 16px;margin-bottom:16px">
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
         <span style="font-size:14px">🌐</span>
         <label style="font-size:13px;font-weight:700;color:var(--brand)">系統對外網址設定</label>
@@ -477,39 +477,6 @@
   <div class="m-foot"><button class="btn btn-o" onclick="closeStM()">取消</button><button class="btn btn-p" onclick="saveSt()">💾 儲存</button></div>
 </div></div>
 
-
-<!-- SHARE MODAL -->
-<div id="share-modal" class="overlay hidden" onclick="event.target===this&&closeShareM()">
-<div class="modal" style="max-width:500px">
-  <div class="m-head">
-    <h3>🔗 店家專屬連結</h3>
-    <button class="m-close" onclick="closeShareM()">&times;</button>
-  </div>
-  <div style="display:flex;gap:20px;flex-wrap:wrap;margin-bottom:16px">
-    <div id="share-qr-box" style="flex-shrink:0;width:148px;height:148px;border:2px solid var(--gold-light);border-radius:12px;background:#fff;display:flex;align-items:center;justify-content:center">
-      <span style="font-size:11px;color:var(--g400)">產生中…</span>
-    </div>
-    <div style="flex:1;min-width:180px;display:flex;flex-direction:column;gap:10px">
-      <div>
-        <div style="font-size:11px;font-weight:700;color:var(--brand);letter-spacing:1px;margin-bottom:3px">店家名稱</div>
-        <div id="share-store-name" style="font-size:18px;font-weight:800;color:var(--brand-dark)">—</div>
-        <div id="share-store-meta" style="font-size:12px;color:var(--text-muted)"></div>
-      </div>
-      <div>
-        <div style="font-size:11px;font-weight:700;color:var(--brand);letter-spacing:1px;margin-bottom:3px">專屬連結</div>
-        <div id="share-short-url" style="background:var(--cream);border:1.5px solid var(--g200);border-radius:8px;padding:8px 10px;font-size:12px;color:var(--text);word-break:break-all;min-height:32px;cursor:text" onclick="selectAllText(this)">產生中…</div>
-      </div>
-      <div style="display:flex;gap:8px">
-        <button id="share-copy-btn" onclick="doShareCopy()" style="flex:1;padding:10px;background:linear-gradient(135deg,var(--brand-dark),var(--brand-light));color:#fff;border:none;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;transition:.2s">📋 複製短網址</button>
-        <button onclick="doDownloadQr()" style="padding:10px 12px;background:var(--white);color:var(--brand);border:1.5px solid var(--gold-light);border-radius:10px;font-size:13px;cursor:pointer">⬇ QR</button>
-      </div>
-    </div>
-  </div>
-  <div style="font-size:11px;color:var(--text-muted);background:var(--cream);border-radius:8px;padding:10px 12px;line-height:1.6">
-    💡 可直接複製連結給店家，或貼到 <a href="https://tinyurl.com" target="_blank" style="color:var(--gold-deep)">TinyURL.com</a> 縮短後再分享。掃描 QR Code 也可直接進入該店試算頁面。
-  </div>
-</div>
-</div>
 <div class="copyright-bar">&copy; 2026 FlowHub. All rights reserved. 未經授權禁止複製或使用本系統。</div>
 <div id="toast" class="toast hidden"></div>
 
@@ -882,7 +849,7 @@ function renderFc(){
 function togFc(id){const f=D.financeCompanies.find(x=>x.id===id);if(f){f.active=!f.active;save();renderStats();renderFc();toast(f.active?'已啟用':'已停用')}}
 function delFc(id){const f=D.financeCompanies.find(x=>x.id===id);if(!f||!confirm('確定刪除「'+f.name+'」？'))return;D.financeCompanies=D.financeCompanies.filter(x=>x.id!==id);D.stores.forEach(s=>{s.fcConfigs=(s.fcConfigs||[]).filter(x=>x.fcId!==id)});save();renderStats();renderFc();renderSt();toast('已刪除')}
 
-function getBaseUrl(){return location.origin+location.pathname.replace(/\/$/,'')}
+function getBaseUrl(){return location.origin+location.pathname}
 function getStoreUrl(storeId){
   const base=getBaseUrl();
   const store=D.stores.find(s=>s.id===storeId);
@@ -966,16 +933,12 @@ function renderSt(){
   const urlOk=isUrlReady();
   document.getElementById('st-tbody').innerHTML=D.stores.map(s=>{
     const fcn=(s.fcConfigs||[]).map(cfg=>{const f=D.financeCompanies.find(x=>x.id===cfg.fcId);if(!f)return'';const pCnt=(cfg.plans||[]).length;return`<span class="tag tag-fc">${esc(f.name)} <small style="opacity:.6">(${pCnt}期)</small></span>`}).join('');
-    const stUrl=getStoreUrl(s.id);
-    const shortUrl=s.shortUrl||'';
     let linkCell;
-    if(shortUrl){
-      linkCell=`<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
-        <a href="${esc(shortUrl)}" target="_blank" style="font-size:12px;font-weight:700;color:var(--gold-deep);text-decoration:none">${esc(shortUrl)}</a>
-        <button onclick="quickCopyShort('${s.id}')" id="qc-${s.id}" style="padding:2px 8px;font-size:11px;font-weight:600;background:var(--gold-pale);color:var(--gold-deep);border:1px solid var(--gold-light);border-radius:5px;cursor:pointer">複製</button>
-      </div>`;
+    if(urlOk){
+      const stUrl=getStoreUrl(s.id);
+      linkCell=`<div class="store-link"><input type="text" value="${esc(stUrl)}" readonly onclick="this.select()"><button onclick="copyLink(this,'${s.id}')">複製連結</button><a href="${esc(stUrl)}" target="_blank" class="btn btn-o" style="font-size:11px;padding:4px 8px;text-decoration:none;margin-left:4px">開啟</a></div>`;
     } else {
-      linkCell=`<button onclick="openShareM('${s.id}')" style="padding:4px 12px;font-size:12px;font-weight:600;background:var(--cream);color:var(--brand);border:1px solid var(--g300);border-radius:6px;cursor:pointer">點此產生短網址</button>`;
+      linkCell=`<span style="font-size:11px;color:#8a6d00">⚠ 請先設定網址</span>`;
     }
     return`<tr>
       <td><strong>${esc(s.name)}</strong>${s.note?'<br><span style="font-size:11px;color:var(--g400)">'+esc(s.note)+'</span>':''}</td>
@@ -985,7 +948,6 @@ function renderSt(){
       <td><span class="badge ${s.active?'b-on':'b-off'}">${s.active?'啟用':'停用'}</span></td>
       <td style="white-space:nowrap">
         <button class="btn btn-o" onclick="openStM('${s.id}')">編輯</button>
-        <button class="btn btn-o" style="color:var(--gold-deep);border-color:var(--gold-light)" onclick="openShareM('${s.id}')">🔗 分享</button>
         <button class="btn ${s.active?'btn-o':'btn-s'}" onclick="togSt('${s.id}')">${s.active?'停用':'啟用'}</button>
         <button class="btn btn-d" onclick="delSt('${s.id}')">刪除</button>
       </td></tr>`}).join('');
@@ -1291,85 +1253,6 @@ function initApp(){
   // Normal mode
   fillStoreSel();onStoreChange();
 }
-
-
-function quickCopyShort(sid){
-  var s=D.stores.find(function(x){return x.id===sid});
-  if(!s||!s.shortUrl){toast('請先點「🔗 分享」產生短網址');return}
-  var btn=document.getElementById('qc-'+sid);
-  var done=function(){if(btn){btn.textContent='已複製！';btn.style.background='var(--sage-bg)';btn.style.color='var(--sage-dark)';setTimeout(function(){btn.textContent='複製';btn.style.background='var(--gold-pale)';btn.style.color='var(--gold-deep)'},2000)}toast('已複製短網址')}
-  if(navigator.clipboard){navigator.clipboard.writeText(s.shortUrl).then(done).catch(function(){_fbCopy(s.shortUrl,done)})}
-  else{_fbCopy(s.shortUrl,done)}
-}
-function _fbCopy(text,done){
-  var ta=document.createElement('textarea');ta.value=text;ta.style.cssText='position:fixed;top:-9999px;opacity:0';
-  document.body.appendChild(ta);ta.focus();ta.select();
-  try{document.execCommand('copy');done()}catch(e){toast('請手動複製')}
-  document.body.removeChild(ta);
-}
-
-/* == SHARE MODAL == */
-var _sQrLib=null,_sUrl='',_sShort='',_sName='',_sStoreId='';
-function selectAllText(el){var r=document.createRange();r.selectNodeContents(el);var s=window.getSelection();s.removeAllRanges();s.addRange(r)}
-function openShareM(sid){
-  var store=D.stores.find(function(s){return s.id===sid});if(!store)return;
-  _sName=store.name;_sStoreId=sid;
-  _sUrl=getStoreUrl(sid);_sShort=_sUrl;
-  document.getElementById('share-store-name').textContent=store.name;
-  var fcn=(store.fcConfigs||[]).map(function(c){var f=D.financeCompanies.find(function(x){return x.id===c.fcId});return f?f.name.replace(/\(.*?\)/,'').trim():''}).filter(Boolean).join('・');
-  document.getElementById('share-store-meta').textContent=(store.defaultType==='zero'?'零利率':'一般專案')+(fcn?' | '+fcn:'');
-  document.getElementById('share-short-url').textContent='產生中…';
-  document.getElementById('share-copy-btn').textContent='📋 複製連結';
-  document.getElementById('share-copy-btn').style.background='linear-gradient(135deg,var(--brand-dark),var(--brand-light))';
-  document.getElementById('share-qr-box').innerHTML='<span style="font-size:11px;color:var(--g400)">產生中…</span>';
-  document.getElementById('share-modal').classList.remove('hidden');
-  // 直接顯示對外連結（穩定可靠）
-  _sShort = _sUrl;
-  document.getElementById('share-short-url').textContent = _sShort;
-  _loadQrAndRender(_sShort);
-  var st=D.stores.find(function(x){return x.id===_sStoreId});
-  if(st){st.shortUrl=_sShort;save();renderSt()}
-      if(st&&_sShort!==_sUrl){st.shortUrl=_sShort;save();renderSt()}
-    }).catch(function(){
-      // fallback：直接用原始連結
-      _sShort=_sUrl;
-      document.getElementById('share-short-url').textContent=_sShort;
-      _loadQrAndRender(_sShort);
-    });
-}
-function _loadQrAndRender(url){
-  if(_sQrLib==='err'){document.getElementById('share-qr-box').innerHTML='<span style="font-size:10px;color:red;text-align:center">QR失敗</span>';return}
-  if(_sQrLib===true){_doRenderQr(url);return}
-  var s=document.createElement('script');
-  s.src='https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js';
-  s.onload=function(){_sQrLib=true;_doRenderQr(url)};
-  s.onerror=function(){_sQrLib='err';document.getElementById('share-qr-box').innerHTML='<span style="font-size:10px;color:red;text-align:center">QR失敗</span>'};
-  document.head.appendChild(s);
-}
-function _doRenderQr(url){
-  var box=document.getElementById('share-qr-box');box.innerHTML='';
-  try{new QRCode(box,{text:url,width:144,height:144,colorDark:'#3e3836',colorLight:'#fff',correctLevel:QRCode.CorrectLevel.M})}
-  catch(e){box.innerHTML='<span style="font-size:10px;color:red">QR錯誤</span>'}
-}
-function closeShareM(){document.getElementById('share-modal').classList.add('hidden')}
-function doShareCopy(){
-  var btn=document.getElementById('share-copy-btn');
-  var done=function(){btn.textContent='✓ 已複製！';btn.style.background='linear-gradient(135deg,var(--sage-dark),var(--sage))';setTimeout(function(){btn.textContent='📋 複製連結';btn.style.background='linear-gradient(135deg,var(--brand-dark),var(--brand-light))'},2000)};
-  if(navigator.clipboard){navigator.clipboard.writeText(_sShort).then(done).catch(function(){_fallbackCopy(done)})}
-  else{_fallbackCopy(done)}
-}
-function _fallbackCopy(done){
-  var ta=document.createElement('textarea');ta.value=_sShort;ta.style.cssText='position:fixed;top:-9999px;opacity:0';
-  document.body.appendChild(ta);ta.focus();ta.select();
-  try{document.execCommand('copy');done()}catch(e){toast('請手動複製連結')}
-  document.body.removeChild(ta);
-}
-function doDownloadQr(){
-  var c=document.getElementById('share-qr-box').querySelector('canvas');
-  if(!c){toast('QR尚未產生，請稍候');return}
-  var a=document.createElement('a');a.download='QR_'+_sName+'.png';a.href=c.toDataURL('image/png');a.click();toast('QR已下載');
-}
-/* == END SHARE MODAL == */
 
 /* INIT */
 initApp();
