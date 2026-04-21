@@ -596,7 +596,7 @@ stores:[
   ]}
 ]}}
 
-let D=load();
+let D=load();D.baseUrl='';
 function load(){try{const r=localStorage.getItem(SK);if(r){const d=JSON.parse(r);migrateData(d);return d}}catch(e){}return defaults()}
 function migrateData(d){
   // Migrate: add useCoefficient flag to 裕富/BuyNpay
@@ -882,7 +882,7 @@ function renderFc(){
 function togFc(id){const f=D.financeCompanies.find(x=>x.id===id);if(f){f.active=!f.active;save();renderStats();renderFc();toast(f.active?'已啟用':'已停用')}}
 function delFc(id){const f=D.financeCompanies.find(x=>x.id===id);if(!f||!confirm('確定刪除「'+f.name+'」？'))return;D.financeCompanies=D.financeCompanies.filter(x=>x.id!==id);D.stores.forEach(s=>{s.fcConfigs=(s.fcConfigs||[]).filter(x=>x.fcId!==id)});save();renderStats();renderFc();renderSt();toast('已刪除')}
 
-function getBaseUrl(){if(D.baseUrl&&D.baseUrl.startsWith('http'))return D.baseUrl;return location.origin+location.pathname}
+function getBaseUrl(){return location.origin+location.pathname.replace(/\/$/,'')}
 function getStoreUrl(storeId){
   const base=getBaseUrl();
   const store=D.stores.find(s=>s.id===storeId);
@@ -1323,16 +1323,19 @@ function openShareM(sid){
   document.getElementById('share-copy-btn').style.background='linear-gradient(135deg,var(--brand-dark),var(--brand-light))';
   document.getElementById('share-qr-box').innerHTML='<span style="font-size:11px;color:var(--g400)">產生中…</span>';
   document.getElementById('share-modal').classList.remove('hidden');
-  fetch('https://tinyurl.com/api-create.php?url='+encodeURIComponent(_sUrl))
+  // 使用 is.gd（支援 CORS）
+  fetch('https://is.gd/create.php?format=simple&url='+encodeURIComponent(_sUrl))
     .then(function(r){return r.text()})
     .then(function(short){
+      short=(short||'').trim();
       if(short&&short.startsWith('http'))_sShort=short;
       document.getElementById('share-short-url').textContent=_sShort;
       _loadQrAndRender(_sShort);
-      // 儲存短網址到店家資料，更新列表
       var st=D.stores.find(function(x){return x.id===_sStoreId});
       if(st&&_sShort!==_sUrl){st.shortUrl=_sShort;save();renderSt()}
     }).catch(function(){
+      // fallback：直接用原始連結
+      _sShort=_sUrl;
       document.getElementById('share-short-url').textContent=_sShort;
       _loadQrAndRender(_sShort);
     });
