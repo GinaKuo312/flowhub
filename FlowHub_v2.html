@@ -563,7 +563,7 @@ stores:[
   ]}
 ]}}
 
-let D=load();D.baseUrl='';
+let D=load();if(D.baseUrl&&!D.baseUrl.startsWith('https://ginakuo'))D.baseUrl='';
 function load(){try{const r=localStorage.getItem(SK);if(r){const d=JSON.parse(r);migrateData(d);return d}}catch(e){}return defaults()}
 function migrateData(d){
   // Migrate: add useCoefficient flag to 裕富/BuyNpay
@@ -849,7 +849,7 @@ function renderFc(){
 function togFc(id){const f=D.financeCompanies.find(x=>x.id===id);if(f){f.active=!f.active;save();renderStats();renderFc();toast(f.active?'已啟用':'已停用')}}
 function delFc(id){const f=D.financeCompanies.find(x=>x.id===id);if(!f||!confirm('確定刪除「'+f.name+'」？'))return;D.financeCompanies=D.financeCompanies.filter(x=>x.id!==id);D.stores.forEach(s=>{s.fcConfigs=(s.fcConfigs||[]).filter(x=>x.fcId!==id)});save();renderStats();renderFc();renderSt();toast('已刪除')}
 
-function getBaseUrl(){return location.origin+location.pathname}
+function getBaseUrl(){return D.baseUrl&&D.baseUrl.startsWith('https://')?D.baseUrl:'https://ginakuo312.github.io/flowhub/FlowHub_v2.html'}
 function getStoreUrl(storeId){
   const base=getBaseUrl();
   const store=D.stores.find(s=>s.id===storeId);
